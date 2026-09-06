@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Runtime.ExceptionServices;
 
 namespace CargoHUB.Framework;
 
@@ -12,17 +11,21 @@ public static class RouteDiscovery
         ArgumentNullException.ThrowIfNull(app);
 
         var handlerAssembly = assembly ?? typeof(RouteDiscovery).Assembly;
+        var handlerTypes = FindHandlerTypes(handlerAssembly).ToArray();
+        var middlewares = MiddlewareDiscovery.Discover(handlerTypes);
 
-        foreach (var handlerType in FindHandlerTypes(handlerAssembly))
+        foreach (var handlerType in handlerTypes)
         {
             foreach (var method in FindRouteMethods(handlerType))
             {
+                var routeMiddlewares = MiddlewareDiscovery.ResolveForRoute(handlerType, method, middlewares);
+
                 foreach (var route in method.GetCustomAttributes<RouteAttribute>(inherit: true))
                 {
                     app.MapMethods(
                         route.Template,
                         [route.Verb],
-                        context => InvokeAsync(context, handlerType, method));
+                        context => InvokeRouteAsync(context, handlerType, method, routeMiddlewares));
                 }
             }
         }
@@ -32,7 +35,8 @@ public static class RouteDiscovery
         assembly
             .GetTypes()
             .Where(type =>
-                type is { IsClass: true, IsAbstract: false } &&
+                type.IsClass &&
+                (!type.IsAbstract || type.IsSealed) &&
                 IsInHandlersNamespace(type.Namespace));
 
     private static bool IsInHandlersNamespace(string? namespaceName) =>
@@ -45,103 +49,45 @@ public static class RouteDiscovery
             .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
             .Where(method => method.GetCustomAttributes<RouteAttribute>(inherit: true).Any());
 
-    private static async Task InvokeAsync(HttpContext context, Type handlerType, MethodInfo method)
+    private static async Task InvokeRouteAsync(
+        HttpContext context,
+        Type handlerType,
+        MethodInfo routeMethod,
+        IReadOnlyList<DiscoveredMiddleware> middlewares)
     {
-        var handler = method.IsStatic
-            ? null
-            : ActivatorUtilities.CreateInstance(context.RequestServices, handlerType);
-
-        var arguments = method
-            .GetParameters()
-            .Select(parameter => ResolveParameter(parameter, context))
-            .ToArray();
-
-        object? result;
-
-        try
+        foreach (var middleware in middlewares.Where(middleware => middleware.Attribute.Hook != Hook.After))
         {
-            result = method.Invoke(handler, arguments);
-        }
-        catch (TargetInvocationException exception) when (exception.InnerException is not null)
-        {
-            ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
-            throw;
+            if (await InvokeMiddlewareAsync(context, middleware))
+                return;
         }
 
-        result = await AwaitResultAsync(result);
+        var routeResult = await HandlerInvoker.InvokeAsync(context, handlerType, routeMethod);
 
-        if (result is IResult endpointResult)
+        foreach (var middleware in middlewares.Where(middleware => middleware.Attribute.Hook == Hook.After))
         {
-            await endpointResult.ExecuteAsync(context);
-            return;
+            if (await InvokeMiddlewareAsync(context, middleware))
+                return;
         }
 
-        if (result is not null)
-            await Results.Json(result).ExecuteAsync(context);
+        await HandlerInvoker.ExecuteResultAsync(context, routeResult);
     }
 
-    private static object? ResolveParameter(ParameterInfo parameter, HttpContext context)
+    private static async Task<bool> InvokeMiddlewareAsync(
+        HttpContext context,
+        DiscoveredMiddleware middleware)
     {
-        var parameterType = parameter.ParameterType;
-
-        if (parameterType == typeof(Request))
-            return new Request(context);
-
-        if (parameterType == typeof(HttpContext))
-            return context;
-
-        if (parameterType == typeof(CancellationToken))
-            return context.RequestAborted;
-
-        if (parameterType == typeof(IServiceProvider))
-            return context.RequestServices;
-
-        var service = context.RequestServices.GetService(parameterType);
-        if (service is not null)
-            return service;
-
-        if (parameter.HasDefaultValue)
-            return parameter.DefaultValue;
-
-        throw new InvalidOperationException(
-            $"Cannot resolve route parameter '{parameter.Name}' of type '{parameterType.FullName}' " +
-            $"for {parameter.Member.DeclaringType?.FullName}.{parameter.Member.Name}.");
-    }
-
-    private static async Task<object?> AwaitResultAsync(object? result)
-    {
+        var result = await HandlerInvoker.InvokeAsync(context, middleware.HandlerType, middleware.Method);
         if (result is null)
-            return null;
+            return false;
 
-        if (result is Task task)
+        if (result is not Response response)
         {
-            await task;
-            return GetTaskResult(task);
+            throw new InvalidOperationException(
+                $"Middleware {middleware.Method.DeclaringType?.FullName}.{middleware.Method.Name} " +
+                "returned a non-null value that is not a Response.");
         }
 
-        if (result is ValueTask valueTask)
-        {
-            await valueTask;
-            return null;
-        }
-
-        var resultType = result.GetType();
-        if (resultType.IsGenericType && resultType.GetGenericTypeDefinition() == typeof(ValueTask<>))
-        {
-            var asTask = (Task?)resultType
-                .GetMethod(nameof(ValueTask<int>.AsTask), BindingFlags.Public | BindingFlags.Instance)
-                ?.Invoke(result, null);
-
-            if (asTask is null)
-                throw new InvalidOperationException($"Could not await route result of type '{resultType.FullName}'.");
-
-            await asTask;
-            return GetTaskResult(asTask);
-        }
-
-        return result;
+        await HandlerInvoker.ExecuteResultAsync(context, response);
+        return true;
     }
-
-    private static object? GetTaskResult(Task task) =>
-        task.GetType().GetProperty("Result", BindingFlags.Public | BindingFlags.Instance)?.GetValue(task);
 }
