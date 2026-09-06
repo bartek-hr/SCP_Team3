@@ -1,3 +1,4 @@
+using CargoHUB.Framework;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +18,7 @@ builder.Services.AddOpenApi("v1", options =>
 
 var app = builder.Build();
 
-// TODO: Add endpoint discovery
+app.MapDiscoveredRoutes();
 
 if (app.Environment.IsDevelopment())
 {
