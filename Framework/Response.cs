@@ -37,6 +37,7 @@ public abstract class Response : IResult
     public static Response NotFound()        => new EmptyResponse(StatusCodes.Status404NotFound);
     public static Response Conflict()        => new EmptyResponse(StatusCodes.Status409Conflict);
 
+    public static Response Ok()        => new EmptyResponse(StatusCodes.Status200OK);
     public static Response<T> Ok<T>(T body)       => Response<T>.Ok(body);
     public static Response<T> Created<T>(T body)  => Response<T>.Created(body);
     public static Response<T> Accepted<T>(T body) => Response<T>.Accepted(body);
