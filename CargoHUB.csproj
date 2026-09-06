@@ -16,4 +16,9 @@
       <PackageReference Include="Scalar.AspNetCore" Version="2.17.2" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Datasource\" />
+      <Folder Include="Migrations\" />
+    </ItemGroup>
+
 </Project>
