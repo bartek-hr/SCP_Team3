@@ -3,7 +3,7 @@ using System.Security.Claims;
 
 namespace CargoHUB.Framework;
 
-public sealed class Request(HttpContext ctx)
+public class Request(HttpContext ctx)
 {
     public HttpContext Context { get; } = ctx;
 
@@ -46,4 +46,9 @@ public sealed class Request(HttpContext ctx)
 
     public async ValueTask<T> RequiredBodyAsync<T>() =>
         await BodyAsync<T>() ?? throw new BadHttpRequestException($"A JSON body of type {typeof(T).Name} is required.");
+}
+
+public sealed class Request<T>(HttpContext context, T data) : Request(context)
+{
+    public T Data { get; } = data;
 }

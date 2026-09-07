@@ -10,17 +10,20 @@ public enum Hook
 
 // ROUTES
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-public abstract class RouteAttribute(string verb, string template) : Attribute
+public abstract class RouteAttribute(string verb, string template, int version = 1) : Attribute
 {
     public string Verb { get; } = verb;
     public string Template { get; } = template;
+    public int Version { get; } = version > 0
+        ? version
+        : throw new ArgumentOutOfRangeException(nameof(version), "Route versions must be greater than zero.");
 }
 
-public sealed class GetAttribute(string template)    : RouteAttribute("GET", template);
-public sealed class PostAttribute(string template)   : RouteAttribute("POST", template);
-public sealed class PutAttribute(string template)    : RouteAttribute("PUT", template);
-public sealed class PatchAttribute(string template)  : RouteAttribute("PATCH", template);
-public sealed class DeleteAttribute(string template) : RouteAttribute("DELETE", template);
+public sealed class GetAttribute(string template, int version = 1)    : RouteAttribute("GET", template, version);
+public sealed class PostAttribute(string template, int version = 1)   : RouteAttribute("POST", template, version);
+public sealed class PutAttribute(string template, int version = 1)    : RouteAttribute("PUT", template, version);
+public sealed class PatchAttribute(string template, int version = 1)  : RouteAttribute("PATCH", template, version);
+public sealed class DeleteAttribute(string template, int version = 1) : RouteAttribute("DELETE", template, version);
 
 
 // MIDDLEWARE
@@ -37,4 +40,16 @@ public sealed class MiddlewareAttribute(string name, Hook hook = Hook.Before) : 
 public sealed class UseAttribute(params string[] names) : Attribute
 {
     public string[] Names { get; } = names;
+}
+
+// DESCRIBE
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+public sealed class DescribeAttribute(string summary) : Attribute
+{
+    public string Summary { get; } = summary;
+    public string? Description { get; set; }
+    public string? OperationId { get; set; }
+    public string[] Tags { get; set; } = [];
+    public int SuccessStatus { get; set; } = 200;
 }
