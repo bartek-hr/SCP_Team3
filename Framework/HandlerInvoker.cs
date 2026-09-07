@@ -1,7 +1,6 @@
 using System.Reflection;
 using System.Runtime.ExceptionServices;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json;
 
 namespace CargoHUB.Framework;
 
@@ -13,10 +12,9 @@ internal static class HandlerInvoker
             ? null
             : ActivatorUtilities.CreateInstance(context.RequestServices, handlerType);
 
-        var arguments = method
+        var arguments = await Task.WhenAll(method
             .GetParameters()
-            .Select(parameter => ResolveParameter(parameter, context))
-            .ToArray();
+            .Select(parameter => ResolveParameterAsync(parameter, context)));
 
         object? result;
 
@@ -45,12 +43,15 @@ internal static class HandlerInvoker
             await Results.Json(result).ExecuteAsync(context);
     }
 
-    private static object? ResolveParameter(ParameterInfo parameter, HttpContext context)
+    private static async Task<object?> ResolveParameterAsync(ParameterInfo parameter, HttpContext context)
     {
         var parameterType = parameter.ParameterType;
 
         if (parameterType == typeof(Request))
             return new Request(context);
+
+        if (IsTypedRequest(parameterType))
+            return await BindTypedRequestAsync(context, parameterType.GetGenericArguments()[0]);
 
         if (parameterType == typeof(HttpContext))
             return context;
@@ -71,6 +72,37 @@ internal static class HandlerInvoker
         throw new InvalidOperationException(
             $"Cannot resolve handler parameter '{parameter.Name}' of type '{parameterType.FullName}' " +
             $"for {parameter.Member.DeclaringType?.FullName}.{parameter.Member.Name}.");
+    }
+
+    private static bool IsTypedRequest(Type type) =>
+        type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Request<>);
+
+    private static async Task<object> BindTypedRequestAsync(HttpContext context, Type dataType)
+    {
+        try
+        {
+            var data = await context.Request.ReadFromJsonAsync(dataType, context.RequestAborted);
+            if (data is null)
+            {
+                throw new RequestBindingException(
+                    $"A JSON body of type {dataType.Name} is required.");
+            }
+
+            return Activator.CreateInstance(typeof(Request<>).MakeGenericType(dataType), context, data)
+                   ?? throw new InvalidOperationException($"Could not create Request<{dataType.Name}>.");
+        }
+        catch (RequestBindingException)
+        {
+            throw;
+        }
+        catch (JsonException exception)
+        {
+            throw new RequestBindingException($"The JSON request body is invalid for {dataType.Name}.", exception);
+        }
+        catch (BadHttpRequestException exception)
+        {
+            throw new RequestBindingException($"The JSON request body is invalid for {dataType.Name}.", exception);
+        }
     }
 
     private static async Task<object?> AwaitResultAsync(object? result)
@@ -110,3 +142,6 @@ internal static class HandlerInvoker
     private static object? GetTaskResult(Task task) =>
         task.GetType().GetProperty("Result", BindingFlags.Public | BindingFlags.Instance)?.GetValue(task);
 }
+
+internal sealed class RequestBindingException(string message, Exception? innerException = null)
+    : Exception(message, innerException);
