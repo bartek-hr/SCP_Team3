@@ -33,9 +33,11 @@ public sealed class RouteDiscoveryTestHandler
     }
 
     [Get("/discovered/{user}")]
+    [Describe("Returns a greeting.")]
     public Response Hello(Request request) => Response.Ok($"Hello {request.Param("user")}!");
 
     [Get("/discovered/blocked")]
+    [Describe("Returns a blocked response.")]
     [Use("RouteBlock")]
     public Response Blocked()
     {
@@ -44,6 +46,7 @@ public sealed class RouteDiscoveryTestHandler
     }
 
     [Get("/discovered/hooks")]
+    [Describe("Executes route hooks.")]
     [Use("RouteBefore", "RouteAfter")]
     public Response Hooks()
     {
@@ -52,6 +55,7 @@ public sealed class RouteDiscoveryTestHandler
     }
 
     [Get("/discovered/override")]
+    [Describe("Executes an overriding route.")]
     [Use("RouteOverride")]
     public Response OverrideRoute()
     {

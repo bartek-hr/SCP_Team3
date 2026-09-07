@@ -38,3 +38,15 @@ public sealed class UseAttribute(params string[] names) : Attribute
 {
     public string[] Names { get; } = names;
 }
+
+// DESCRIBE
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+public sealed class DescribeAttribute(string summary) : Attribute
+{
+    public string Summary { get; } = summary;
+    public string? Description { get; set; }
+    public string? OperationId { get; set; }
+    public string[] Tags { get; set; } = [];
+    public int SuccessStatus { get; set; } = 200;
+}

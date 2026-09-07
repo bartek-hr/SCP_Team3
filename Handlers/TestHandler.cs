@@ -9,10 +9,12 @@ public class TestHandler
     public Response? Blocked() => Response.Forbidden();
 
     [Get("/test")]
+    [Describe("Tests route access.")]
     [Use("Blocked")]
     public Response Test() => Response.Ok();
 
     [Get("/hello/{user}")]
+    [Describe("Returns a greeting.")]
     public Response Test(Request request) => Response.Ok($"Hello {request.Param("user")}!");
 
 }
