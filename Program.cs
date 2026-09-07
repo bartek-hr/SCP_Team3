@@ -15,6 +15,14 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<CargoHubDbContext>(options =>
     options.UseSqlite(connectionString));
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+        policy.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
+
 builder.Services.AddOpenApi("v1", options =>
 {
     options.AddDocumentTransformer((doc, _, _) =>
@@ -29,6 +37,8 @@ builder.Services.AddOpenApi("v1", options =>
 });
 
 var app = builder.Build();
+
+app.UseCors();
 
 await app.Services.ApplyMigrationsAsync();
 
