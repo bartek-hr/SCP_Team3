@@ -17,7 +17,7 @@ public sealed class RouteDiscoveryTests
     {
         RouteInvocationLog.Reset();
         await using var app = CreateApplication();
-        var endpoint = FindEndpoint(app, "/discovered/{user}");
+        var endpoint = FindEndpoint(app, "/api/v1/discovered/{user}");
         var metadata = endpoint.Metadata.GetMetadata<HttpMethodMetadata>();
         var context = HttpContextTestHelpers.CreateContext(app.Services);
         context.Request.Path = "/discovered/Ada";
@@ -39,7 +39,7 @@ public sealed class RouteDiscoveryTests
     {
         RouteInvocationLog.Reset();
         await using var app = CreateApplication();
-        var endpoint = FindEndpoint(app, "/discovered/blocked");
+        var endpoint = FindEndpoint(app, "/api/v1/discovered/blocked");
         var context = HttpContextTestHelpers.CreateContext(app.Services);
 
         await endpoint.RequestDelegate!(context);
@@ -54,7 +54,7 @@ public sealed class RouteDiscoveryTests
     {
         RouteInvocationLog.Reset();
         await using var app = CreateApplication();
-        var endpoint = FindEndpoint(app, "/discovered/hooks");
+        var endpoint = FindEndpoint(app, "/api/v1/discovered/hooks");
         var context = HttpContextTestHelpers.CreateContext(app.Services);
 
         await endpoint.RequestDelegate!(context);
@@ -73,7 +73,7 @@ public sealed class RouteDiscoveryTests
     {
         RouteInvocationLog.Reset();
         await using var app = CreateApplication();
-        var endpoint = FindEndpoint(app, "/discovered/override");
+        var endpoint = FindEndpoint(app, "/api/v1/discovered/override");
         var context = HttpContextTestHelpers.CreateContext(app.Services);
 
         await endpoint.RequestDelegate!(context);

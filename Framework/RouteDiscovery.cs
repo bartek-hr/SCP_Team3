@@ -36,7 +36,7 @@ public static class RouteDiscovery
                 foreach (var route in method.GetCustomAttributes<RouteAttribute>(inherit: true))
                 {
                     var endpoint = app.MapMethods(
-                        route.Template,
+                        GetVersionedTemplate(route),
                         [route.Verb],
                         (Delegate)(Func<HttpContext, Task>)(context =>
                             InvokeRouteAsync(context, handlerType, method, routeMiddlewares)));
@@ -72,6 +72,15 @@ public static class RouteDiscovery
         handlerType
             .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
             .Where(method => method.GetCustomAttributes<RouteAttribute>(inherit: true).Any());
+
+    private static string GetVersionedTemplate(RouteAttribute route)
+    {
+        var template = route.Template.StartsWith("/", StringComparison.Ordinal)
+            ? route.Template
+            : $"/{route.Template}";
+
+        return $"/api/v{route.Version}{template}";
+    }
 
     private static async Task InvokeRouteAsync(
         HttpContext context,
