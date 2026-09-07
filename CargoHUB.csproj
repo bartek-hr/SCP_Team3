@@ -21,4 +21,8 @@
       <Folder Include="Migrations\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="CargoHUB.Tests\**\*.cs" />
+    </ItemGroup>
+
 </Project>
