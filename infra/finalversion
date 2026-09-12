@@ -33,6 +33,11 @@ init() {
   [[ -f $COMPOSE_FILE ]] || fail "FV_SOURCE_DIR must point at an SCP_Team3 checkout"
   mkdir -p "$FV_STATE_DIR" "$FV_NGINX_CONF_DIR"
   touch "$LOCK_FILE"
+  if [[ $EUID -eq 0 ]]; then
+    chmod g+rw "$LOCK_FILE"
+  elif [[ ! -w $LOCK_FILE ]]; then
+    fail "runner account cannot write $LOCK_FILE; rerun infra/install.sh"
+  fi
   export FV_NGINX_CONF_DIR
 }
 
