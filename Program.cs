@@ -65,7 +65,7 @@ app.UseStaticFiles(new StaticFileOptions
 
 await app.Services.ApplyMigrationsAsync();
 
-app.MapGet("/", () => Results.File(swaggerUiIndexPath, "text/html"))
+app.MapGet("/swagger", () => Results.File(swaggerUiIndexPath, "text/html"))
     .ExcludeFromDescription();
 
 app.MapGet("/health/ready", () => Results.Ok(new { status = "ready" }))
