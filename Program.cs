@@ -61,10 +61,7 @@ app.MapGet("/health/ready", () => Results.Ok(new { status = "ready" }))
 
 app.MapDiscoveredRoutes();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi("/openapi/{documentName}.json");   // -> /openapi/v1.json
-    app.MapScalarApiReference();                      // -> /scalar
-}
+app.MapOpenApi("/openapi/{documentName}.json");   // -> /openapi/v1.json
+app.MapScalarApiReference();                      // -> /scalar
 
 await app.RunAsync();
