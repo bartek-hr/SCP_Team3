@@ -1,0 +1,36 @@
+name: Deploy trusted branches on Pi
+
+on:
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment target
+        required: true
+        type: choice
+        options: [main, dev]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: finalversion-${{ inputs.environment || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # This runner is privileged through Docker. Restrict this workflow to protected
+    # branches and a runner group that is unavailable to public/fork PR workflows.
+    runs-on: [self-hosted, finalversion]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Build, test, and promote local runtime
+        env:
+          FV_SOURCE_DIR: ${{ github.workspace }}
+          TARGET: ${{ inputs.environment || github.ref_name }}
+          COMMIT: ${{ github.sha }}
+        run: finalversion deploy "$TARGET" "$COMMIT"

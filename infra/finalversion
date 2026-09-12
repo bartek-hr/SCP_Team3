@@ -1,0 +1,261 @@
+#!/usr/bin/env bash
+# Deploy one isolated local Docker runtime. This script never pushes images.
+set -euo pipefail
+
+FV_SOURCE_DIR=${FV_SOURCE_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}
+FV_STATE_DIR=${FV_STATE_DIR:-/var/lib/finalversion}
+FV_NGINX_CONF_DIR=${FV_NGINX_CONF_DIR:-$FV_STATE_DIR/nginx/conf.d}
+FV_MAIN_HOST=${FV_MAIN_HOST:-finalversion.dev}
+FV_DEV_HOST=${FV_DEV_HOST:-dev.finalversion.dev}
+FV_PREVIEW_DOMAIN=${FV_PREVIEW_DOMAIN:-finalversion.dev}
+FV_IDLE_SECONDS=${FV_IDLE_SECONDS:-1800}
+FV_BUILD_NETWORK=${FV_BUILD_NETWORK:-host}
+STATE_FILE="$FV_STATE_DIR/deployments.json"
+LOCK_FILE="$FV_STATE_DIR/lifecycle.lock"
+COMPOSE_FILE="$FV_SOURCE_DIR/infra/compose.yml"
+
+fail() { printf 'finalversion: %s\n' "$*" >&2; exit 1; }
+usage() { cat <<'EOF'
+Usage:
+  finalversion bootstrap
+  finalversion deploy <main|dev> <full-git-sha>
+  finalversion deploy-pr <number> <full-git-sha> [hostname]
+  finalversion remove-pr <number>
+  finalversion sleep-idle
+EOF
+}
+need() { command -v "$1" >/dev/null || fail "required command is missing: $1"; }
+valid_sha() { [[ $1 =~ ^[0-9a-f]{7,64}$ ]]; }
+valid_host() { [[ $1 =~ ^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$ ]]; }
+
+init() {
+  need docker; need python3; need flock
+  [[ -f $COMPOSE_FILE ]] || fail "FV_SOURCE_DIR must point at an SCP_Team3 checkout"
+  mkdir -p "$FV_STATE_DIR" "$FV_NGINX_CONF_DIR"
+  touch "$LOCK_FILE"
+  export FV_NGINX_CONF_DIR
+}
+
+with_lock() { ( flock -x 9; "$@" ) 9>"$LOCK_FILE"; }
+bootstrap() {
+  init
+  docker compose -f "$COMPOSE_FILE" up -d nginx
+  printf 'nginx is listening only on 127.0.0.1:8080\n'
+}
+
+state_get() {
+  python3 - "$STATE_FILE" "$1" <<'PY'
+import json, sys
+try:
+    state=json.load(open(sys.argv[1]))
+except FileNotFoundError:
+    state={"deployments": {}}
+value=state.get("deployments", {}).get(sys.argv[2], {})
+for key in ("container", "image", "hostname", "kind"):
+    print(value.get(key, ""))
+PY
+}
+state_put() {
+  local key=$1 kind=$2 hostname=$3 container=$4 image=$5
+  python3 - "$STATE_FILE" "$key" "$kind" "$hostname" "$container" "$image" <<'PY'
+import json, os, sys, tempfile, time
+path, key, kind, host, container, image = sys.argv[1:]
+os.makedirs(os.path.dirname(path), mode=0o770, exist_ok=True)
+try:
+    with open(path) as f: state=json.load(f)
+except FileNotFoundError:
+    state={"deployments": {}}
+state.setdefault("deployments", {})[key] = {
+    "container": container, "hostname": host, "image": image,
+    "kind": kind, "last_activity": int(time.time())}
+fd, tmp=tempfile.mkstemp(dir=os.path.dirname(path), prefix="deployments.")
+with os.fdopen(fd, "w") as f:
+    json.dump(state, f, sort_keys=True); f.write("\n"); f.flush(); os.fsync(f.fileno())
+os.chmod(tmp, 0o660); os.replace(tmp, path)
+PY
+}
+state_remove() {
+  python3 - "$STATE_FILE" "$1" <<'PY'
+import json, os, sys, tempfile
+path, key=sys.argv[1:]
+try:
+    with open(path) as f: state=json.load(f)
+except FileNotFoundError:
+    raise SystemExit(0)
+state.get("deployments", {}).pop(key, None)
+fd, tmp=tempfile.mkstemp(dir=os.path.dirname(path), prefix="deployments.")
+with os.fdopen(fd, "w") as f:
+    json.dump(state, f, sort_keys=True); f.write("\n"); f.flush(); os.fsync(f.fileno())
+os.chmod(tmp, 0o660); os.replace(tmp, path)
+PY
+}
+
+nginx_reload() {
+  docker exec fv-nginx nginx -t
+  docker exec fv-nginx nginx -s reload
+}
+render_config() {
+  local key=$1 kind=$2 host=$3 container=$4
+  local target="$FV_NGINX_CONF_DIR/$key.conf" temp="$FV_NGINX_CONF_DIR/.$key.conf.$$"
+  if [[ $kind == preview ]]; then
+    cat > "$temp" <<EOF
+server {
+    listen 8080;
+    server_name $host;
+    set \$fv_backend $container;
+    location = /_lifecycle/wake {
+        internal;
+        proxy_pass http://host.docker.internal:9081/wake;
+        proxy_set_header X-Finalversion-Host \$host;
+        proxy_set_header X-Finalversion-Method \$request_method;
+        proxy_set_header X-Finalversion-URI \$request_uri;
+        proxy_set_header Content-Length "";
+    }
+    location / {
+        auth_request /_lifecycle/wake;
+        error_page 500 = @preview_warming;
+        add_header Cache-Control "no-store" always;
+        proxy_pass http://\$fv_backend:8080;
+    }
+    location @preview_warming {
+        add_header Cache-Control "no-store" always;
+        add_header Retry-After "5" always;
+        return 503 "Preview is warming. Retry shortly.\\n";
+    }
+}
+EOF
+  else
+    cat > "$temp" <<EOF
+server {
+    listen 8080;
+    server_name $host;
+    set \$fv_backend $container;
+    location / { proxy_pass http://\$fv_backend:8080; }
+}
+EOF
+  fi
+  mv "$temp" "$target"
+  chmod 0644 "$target"
+}
+
+wait_healthy() {
+  local container=$1 deadline=$((SECONDS + 80)) state
+  while (( SECONDS < deadline )); do
+    state=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$container" 2>/dev/null || true)
+    [[ $state == healthy || $state == running ]] && return 0
+    sleep 1
+  done
+  return 1
+}
+
+run_deploy() {
+  local key=$1 kind=$2 host=$3 sha=$4
+  valid_sha "$sha" || fail "commit must be a hexadecimal Git SHA"
+  valid_host "$host" || fail "invalid hostname"
+  [[ $key =~ ^(main|dev|pr-[1-9][0-9]*)$ ]] || fail "invalid deployment name"
+
+  local network="fv-$key" volume="fv-$key-data" image="cargo-hub-$key:${sha:0:12}"
+  local container="fv-$key-${sha:0:12}-$(date +%s)-$RANDOM" old=() old_container old_image
+  mapfile -t old < <(state_get "$key")
+  old_container=${old[0]:-}; old_image=${old[1]:-}
+
+  docker network inspect "$network" >/dev/null 2>&1 || \
+    docker network create --internal --opt com.docker.network.bridge.gateway_mode_ipv4=isolated "$network" >/dev/null
+  docker volume create "$volume" >/dev/null
+  docker build --network "$FV_BUILD_NETWORK" --tag "$image" "$FV_SOURCE_DIR"
+  docker rm -f "$container" >/dev/null 2>&1 || true
+  docker run --detach --name "$container" --network "$network" \
+    --read-only --tmpfs /tmp:rw,noexec,nosuid,size=32m \
+    --mount "type=volume,src=$volume,dst=/app/data" \
+    --cap-drop ALL --security-opt no-new-privileges:true \
+    --pids-limit 256 --memory 1g --cpus 1.5 --restart unless-stopped "$image" >/dev/null
+  docker network connect "$network" fv-nginx 2>/dev/null || true
+
+  if ! wait_healthy "$container"; then
+    docker rm -f "$container" >/dev/null 2>&1 || true
+    fail "replacement did not become healthy; current deployment was left unchanged"
+  fi
+
+  local existing="$FV_NGINX_CONF_DIR/$key.conf" backup="$FV_NGINX_CONF_DIR/.$key.conf.previous"
+  [[ -f $existing ]] && cp "$existing" "$backup" || rm -f "$backup"
+  render_config "$key" "$kind" "$host" "$container"
+  if ! nginx_reload; then
+    [[ -f $backup ]] && mv "$backup" "$existing" || rm -f "$existing"
+    docker rm -f "$container" >/dev/null 2>&1 || true
+    fail "nginx rejected the replacement configuration"
+  fi
+  rm -f "$backup"
+  state_put "$key" "$kind" "$host" "$container" "$image"
+
+  if [[ -n $old_container && $old_container != "$container" ]]; then
+    docker rm -f "$old_container" >/dev/null 2>&1 || true
+    [[ -n $old_image && $old_image != "$image" ]] && docker image rm "$old_image" >/dev/null 2>&1 || true
+  fi
+  printf 'deployed %s at %s (%s)\n' "$key" "$host" "$sha"
+}
+
+deploy() {
+  init; bootstrap
+  local environment=$1 sha=$2 host
+  case $environment in
+    main) host=$FV_MAIN_HOST ;;
+    dev) host=$FV_DEV_HOST ;;
+    *) fail 'environment must be main or dev' ;;
+  esac
+  with_lock run_deploy "$environment" "$environment" "$host" "$sha"
+}
+deploy_pr() {
+  init; bootstrap
+  local number=$1 sha=$2 host=${3:-pr-$1.$FV_PREVIEW_DOMAIN}
+  [[ $number =~ ^[1-9][0-9]*$ ]] || fail 'PR number must be positive'
+  with_lock run_deploy "pr-$number" preview "$host" "$sha"
+}
+remove_pr_inner() {
+  local key="pr-$1" values container image
+  mapfile -t values < <(state_get "$key")
+  container=${values[0]:-}; image=${values[1]:-}
+  [[ -n $container ]] && docker rm -f "$container" >/dev/null 2>&1 || true
+  rm -f "$FV_NGINX_CONF_DIR/$key.conf"
+  nginx_reload
+  docker network disconnect "fv-$key" fv-nginx >/dev/null 2>&1 || true
+  docker network rm "fv-$key" >/dev/null 2>&1 || true
+  docker volume rm "fv-$key-data" >/dev/null 2>&1 || true
+  [[ -n $image ]] && docker image rm "$image" >/dev/null 2>&1 || true
+  state_remove "$key"
+  printf 'removed %s\n' "$key"
+}
+remove_pr() {
+  init; bootstrap
+  [[ $1 =~ ^[1-9][0-9]*$ ]] || fail 'PR number must be positive'
+  with_lock remove_pr_inner "$1"
+}
+sleep_idle_inner() {
+  local now=$1
+  while IFS=$'\t' read -r key container last; do
+    [[ -n $key && $last =~ ^[0-9]+$ ]] || continue
+    (( now - last >= FV_IDLE_SECONDS )) || continue
+    [[ $(docker inspect --format '{{.State.Status}}' "$container" 2>/dev/null || true) == running ]] || continue
+    docker stop --time 30 "$container" >/dev/null
+    printf 'slept %s after %ss idle\n' "$key" "$((now-last))"
+  done < <(python3 - "$STATE_FILE" <<'PY'
+import json, sys
+try:
+    state=json.load(open(sys.argv[1]))
+except FileNotFoundError:
+    state={}
+for key, item in state.get("deployments", {}).items():
+    if item.get("kind") == "preview":
+        print(f"{key}\t{item.get('container','')}\t{item.get('last_activity',0)}")
+PY
+)
+}
+sleep_idle() { init; with_lock sleep_idle_inner "$(date +%s)"; }
+
+case ${1:-} in
+  bootstrap) bootstrap ;;
+  deploy) [[ $# == 3 ]] || { usage; exit 2; }; deploy "$2" "$3" ;;
+  deploy-pr) [[ $# == 3 || $# == 4 ]] || { usage; exit 2; }; deploy_pr "$2" "$3" "${4:-}" ;;
+  remove-pr) [[ $# == 2 ]] || { usage; exit 2; }; remove_pr "$2" ;;
+  sleep-idle) sleep_idle ;;
+  *) usage; exit 2 ;;
+esac

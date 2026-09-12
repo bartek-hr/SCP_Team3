@@ -1,0 +1,27 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: fv-nginx
+    user: "101:101"
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:mode=1777,noexec,nosuid,size=32m
+      - /var/cache/nginx:uid=101,gid=101,mode=0755,noexec,nosuid,size=32m
+    volumes:
+      - ${FV_NGINX_CONF_DIR:-./nginx/conf.d}:/etc/nginx/conf.d:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - edge
+
+networks:
+  edge:
+    name: fv-edge

@@ -1,0 +1,10 @@
+[Unit]
+Description=Sleep inactive Finalversion previews
+After=finalversion-controller.service
+
+[Service]
+Type=oneshot
+User=root
+Group=finalversion-deploy
+EnvironmentFile=/etc/finalversion/finalversion.env
+ExecStart=/usr/local/bin/finalversion sleep-idle

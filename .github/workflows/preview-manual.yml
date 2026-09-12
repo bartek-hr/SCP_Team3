@@ -1,0 +1,35 @@
+name: Deploy a reviewed preview on Pi
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Reviewed PR number
+        required: true
+        type: string
+      commit:
+        description: Full commit SHA to deploy
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: finalversion-pr-${{ inputs.pr_number }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # Manual dispatch is intentional: do not let a public/fork PR select a
+    # privileged self-hosted runner. Maintainers dispatch only after review.
+    runs-on: [self-hosted, finalversion]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit }}
+          fetch-depth: 1
+      - name: Build, test, and promote reviewed preview
+        env:
+          FV_SOURCE_DIR: ${{ github.workspace }}
+        run: finalversion deploy-pr '${{ inputs.pr_number }}' '${{ inputs.commit }}'

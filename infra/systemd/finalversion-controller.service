@@ -1,0 +1,21 @@
+[Unit]
+Description=Finalversion preview wake controller
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+User=root
+Group=finalversion-deploy
+EnvironmentFile=/etc/finalversion/finalversion.env
+ExecStart=/usr/bin/python3 /usr/local/lib/finalversion/lifecycle-controller.py
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/finalversion
+
+[Install]
+WantedBy=multi-user.target

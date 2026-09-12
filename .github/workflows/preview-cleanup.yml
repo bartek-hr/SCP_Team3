@@ -1,0 +1,15 @@
+name: Remove closed preview
+
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions: {}
+
+jobs:
+  remove:
+    # No repository checkout or PR-controlled code runs in this job. It only removes
+    # the preview whose number GitHub supplied in the trusted event payload.
+    runs-on: [self-hosted, finalversion]
+    steps:
+      - run: finalversion remove-pr '${{ github.event.pull_request.number }}'

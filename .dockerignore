@@ -1,0 +1,12 @@
+.git
+.github
+bin
+obj
+**/bin
+**/obj
+infra/state
+infra/nginx/conf.d/*.conf
+!infra/nginx/conf.d/.gitkeep
+*.sqlite
+*.db
+README.md

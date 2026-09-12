@@ -1,0 +1,14 @@
+[Unit]
+Description=Finalversion local nginx proxy
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+EnvironmentFile=/etc/finalversion/finalversion.env
+ExecStart=/usr/local/bin/finalversion bootstrap
+ExecStop=/usr/bin/docker compose -f ${FV_SOURCE_DIR}/infra/compose.yml down
+
+[Install]
+WantedBy=multi-user.target
