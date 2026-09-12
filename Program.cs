@@ -2,9 +2,13 @@ using CargoHUB.Datasource;
 using CargoHUB.Framework;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.FileProviders;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var swaggerUiPath = Path.Combine(builder.Environment.ContentRootPath, "swagger-ui");
+var swaggerUiIndexPath = Path.Combine(swaggerUiPath, "index.html");
 
 // A container mounts this directory as its only writable persistent storage. The
 // development default preserves the existing local SQLite location.
@@ -53,8 +57,16 @@ var app = builder.Build();
 
 app.UseForwardedHeaders();
 app.UseCors();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(swaggerUiPath),
+    RequestPath = string.Empty,
+});
 
 await app.Services.ApplyMigrationsAsync();
+
+app.MapGet("/", () => Results.File(swaggerUiIndexPath, "text/html"))
+    .ExcludeFromDescription();
 
 app.MapGet("/health/ready", () => Results.Ok(new { status = "ready" }))
     .ExcludeFromDescription();
