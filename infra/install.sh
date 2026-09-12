@@ -11,7 +11,9 @@ getent group docker >/dev/null || { echo 'Docker group is missing.' >&2; exit 1;
 
 getent group finalversion-deploy >/dev/null || groupadd --system finalversion-deploy
 usermod -aG docker,finalversion-deploy "$RUNNER_USER"
-install -d -o root -g finalversion-deploy -m 2770 /var/lib/finalversion/nginx/conf.d
+# The deployment group writes generated vhost files; nginx runs as an unprivileged
+# container user and needs read/traverse access to load them.
+install -d -o root -g finalversion-deploy -m 2775 /var/lib/finalversion/nginx/conf.d
 install -d -o root -g root -m 0755 /etc/finalversion /usr/local/lib/finalversion
 install -m 0750 -o root -g finalversion-deploy "$SOURCE_DIR/infra/finalversion" /usr/local/bin/finalversion
 install -m 0750 -o root -g finalversion-deploy "$SOURCE_DIR/infra/lifecycle-controller.py" /usr/local/lib/finalversion/lifecycle-controller.py
