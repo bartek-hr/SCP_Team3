@@ -15,16 +15,23 @@ public sealed class DatabaseMigrationExtensionsTests
         await using var connection = new SqliteConnection("Data Source=:memory:");
         await connection.OpenAsync();
 
-        using var services = new ServiceCollection()
+        using ServiceProvider services = new ServiceCollection()
             .AddDbContext<CargoHubDbContext>(options => options.UseSqlite(connection))
             .BuildServiceProvider();
 
         await services.ApplyMigrationsAsync();
 
-        await using var scope = services.CreateAsyncScope();
-        var context = scope.ServiceProvider.GetRequiredService<CargoHubDbContext>();
+        await using AsyncServiceScope scope = services.CreateAsyncScope();
+        CargoHubDbContext context = scope.ServiceProvider.GetRequiredService<CargoHubDbContext>();
 
         Assert.AreEqual("Microsoft.EntityFrameworkCore.Sqlite", context.Database.ProviderName);
         Assert.IsTrue(await context.Database.CanConnectAsync());
+        Assert.AreEqual(300, await context.Clients.CountAsync());
+        Assert.AreEqual(
+            "Jumbo Amersfoort Leusderweg",
+            await context.Clients
+                .Where(client => client.Id == 1)
+                .Select(client => client.Name)
+                .SingleAsync());
     }
 }
