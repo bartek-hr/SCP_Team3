@@ -1,47 +1,26 @@
 using CargoHUB.Access;
-using CargoHUB.Datasource;
 using CargoHUB.Logics;
 using CargoHUB.Models;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
+using CargoHUB.Tests.Infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CargoHUB.Tests.Logics;
 
 [TestClass]
-public sealed class ClientLogicTests
+public sealed class ClientLogicTests : DatabaseTest
 {
-    private SqliteConnection _connection = null!;
-    private CargoHubDbContext _context = null!;
-    private ClientLogic _logic = null!;
+    private ClientLogic Logic => new(new ClientDataAccess(Context));
 
-    [TestInitialize]
-    public void Initialize()
+    protected override void SeedDatabase()
     {
-        _connection = new SqliteConnection("Data Source=:memory:");
-        _connection.Open();
-
-        DbContextOptions<CargoHubDbContext> options = new DbContextOptionsBuilder<CargoHubDbContext>()
-            .UseSqlite(_connection)
-            .Options;
-        _context = new CargoHubDbContext(options);
-        _context.Database.EnsureCreated();
-        _context.Clients.Add(CreateClient(1));
-        _context.SaveChanges();
-        _logic = new ClientLogic(new ClientDataAccess(_context));
-    }
-
-    [TestCleanup]
-    public void Cleanup()
-    {
-        _context.Dispose();
-        _connection.Dispose();
+        Context.Clients.Add(CreateClient(1));
+        Context.SaveChanges();
     }
 
     [TestMethod]
     public void GetAllReturnsStoredClients()
     {
-        IReadOnlyList<Client> clients = _logic.GetAll();
+        IReadOnlyList<Client> clients = Logic.GetAll();
 
         Assert.AreEqual(1, clients.Count);
         Assert.AreEqual(1, clients[0].Id);
@@ -50,7 +29,7 @@ public sealed class ClientLogicTests
     [TestMethod]
     public void GetByIdReturnsStoredClient()
     {
-        Client? client = _logic.GetById(1);
+        Client? client = Logic.GetById(1);
 
         Assert.IsNotNull(client);
         Assert.AreEqual("Test Client 1", client.Name);
@@ -59,9 +38,9 @@ public sealed class ClientLogicTests
     [TestMethod]
     public void GetByIdReturnsNullForMissingAndInvalidIds()
     {
-        Assert.IsNull(_logic.GetById(999));
-        Assert.IsNull(_logic.GetById(0));
-        Assert.IsNull(_logic.GetById(-1));
+        Assert.IsNull(Logic.GetById(999));
+        Assert.IsNull(Logic.GetById(0));
+        Assert.IsNull(Logic.GetById(-1));
     }
 
     [TestMethod]
@@ -69,9 +48,9 @@ public sealed class ClientLogicTests
     {
         Client client = CreateClient();
 
-        _logic.Add(client);
+        Logic.Add(client);
 
-        Client? storedClient = _logic.GetById(client.Id);
+        Client? storedClient = Logic.GetById(client.Id);
         Assert.IsNotNull(storedClient);
         Assert.IsTrue(storedClient.CreatedAt > DateTime.UnixEpoch);
         Assert.IsTrue(storedClient.UpdatedAt >= storedClient.CreatedAt);
@@ -80,24 +59,24 @@ public sealed class ClientLogicTests
     [TestMethod]
     public void AddRejectsNullAndInvalidClients()
     {
-        Assert.ThrowsException<ArgumentNullException>(() => _logic.Add(null!));
+        Assert.ThrowsException<ArgumentNullException>(() => Logic.Add(null!));
 
         Client invalidClient = CreateClient();
         invalidClient.ContactEmail = "invalid-email";
 
-        Assert.ThrowsException<ArgumentException>(() => _logic.Add(invalidClient));
+        Assert.ThrowsException<ArgumentException>(() => Logic.Add(invalidClient));
     }
 
     [TestMethod]
     public void UpdatePersistsChangesAndPreservesCreationTime()
     {
-        DateTime createdAt = _logic.GetById(1)!.CreatedAt;
+        DateTime createdAt = Logic.GetById(1)!.CreatedAt;
         Client updatedClient = CreateClient(name: "Updated Client");
         updatedClient.CreatedAt = DateTime.UtcNow.AddYears(1);
 
-        _logic.Update(1, updatedClient);
+        Logic.Update(1, updatedClient);
 
-        Client? storedClient = _logic.GetById(1);
+        Client? storedClient = Logic.GetById(1);
         Assert.IsNotNull(storedClient);
         Assert.AreEqual("Updated Client", storedClient.Name);
         Assert.AreEqual(createdAt, storedClient.CreatedAt);
@@ -107,43 +86,43 @@ public sealed class ClientLogicTests
     [TestMethod]
     public void UpdateDoesNothingForMissingClient()
     {
-        _logic.Update(999, CreateClient(name: "Missing Client"));
+        Logic.Update(999, CreateClient(name: "Missing Client"));
 
-        Assert.AreEqual(1, _logic.GetAll().Count);
+        Assert.AreEqual(1, Logic.GetAll().Count);
     }
 
     [TestMethod]
     public void UpdateRejectsInvalidData()
     {
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _logic.Update(0, CreateClient()));
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => Logic.Update(0, CreateClient()));
 
         Client invalidClient = CreateClient();
         invalidClient.Name = string.Empty;
 
-        Assert.ThrowsException<ArgumentException>(() => _logic.Update(1, invalidClient));
+        Assert.ThrowsException<ArgumentException>(() => Logic.Update(1, invalidClient));
     }
 
     [TestMethod]
     public void RemoveDeletesStoredClient()
     {
-        _logic.Remove(1);
+        Logic.Remove(1);
 
-        Assert.IsNull(_logic.GetById(1));
+        Assert.IsNull(Logic.GetById(1));
     }
 
     [TestMethod]
     public void RemoveDoesNothingForMissingClient()
     {
-        _logic.Remove(999);
+        Logic.Remove(999);
 
-        Assert.AreEqual(1, _logic.GetAll().Count);
+        Assert.AreEqual(1, Logic.GetAll().Count);
     }
 
     [TestMethod]
     public void RemoveRejectsInvalidIds()
     {
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _logic.Remove(0));
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => _logic.Remove(-1));
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => Logic.Remove(0));
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => Logic.Remove(-1));
     }
 
     private static Client CreateClient(int id = 0, string name = "Test Client") =>
