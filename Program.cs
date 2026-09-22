@@ -1,5 +1,7 @@
+using CargoHUB.Access;
 using CargoHUB.Datasource;
 using CargoHUB.Framework;
+using CargoHUB.Logics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.FileProviders;
@@ -22,6 +24,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<CargoHubDbContext>(options =>
     options.UseSqlite(connectionString));
+builder.Services.AddScoped<ClientDataAccess>();
+builder.Services.AddScoped<ClientLogic>();
 
 // Production traffic can reach the app only through the local nginx proxy, which
 // sets the original scheme and client IP. App containers have no published ports.
