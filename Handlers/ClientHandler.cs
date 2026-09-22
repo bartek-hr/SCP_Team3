@@ -43,13 +43,13 @@ public sealed class ClientHandler
     }
 
     [Post("/clients")]
-    [Describe("Creates a client.", Tags = ["Clients"], OperationId = "createClient")]
+    [Describe("Creates a client.", Tags = ["Clients"], OperationId = "createClient", SuccessStatus = StatusCodes.Status201Created)]
     public Response Add(Request<Client> request)
     {
         try
         {
             _logic.Add(request.Data);
-            return Response.Ok();
+            return Response.Created();
         }
         catch (ArgumentException)
         {
