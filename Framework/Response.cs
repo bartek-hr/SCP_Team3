@@ -32,6 +32,7 @@ public abstract class Response : IResult
     public static Response Status(int code)  => new EmptyResponse(code);
     public static Response NoContent()       => new EmptyResponse(StatusCodes.Status204NoContent);
     public static Response BadRequest()      => new EmptyResponse(StatusCodes.Status400BadRequest);
+    public static Response Created()        => new EmptyResponse(StatusCodes.Status201Created);
     public static Response Unauthorized()    => new EmptyResponse(StatusCodes.Status401Unauthorized);
     public static Response Forbidden()       => new EmptyResponse(StatusCodes.Status403Forbidden);
     public static Response NotFound()        => new EmptyResponse(StatusCodes.Status404NotFound);
