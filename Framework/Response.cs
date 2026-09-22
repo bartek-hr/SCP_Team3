@@ -63,6 +63,7 @@ public sealed class Response<T> : Response
 
     public T? Body => _body;
 
+    public static new Response<T> BadRequest() => new(default, StatusCodes.Status400BadRequest);
     public static new Response<T> Ok(T body)       => new(body, StatusCodes.Status200OK);
     public static new Response<T> Created(T body)  => new(body, StatusCodes.Status201Created);
     public static new Response<T> Accepted(T body) => new(body, StatusCodes.Status202Accepted);
