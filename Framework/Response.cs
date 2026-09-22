@@ -31,11 +31,13 @@ public abstract class Response : IResult
 
     public static Response Status(int code)  => new EmptyResponse(code);
     public static Response NoContent()       => new EmptyResponse(StatusCodes.Status204NoContent);
-    public static Response BadRequest()    => new EmptyResponse(StatusCodes.Status400BadRequest);
+    public static Response BadRequest()      => new EmptyResponse(StatusCodes.Status400BadRequest);
     public static Response Unauthorized()    => new EmptyResponse(StatusCodes.Status401Unauthorized);
     public static Response Forbidden()       => new EmptyResponse(StatusCodes.Status403Forbidden);
     public static Response NotFound()        => new EmptyResponse(StatusCodes.Status404NotFound);
     public static Response Conflict()        => new EmptyResponse(StatusCodes.Status409Conflict);
+    public static Response ServerError()        => new EmptyResponse(StatusCodes.Status500InternalServerError);
+    public static Response NotImplemented()        => new EmptyResponse(StatusCodes.Status501NotImplemented);
 
     public static Response Ok()        => new EmptyResponse(StatusCodes.Status200OK);
     public static Response<T> Ok<T>(T body)       => Response<T>.Ok(body);
