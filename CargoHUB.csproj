@@ -23,6 +23,7 @@
 
     <ItemGroup>
       <Content Include="swagger-ui\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+      <EmbeddedResource Include="legacy\data\client.json" LogicalName="CargoHUB.LegacyData.ClientJson" />
     </ItemGroup>
 
     <ItemGroup>
