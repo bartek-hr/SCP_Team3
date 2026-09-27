@@ -2,6 +2,18 @@
 # Deploy one isolated local Docker runtime. This script never pushes images.
 set -euo pipefail
 
+# The GitHub Actions cleanup workflow deliberately does not check out repository
+# code.  When invoked from that job, load the host's trusted installation values
+# so cleanup uses the same Compose file and state directory as deployment.
+# Deployment jobs set FV_SOURCE_DIR explicitly to their checked-out revision, so
+# leave that value untouched.
+if [[ -z ${FV_SOURCE_DIR+x} && -r /etc/finalversion/finalversion.env ]]; then
+  # shellcheck disable=SC1091
+  set -a
+  . /etc/finalversion/finalversion.env
+  set +a
+fi
+
 FV_SOURCE_DIR=${FV_SOURCE_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}
 FV_STATE_DIR=${FV_STATE_DIR:-/var/lib/finalversion}
 FV_NGINX_CONF_DIR=${FV_NGINX_CONF_DIR:-$FV_STATE_DIR/nginx/conf.d}
