@@ -8,6 +8,7 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
 {
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Supplier> Suppliers => Set<Supplier>();
+    public DbSet<ItemType> ItemTypes => Set<ItemType>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,6 +49,17 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
             entity.Property(supplier => supplier.Reference).HasColumnName("reference").IsRequired();
             entity.Property(supplier => supplier.CreatedAt).HasColumnName("created_at").IsRequired();
             entity.Property(supplier => supplier.UpdatedAt).HasColumnName("updated_at").IsRequired();
+        });
+
+        modelBuilder.Entity<ItemType>(entity =>
+        {
+            entity.ToTable("ItemTypes");
+            entity.HasKey(itemType => itemType.Id);
+            entity.Property(itemType => itemType.Id).HasColumnName("id");
+            entity.Property(itemType => itemType.Name).HasColumnName("name").IsRequired();
+            entity.Property(itemType => itemType.Description).HasColumnName("description").IsRequired();
+            entity.Property(itemType => itemType.CreatedAt).HasColumnName("created_at").IsRequired();
+            entity.Property(itemType => itemType.UpdatedAt).HasColumnName("updated_at").IsRequired();
         });
     }
 }

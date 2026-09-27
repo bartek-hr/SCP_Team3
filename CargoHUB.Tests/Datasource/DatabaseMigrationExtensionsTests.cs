@@ -27,6 +27,13 @@ public sealed class DatabaseMigrationExtensionsTests
         Assert.AreEqual("Microsoft.EntityFrameworkCore.Sqlite", context.Database.ProviderName);
         Assert.IsTrue(await context.Database.CanConnectAsync());
         Assert.AreEqual(300, await context.Clients.CountAsync());
+        Assert.AreEqual(3, await context.ItemTypes.CountAsync());
+        Assert.AreEqual(
+            "Single",
+            await context.ItemTypes
+                .Where(itemType => itemType.Id == 1)
+                .Select(itemType => itemType.Name)
+                .SingleAsync());
         Assert.AreEqual(
             "Jumbo Amersfoort Leusderweg",
             await context.Clients
