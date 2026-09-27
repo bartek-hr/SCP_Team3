@@ -8,9 +8,26 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
 {
     public DbSet<Client> Clients => Set<Client>();
 
+    public DbSet<Inventory> Inventories => Set<Inventory>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+
+        modelBuilder.Entity<Inventory>(entity =>
+        {
+            entity.ToTable("Inventories");
+            entity.HasKey(inventory => new { inventory.ItemId, inventory.LocationId });
+            entity.Property(inventory => inventory.ItemId).HasColumnName("item_id");
+            entity.Property(inventory => inventory.LocationId).HasColumnName("location_id");
+            entity.Property(inventory => inventory.QuantityOnHand).HasColumnName("quantity_on_hand");
+            entity.Property(inventory => inventory.QuantityExpected).HasColumnName("quantity_expected");
+            entity.Property(inventory => inventory.QuantityOrdered).HasColumnName("quantity_ordered");
+            entity.Property(inventory => inventory.QuantityAllocated).HasColumnName("quantity_allocated");
+            entity.Property(inventory => inventory.CreatedAt).HasColumnName("created_at");
+            entity.Property(inventory => inventory.UpdatedAt).HasColumnName("updated_at");
+        });
 
         modelBuilder.Entity<Client>(entity =>
         {
