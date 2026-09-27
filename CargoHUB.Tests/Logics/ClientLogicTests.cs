@@ -9,7 +9,7 @@ namespace CargoHUB.Tests.Logics;
 [TestClass]
 public sealed class ClientLogicTests : DatabaseTest
 {
-    private ClientLogic Logic => new(new ClientDataAccess(Context));
+    private ClientLogic Logic => new(new ClientAccess(Context));
 
     protected override void SeedDatabase()
     {

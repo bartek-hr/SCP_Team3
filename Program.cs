@@ -24,8 +24,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<CargoHubDbContext>(options =>
     options.UseSqlite(connectionString));
-builder.Services.AddScoped<ClientDataAccess>();
+builder.Services.AddScoped<ClientAccess>();
 builder.Services.AddScoped<ClientLogic>();
+builder.Services.AddScoped<SupplierAccess>();
+builder.Services.AddScoped<SupplierLogic>();
 
 // Production traffic can reach the app only through the local nginx proxy, which
 // sets the original scheme and client IP. App containers have no published ports.
