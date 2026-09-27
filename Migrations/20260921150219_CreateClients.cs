@@ -61,7 +61,7 @@ public partial class CreateClients : Migration
 
     private static object[,] GetClientSeedValues()
     {
-        using Stream stream = typeof(CreateClients).Assembly.GetManifestResourceStream("CargoHUB.LegacyData.ClientJson")
+        using Stream stream = typeof(CreateClients).Assembly.GetManifestResourceStream("CargoHUB.LegacyData.clientJson")
                            ?? throw new InvalidOperationException("The legacy client data resource is missing.");
         List<Client> clients = JsonSerializer.Deserialize<List<Client>>(stream)
                       ?? throw new InvalidOperationException("The legacy client data is invalid.");
