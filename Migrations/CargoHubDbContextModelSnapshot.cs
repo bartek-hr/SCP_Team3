@@ -90,6 +90,40 @@ internal partial class CargoHubDbContextModelSnapshot : ModelSnapshot
 
                 b.ToTable("Clients", (string)null);
             });
+        modelBuilder.Entity("CargoHUB.Models.ItemType", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("id")
+                    .HasJsonPropertyName("id");
+
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("created_at")
+                    .HasJsonPropertyName("created_at");
+
+                b.Property<string>("Description")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("description")
+                    .HasJsonPropertyName("description");
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("name")
+                    .HasJsonPropertyName("name");
+
+                b.Property<DateTime>("UpdatedAt")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("updated_at")
+                    .HasJsonPropertyName("updated_at");
+
+                b.HasKey("Id");
+
+                b.ToTable("ItemTypes", (string)null);
+            });
         modelBuilder.Entity("CargoHUB.Models.Supplier", b =>
             {
                 b.Property<int>("Id")
