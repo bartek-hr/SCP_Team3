@@ -9,7 +9,7 @@ namespace CargoHUB.Tests.Logics;
 [TestClass]
 public sealed class SupplierLogicTests : DatabaseTest
 {
-    private SupplierLogic Logic => new(new SupplierDataAccess(Context));
+    private SupplierLogic Logic => new(new SupplierAccess(Context));
 
     protected override void SeedDatabase()
     {

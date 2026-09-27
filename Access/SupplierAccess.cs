@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CargoHUB.Access;
 
-public sealed class SupplierDataAccess(CargoHubDbContext context)
+public sealed class SupplierAccess(CargoHubDbContext context)
 {
     public IReadOnlyList<Supplier> GetAll() =>
         context.Suppliers.AsNoTracking().OrderBy(supplier => supplier.Id).ToList();

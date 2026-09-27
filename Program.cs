@@ -26,7 +26,7 @@ builder.Services.AddDbContext<CargoHubDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services.AddScoped<ClientDataAccess>();
 builder.Services.AddScoped<ClientLogic>();
-builder.Services.AddScoped<SupplierDataAccess>();
+builder.Services.AddScoped<SupplierAccess>();
 builder.Services.AddScoped<SupplierLogic>();
 
 // Production traffic can reach the app only through the local nginx proxy, which

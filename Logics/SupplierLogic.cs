@@ -3,7 +3,7 @@ using CargoHUB.Models;
 
 namespace CargoHUB.Logics;
 
-public sealed class SupplierLogic(SupplierDataAccess dataAccess)
+public sealed class SupplierLogic(SupplierAccess dataAccess)
 {
     public IReadOnlyList<Supplier> GetAll() => dataAccess.GetAll();
 
