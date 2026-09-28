@@ -14,6 +14,8 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
 
     public DbSet<Order> Orders => Set<Order>();
 
+    public DbSet<Inventory> Inventories => Set<Inventory>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
