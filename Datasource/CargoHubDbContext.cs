@@ -53,6 +53,36 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
             entity.Property(item => item.UnitPrice).HasColumnName("unit_price");
         });
 
+        modelBuilder.Entity<Shipment>(entity =>
+        {
+            entity.ToTable("Shipments");
+            entity.HasKey(row => row.Id);
+            entity.Property(row => row.Id).HasColumnName("id");
+            entity.Property(row => row.Reference).HasColumnName("reference");
+            entity.Property(row => row.OrderId).HasColumnName("order_id");
+            entity.Property(row => row.ShipmentDate).HasColumnName("shipment_date");
+            entity.Property(row => row.ShipmentType).HasColumnName("shipment_type");
+            entity.Property(row => row.ShipmentStatus).HasColumnName("shipment_status");
+            entity.Property(row => row.CarrierName).HasColumnName("carrier_name");
+            entity.Property(row => row.ShippingMethod).HasColumnName("shipping_method");
+            entity.Property(row => row.PaymentType).HasColumnName("payment_type");
+            entity.Property(row => row.CreatedAt).HasColumnName("created_at");
+            entity.Property(row => row.UpdatedAt).HasColumnName("updated_at");
+            entity.HasMany(row => row.Items).WithOne().HasForeignKey(item => item.ShipmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ShipmentItem>(entity =>
+        {
+            entity.ToTable("ShipmentItems");
+            entity.HasKey(item => item.Id);
+            entity.HasIndex(item => new { item.ShipmentId, item.ItemId }).IsUnique();
+            entity.Property(item => item.Id).HasColumnName("id");
+            entity.Property(item => item.ShipmentId).HasColumnName("shipment_id");
+            entity.Property(item => item.ItemId).HasColumnName("item_id");
+            entity.Property(item => item.Amount).HasColumnName("amount");
+        });
+
         modelBuilder.Entity<Client>(entity =>
         {
             entity.ToTable("Clients");
