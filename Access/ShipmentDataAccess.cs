@@ -6,15 +6,21 @@ namespace CargoHUB.Access;
 
 public sealed class ShipmentDataAccess(CargoHubDbContext context)
 {
-    public IReadOnlyList<Shipment> GetAll() =>
-        context.Shipments.AsNoTracking().Include(row => row.Items).OrderBy(row => row.Id).ToList();
+    public IReadOnlyList<Shipment> GetAll()
+    {
+        return context.Shipments.AsNoTracking().Include(row => row.Items).OrderBy(row => row.Id).ToList();
+    }
 
-    public Shipment? GetById(int id) =>
-        context.Shipments.AsNoTracking().Include(row => row.Items).SingleOrDefault(row => row.Id == id);
+    public Shipment? GetById(int id)
+    {
+        return context.Shipments.AsNoTracking().Include(row => row.Items).SingleOrDefault(row => row.Id == id);
+    }
 
-    public IReadOnlyList<ShipmentItem> GetItems(int id) =>
-        context.Set<ShipmentItem>().AsNoTracking().Where(item => item.ShipmentId == id)
+    public IReadOnlyList<ShipmentItem> GetItems(int id)
+    {
+        return context.Set<ShipmentItem>().AsNoTracking().Where(item => item.ShipmentId == id)
             .OrderBy(item => item.ItemId).ToList();
+    }
 
     public void Add(Shipment shipment)
     {

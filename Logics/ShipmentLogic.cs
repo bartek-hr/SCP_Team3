@@ -5,15 +5,25 @@ namespace CargoHUB.Logics;
 
 public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
 {
-    public IReadOnlyList<Shipment> GetAll() => dataAccess.GetAll();
+    public IReadOnlyList<Shipment> GetAll()
+    {
+        return dataAccess.GetAll();
+    }
 
-    public Shipment? GetById(int id) => id > 0 ? dataAccess.GetById(id) : null;
+    public Shipment? GetById(int id)
+    {
+        return id > 0 ? dataAccess.GetById(id) : null;
+    }
 
-    public IReadOnlyList<ShipmentItem> GetItems(int shipmentId) =>
-        shipmentId > 0 ? dataAccess.GetItems(shipmentId) : [];
+    public IReadOnlyList<ShipmentItem> GetItems(int shipmentId)
+    {
+        return shipmentId > 0 ? dataAccess.GetItems(shipmentId) : [];
+    }
 
-    public IReadOnlyList<int> GetOrderIds(int shipmentId) =>
-        GetById(shipmentId)?.OrderId is int orderId ? [orderId] : [];
+    public IReadOnlyList<int> GetOrderIds(int shipmentId)
+    {
+        return GetById(shipmentId)?.OrderId is int orderId ? [orderId] : [];
+    }
 
     public void Add(Shipment shipment)
     {
