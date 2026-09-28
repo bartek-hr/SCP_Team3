@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420" role="img" aria-labelledby="title desc">
+  <title id="title">CargoHUB — warehouse management, rebuilt</title>
+  <desc id="desc">Donkerblauwe banner met mintgroene accenten, een geometrisch magazijn en verbonden opslaglocaties. Een project van SCP Team 3.</desc>
+  <defs>
+    <linearGradient id="background" x2="1" y2="1">
+      <stop stop-color="#101e35"/><stop offset="1" stop-color="#07111f"/>
+    </linearGradient>
+    <linearGradient id="accent"><stop stop-color="#70f4c5"/><stop offset="1" stop-color="#53cfe7"/></linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#26364a" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1280" height="420" rx="24" fill="url(#background)"/>
+  <rect x="720" y="24" width="536" height="372" rx="16" fill="url(#grid)" opacity=".42"/>
+  <rect x="52" y="54" width="6" height="22" rx="3" fill="#70f4c5"/>
+  <text x="72" y="71" fill="#a6bbcd" font-family="Arial, Helvetica, sans-serif" font-size="14" letter-spacing="4">SCP TEAM 3 / ENGINEERING</text>
+  <text x="48" y="190" fill="#f0f6ff" font-family="Arial, Helvetica, sans-serif" font-size="92" font-weight="700" letter-spacing="-5">Cargo<tspan fill="#70f4c5">HUB</tspan></text>
+  <text x="54" y="236" fill="#d8e3ef" font-family="Arial, Helvetica, sans-serif" font-size="25">Warehouse management, rebuilt.</text>
+  <text x="54" y="275" fill="#92a8bd" font-family="Arial, Helvetica, sans-serif" font-size="17">C# API · Legacy compatibility · Layered architecture</text>
+  <rect x="54" y="326" width="260" height="36" rx="18" fill="#132e36" stroke="#29534f"/>
+  <circle cx="74" cy="344" r="4" fill="#70f4c5"/>
+  <text x="88" y="349" fill="#b9eadb" font-family="Arial, Helvetica, sans-serif" font-size="11" letter-spacing="1.5">THE NEXT CHAPTER IN WMS</text>
+  <g fill="none" stroke="#375069" stroke-width="2">
+    <path d="M772 293H829M1098 293H1184V156H1122" stroke-dasharray="6 7"/>
+    <path d="M954 104V63H1138" stroke-dasharray="6 7"/>
+  </g>
+  <g stroke-linejoin="round" stroke-width="2">
+    <path d="M842 185L965 112L1101 185L978 260Z" fill="#203c50" stroke="#5cd9c4"/>
+    <path d="M842 185V286L978 363V260Z" fill="#142b40" stroke="#34546c"/>
+    <path d="M978 260L1101 185V286L978 363Z" fill="#102133" stroke="#34546c"/>
+    <path d="M850 181L965 69L1109 177L986 249Z" fill="#19344a" stroke="#70f4c5"/>
+    <path d="M850 181L965 69L972 144Z" fill="#264e5b" stroke="#70f4c5"/>
+    <path d="M878 235L920 259V330L878 306Z" fill="#081827" stroke="#45718a"/>
+    <path d="M889 253L909 265M889 269L909 281M889 285L909 297" stroke="#45718a"/>
+    <path d="M1000 265L1025 250V277L1000 292Z M1046 238L1071 223V250L1046 265Z" fill="#70f4c5" stroke="#70f4c5" opacity=".8"/>
+    <path d="M768 296L795 280L822 296L795 312Z" fill="#294d5a" stroke="#70f4c5"/>
+    <path d="M768 296V326L795 342V312Z" fill="#173245" stroke="#70f4c5"/>
+    <path d="M795 312L822 296V326L795 342Z" fill="#102839" stroke="#70f4c5"/>
+  </g>
+  <g fill="#70f4c5"><circle cx="1184" cy="156" r="5"/><circle cx="1138" cy="63" r="5"/></g>
+  <rect x="1182" y="326" width="6" height="38" rx="3" fill="url(#accent)"/>
+  <rect x="1194" y="311" width="6" height="53" rx="3" fill="url(#accent)" opacity=".7"/>
+  <rect x="1206" y="294" width="6" height="70" rx="3" fill="url(#accent)" opacity=".4"/>
+</svg>

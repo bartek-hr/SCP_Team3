@@ -12,25 +12,45 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
     public DbSet<Transfer> Transfers => Set<Transfer>();
     public DbSet<TransferItem> TransferItems => Set<TransferItem>();
 
+    public DbSet<Order> Orders => Set<Order>();
+
     public DbSet<Inventory> Inventories => Set<Inventory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-
-        modelBuilder.Entity<Inventory>(entity =>
+        modelBuilder.Entity<Order>(entity =>
         {
-            entity.ToTable("Inventories");
-            entity.HasKey(inventory => new { inventory.ItemId, inventory.LocationId });
-            entity.Property(inventory => inventory.ItemId).HasColumnName("item_id");
-            entity.Property(inventory => inventory.LocationId).HasColumnName("location_id");
-            entity.Property(inventory => inventory.QuantityOnHand).HasColumnName("quantity_on_hand");
-            entity.Property(inventory => inventory.QuantityExpected).HasColumnName("quantity_expected");
-            entity.Property(inventory => inventory.QuantityOrdered).HasColumnName("quantity_ordered");
-            entity.Property(inventory => inventory.QuantityAllocated).HasColumnName("quantity_allocated");
-            entity.Property(inventory => inventory.CreatedAt).HasColumnName("created_at");
-            entity.Property(inventory => inventory.UpdatedAt).HasColumnName("updated_at");
+            entity.ToTable("Orders");
+            entity.HasKey(row => row.Id);
+            entity.Property(row => row.Id).HasColumnName("id");
+            entity.Property(row => row.ClientId).HasColumnName("client_id");
+            entity.Property(row => row.OrderDate).HasColumnName("order_date");
+            entity.Property(row => row.RequestDate).HasColumnName("request_date");
+            entity.Property(row => row.Reference).HasColumnName("reference");
+            entity.Property(row => row.CustomerPoNumber).HasColumnName("customer_po_number");
+            entity.Property(row => row.OrderStatus).HasColumnName("order_status");
+            entity.Property(row => row.ShippingNotes).HasColumnName("shipping_notes");
+            entity.Property(row => row.WarehouseId).HasColumnName("warehouse_id");
+            entity.Property(row => row.ShipToClientId).HasColumnName("ship_to_client_id");
+            entity.Property(row => row.BillToClientId).HasColumnName("bill_to_client_id");
+            entity.Property(row => row.CreatedAt).HasColumnName("created_at");
+            entity.Property(row => row.UpdatedAt).HasColumnName("updated_at");
+            entity.HasMany(row => row.Items).WithOne().HasForeignKey(item => item.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<OrderItem>(entity =>
+        {
+            entity.ToTable("OrderItems");
+            entity.HasKey(item => item.Id);
+            entity.HasIndex(item => new { item.OrderId, item.ItemId }).IsUnique();
+            entity.Property(item => item.Id).HasColumnName("id");
+            entity.Property(item => item.OrderId).HasColumnName("order_id");
+            entity.Property(item => item.ItemId).HasColumnName("item_id");
+            entity.Property(item => item.Amount).HasColumnName("amount");
+            entity.Property(item => item.UnitPrice).HasColumnName("unit_price");
         });
 
         modelBuilder.Entity<Client>(entity =>

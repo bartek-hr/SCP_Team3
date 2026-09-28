@@ -1,14 +1,26 @@
-## requirements
+# Requirements & ontwerpuitgangspunten
 
-- de api moet dezelfde endpoint gaan behouden zodat het compatible is met bestaande clients frontend applicaties die onze api in de backend gebruiken.
-- het moet de goede data doorgeven met goede permisies omdat her meerdere verschillende warehouses en supermarkten er gebruik van gaan maken.
-- geen corrupte database meer mogelijk zijn door goed testen en handlen van de data.
-- het moet sneller zijn dan de bestaande api.
-- goed de api documenteren en testen zoals het nu is voor een goede blueprint van wat en hoe het werkt.
-- moet alles bijhouden van moment dat ze fabriek (of supplier) verlaten tot eindpunt in de supermarkt
-- goede user managment en auth zodat data niet kan veranderen door mensen die dat eignelijk helemaal niet mogen.
-- bouw eerst een goed basis platform dan pas gaan we er nieuwe functionionalitijd in bouwen.
+Deze notities beschrijven de doelen van de C#-rewrite. Ze zijn geen overzicht van reeds opgeleverde functionaliteit. De oorspronkelijke README-notities zijn hier samengebracht.
 
-### notes
-- bouwen testen alleen in c# die bijde endpoints oude python en nieuwe c# testen en specefiek voor onze code maken we testen maar dat is niet nodig voor de oude python code.
-- 
+## Compatibiliteit
+
+- Behoud de bestaande API-endpoints zodat aangesloten clients en frontends kunnen blijven werken.
+- Documenteer en test het huidige gedrag als referentie voor de nieuwe implementatie.
+
+## Data & toegang
+
+- Lever correcte gegevens met passende rechten voor de verschillende magazijnen en supermarkten.
+- Voorkom databasecorruptie door invoer te valideren, fouten af te handelen en het gedrag te testen.
+- Zorg voor gebruikersbeheer en authenticatie zodat alleen bevoegde gebruikers gegevens kunnen wijzigen.
+- Ondersteun het volgen van goederen vanaf de fabriek of leverancier tot het eindpunt in de supermarkt.
+
+## Kwaliteit & volgorde
+
+- Streef naar betere prestaties dan de bestaande API.
+- Bouw eerst een betrouwbare basis voordat nieuwe functionaliteit wordt toegevoegd.
+
+## Testaanpak
+
+- Schrijf tests in C# waarmee zowel de oude Python-endpoints als de nieuwe C#-endpoints kunnen worden gecontroleerd.
+- Voeg daarnaast tests toe voor de interne werking van de nieuwe C#-code.
+- Voor de interne Python-code zijn geen nieuwe tests gepland; het waarneembare API-gedrag blijft wel onderdeel van de vergelijking.
