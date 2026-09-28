@@ -1,0 +1,13 @@
+{
+  "id": 9001,
+  "code": "SUP-9001",
+  "name": "Test Leverancier B.V.",
+  "address": "Leveranciersweg 12",
+  "city": "Utrecht",
+  "zip_code": "3521 AL",
+  "province": "Utrecht",
+  "country": "Netherlands",
+  "contact_name": "Jan Jansen",
+  "phone_number": "+3130-1234567",
+  "reference": "TestLev"
+}
