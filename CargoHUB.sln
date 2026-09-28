@@ -3,6 +3,191 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CargoHUB", "CargoHUB.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CargoHUB.Tests", "CargoHUB.Tests\CargoHUB.Tests.csproj", "{A1A8B847-5A7F-4D35-9CE6-4F7C3E6F4A2B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D11A473B-784B-55CB-8F73-03AFBD27F0FF}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		Dockerfile = Dockerfile
+		dotnet-tools.json = dotnet-tools.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{272A3888-5C6D-5E2F-85C6-96D652399DCC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{4734CEF5-8913-5256-ABE9-759589DD92D4}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\deploy.yml = .github\workflows\deploy.yml
+		.github\workflows\dotnet-tests.yml = .github\workflows\dotnet-tests.yml
+		.github\workflows\preview-cleanup.yml = .github\workflows\preview-cleanup.yml
+		.github\workflows\preview-manual.yml = .github\workflows\preview-manual.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{FAF0D098-0AEB-5F00-A09B-E77B072F2534}"
+	ProjectSection(SolutionItems) = preProject
+		docs\deployment.md = docs\deployment.md
+		docs\INFSCP22 - 2627 - Cursushandleiding Deeltijd.pdf = docs\INFSCP22 - 2627 - Cursushandleiding Deeltijd.pdf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "legacy-api", "legacy-api", "{2571D549-BF6F-5049-9815-5C3D75666A74}"
+	ProjectSection(SolutionItems) = preProject
+		docs\legacy-api\legacy-api.http = docs\legacy-api\legacy-api.http
+		docs\legacy-api\README.md = docs\legacy-api\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "request-bodies", "request-bodies", "{95A954D5-7067-57BE-B71E-6D11DB1AD4DC}"
+	ProjectSection(SolutionItems) = preProject
+		docs\legacy-api\request-bodies\POST_clients.json = docs\legacy-api\request-bodies\POST_clients.json
+		docs\legacy-api\request-bodies\POST_inventories.json = docs\legacy-api\request-bodies\POST_inventories.json
+		docs\legacy-api\request-bodies\POST_item_groups.json = docs\legacy-api\request-bodies\POST_item_groups.json
+		docs\legacy-api\request-bodies\POST_item_lines.json = docs\legacy-api\request-bodies\POST_item_lines.json
+		docs\legacy-api\request-bodies\POST_item_types.json = docs\legacy-api\request-bodies\POST_item_types.json
+		docs\legacy-api\request-bodies\POST_items.json = docs\legacy-api\request-bodies\POST_items.json
+		docs\legacy-api\request-bodies\POST_locations.json = docs\legacy-api\request-bodies\POST_locations.json
+		docs\legacy-api\request-bodies\POST_orders.json = docs\legacy-api\request-bodies\POST_orders.json
+		docs\legacy-api\request-bodies\POST_shipments.json = docs\legacy-api\request-bodies\POST_shipments.json
+		docs\legacy-api\request-bodies\POST_suppliers.json = docs\legacy-api\request-bodies\POST_suppliers.json
+		docs\legacy-api\request-bodies\POST_transfers.json = docs\legacy-api\request-bodies\POST_transfers.json
+		docs\legacy-api\request-bodies\POST_warehouses.json = docs\legacy-api\request-bodies\POST_warehouses.json
+		docs\legacy-api\request-bodies\PUT_clients_id.json = docs\legacy-api\request-bodies\PUT_clients_id.json
+		docs\legacy-api\request-bodies\PUT_item_groups_id.json = docs\legacy-api\request-bodies\PUT_item_groups_id.json
+		docs\legacy-api\request-bodies\PUT_item_lines_id.json = docs\legacy-api\request-bodies\PUT_item_lines_id.json
+		docs\legacy-api\request-bodies\PUT_item_types_id.json = docs\legacy-api\request-bodies\PUT_item_types_id.json
+		docs\legacy-api\request-bodies\PUT_items_id.json = docs\legacy-api\request-bodies\PUT_items_id.json
+		docs\legacy-api\request-bodies\PUT_locations_id.json = docs\legacy-api\request-bodies\PUT_locations_id.json
+		docs\legacy-api\request-bodies\PUT_orders_id.json = docs\legacy-api\request-bodies\PUT_orders_id.json
+		docs\legacy-api\request-bodies\PUT_orders_id_items.json = docs\legacy-api\request-bodies\PUT_orders_id_items.json
+		docs\legacy-api\request-bodies\PUT_shipments_id.json = docs\legacy-api\request-bodies\PUT_shipments_id.json
+		docs\legacy-api\request-bodies\PUT_shipments_id_items.json = docs\legacy-api\request-bodies\PUT_shipments_id_items.json
+		docs\legacy-api\request-bodies\PUT_shipments_id_orders.json = docs\legacy-api\request-bodies\PUT_shipments_id_orders.json
+		docs\legacy-api\request-bodies\PUT_suppliers_id.json = docs\legacy-api\request-bodies\PUT_suppliers_id.json
+		docs\legacy-api\request-bodies\PUT_transfers_id.json = docs\legacy-api\request-bodies\PUT_transfers_id.json
+		docs\legacy-api\request-bodies\PUT_warehouses_id.json = docs\legacy-api\request-bodies\PUT_warehouses_id.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "legacy-python", "legacy-python", "{EEB5CCAF-E81F-5931-80C1-F1307D3A1996}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{5DE19DE3-AEBC-5F7D-8101-F813AEA022B7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "models", "models", "{E5AC8AB4-0DEB-5263-A28D-178B58C5A6A5}"
+	ProjectSection(SolutionItems) = preProject
+		docs\legacy-python\api\models\base.md = docs\legacy-python\api\models\base.md
+		docs\legacy-python\api\models\clients.md = docs\legacy-python\api\models\clients.md
+		docs\legacy-python\api\models\inventories.md = docs\legacy-python\api\models\inventories.md
+		docs\legacy-python\api\models\item_groups.md = docs\legacy-python\api\models\item_groups.md
+		docs\legacy-python\api\models\item_lines.md = docs\legacy-python\api\models\item_lines.md
+		docs\legacy-python\api\models\item_types.md = docs\legacy-python\api\models\item_types.md
+		docs\legacy-python\api\models\items.md = docs\legacy-python\api\models\items.md
+		docs\legacy-python\api\models\locations.md = docs\legacy-python\api\models\locations.md
+		docs\legacy-python\api\models\order_items.md = docs\legacy-python\api\models\order_items.md
+		docs\legacy-python\api\models\orders.md = docs\legacy-python\api\models\orders.md
+		docs\legacy-python\api\models\shipment_items.md = docs\legacy-python\api\models\shipment_items.md
+		docs\legacy-python\api\models\shipments.md = docs\legacy-python\api\models\shipments.md
+		docs\legacy-python\api\models\suppliers.md = docs\legacy-python\api\models\suppliers.md
+		docs\legacy-python\api\models\transfer_items.md = docs\legacy-python\api\models\transfer_items.md
+		docs\legacy-python\api\models\transfers.md = docs\legacy-python\api\models\transfers.md
+		docs\legacy-python\api\models\warehouses.md = docs\legacy-python\api\models\warehouses.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "notes", "notes", "{672906BA-E89B-5E5E-A46C-C83F0D3AFDF5}"
+	ProjectSection(SolutionItems) = preProject
+		docs\notes\requirements.md = docs\notes\requirements.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sprint-0", "sprint-0", "{ABE0E42F-AE70-545B-9381-6327AC6B32CE}"
+	ProjectSection(SolutionItems) = preProject
+		docs\notes\sprint-0\taken-verdeling.md = docs\notes\sprint-0\taken-verdeling.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "server", "server", "{DCC5F20C-F845-54E8-83E4-C9C15AFD0E73}"
+	ProjectSection(SolutionItems) = preProject
+		docs\server\setup_team_logins.sh = docs\server\setup_team_logins.sh
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "infra", "infra", "{80990319-C668-59EB-BA71-10BABD07C631}"
+	ProjectSection(SolutionItems) = preProject
+		infra\compose.yml = infra\compose.yml
+		infra\finalversion = infra\finalversion
+		infra\install.sh = infra\install.sh
+		infra\lifecycle-controller.py = infra\lifecycle-controller.py
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nginx", "nginx", "{0637FF97-E42B-555C-822B-11DBC24D5458}"
+	ProjectSection(SolutionItems) = preProject
+		infra\nginx\nginx.conf = infra\nginx\nginx.conf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "systemd", "systemd", "{0EB557A2-694A-546C-AFB0-9E8889F9CD00}"
+	ProjectSection(SolutionItems) = preProject
+		infra\systemd\finalversion-controller.service = infra\systemd\finalversion-controller.service
+		infra\systemd\finalversion-idle.service = infra\systemd\finalversion-idle.service
+		infra\systemd\finalversion-idle.timer = infra\systemd\finalversion-idle.timer
+		infra\systemd\finalversion-proxy.service = infra\systemd\finalversion-proxy.service
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "legacy", "legacy", "{97DDA7BB-0125-5E95-AF7C-BAE52A6EADD8}"
+	ProjectSection(SolutionItems) = preProject
+		legacy\start-system.sh = legacy\start-system.sh
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{9B75DC89-4794-54BA-AEC6-8E2AD9C47982}"
+	ProjectSection(SolutionItems) = preProject
+		legacy\api\main.py = legacy\api\main.py
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "models", "models", "{A5366CBC-255B-5B52-94C3-E751762198A8}"
+	ProjectSection(SolutionItems) = preProject
+		legacy\api\models\__ init __.py = legacy\api\models\__ init __.py
+		legacy\api\models\base.py = legacy\api\models\base.py
+		legacy\api\models\clients.py = legacy\api\models\clients.py
+		legacy\api\models\inventories.py = legacy\api\models\inventories.py
+		legacy\api\models\item_groups.py = legacy\api\models\item_groups.py
+		legacy\api\models\item_lines.py = legacy\api\models\item_lines.py
+		legacy\api\models\item_types.py = legacy\api\models\item_types.py
+		legacy\api\models\items.py = legacy\api\models\items.py
+		legacy\api\models\locations.py = legacy\api\models\locations.py
+		legacy\api\models\order_items.py = legacy\api\models\order_items.py
+		legacy\api\models\orders.py = legacy\api\models\orders.py
+		legacy\api\models\shipment_items.py = legacy\api\models\shipment_items.py
+		legacy\api\models\shipments.py = legacy\api\models\shipments.py
+		legacy\api\models\suppliers.py = legacy\api\models\suppliers.py
+		legacy\api\models\transfer_items.py = legacy\api\models\transfer_items.py
+		legacy\api\models\transfers.py = legacy\api\models\transfers.py
+		legacy\api\models\warehouses.py = legacy\api\models\warehouses.py
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "processors", "processors", "{4501EDB6-107E-5333-A2FA-A0AE7F707169}"
+	ProjectSection(SolutionItems) = preProject
+		legacy\api\processors\__ init __.py = legacy\api\processors\__ init __.py
+		legacy\api\processors\notification_processor.py = legacy\api\processors\notification_processor.py
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "providers", "providers", "{233BB714-AB58-59A0-A69F-A9246A0FB7F6}"
+	ProjectSection(SolutionItems) = preProject
+		legacy\api\providers\__ init __.py = legacy\api\providers\__ init __.py
+		legacy\api\providers\auth_provider.py = legacy\api\providers\auth_provider.py
+		legacy\api\providers\data_provider.py = legacy\api\providers\data_provider.py
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{815D8EE2-F30C-5E57-B92D-12D9EDC7DCAD}"
+	ProjectSection(SolutionItems) = preProject
+		legacy\data\client.json = legacy\data\client.json
+		legacy\data\inventory.json = legacy\data\inventory.json
+		legacy\data\item.json = legacy\data\item.json
+		legacy\data\item_group.json = legacy\data\item_group.json
+		legacy\data\item_line.json = legacy\data\item_line.json
+		legacy\data\item_type.json = legacy\data\item_type.json
+		legacy\data\location.json = legacy\data\location.json
+		legacy\data\order.json = legacy\data\order.json
+		legacy\data\order_item.json = legacy\data\order_item.json
+		legacy\data\shipment.json = legacy\data\shipment.json
+		legacy\data\shipment_item.json = legacy\data\shipment_item.json
+		legacy\data\supplier.json = legacy\data\supplier.json
+		legacy\data\transfer.json = legacy\data\transfer.json
+		legacy\data\transfer_item.json = legacy\data\transfer_item.json
+		legacy\data\user.json = legacy\data\user.json
+		legacy\data\warehouse.json = legacy\data\warehouse.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,5 +202,27 @@ Global
 		{A1A8B847-5A7F-4D35-9CE6-4F7C3E6F4A2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1A8B847-5A7F-4D35-9CE6-4F7C3E6F4A2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1A8B847-5A7F-4D35-9CE6-4F7C3E6F4A2B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{272A3888-5C6D-5E2F-85C6-96D652399DCC} = {D11A473B-784B-55CB-8F73-03AFBD27F0FF}
+		{4734CEF5-8913-5256-ABE9-759589DD92D4} = {272A3888-5C6D-5E2F-85C6-96D652399DCC}
+		{FAF0D098-0AEB-5F00-A09B-E77B072F2534} = {D11A473B-784B-55CB-8F73-03AFBD27F0FF}
+		{2571D549-BF6F-5049-9815-5C3D75666A74} = {FAF0D098-0AEB-5F00-A09B-E77B072F2534}
+		{95A954D5-7067-57BE-B71E-6D11DB1AD4DC} = {2571D549-BF6F-5049-9815-5C3D75666A74}
+		{EEB5CCAF-E81F-5931-80C1-F1307D3A1996} = {FAF0D098-0AEB-5F00-A09B-E77B072F2534}
+		{5DE19DE3-AEBC-5F7D-8101-F813AEA022B7} = {EEB5CCAF-E81F-5931-80C1-F1307D3A1996}
+		{E5AC8AB4-0DEB-5263-A28D-178B58C5A6A5} = {5DE19DE3-AEBC-5F7D-8101-F813AEA022B7}
+		{672906BA-E89B-5E5E-A46C-C83F0D3AFDF5} = {FAF0D098-0AEB-5F00-A09B-E77B072F2534}
+		{ABE0E42F-AE70-545B-9381-6327AC6B32CE} = {672906BA-E89B-5E5E-A46C-C83F0D3AFDF5}
+		{DCC5F20C-F845-54E8-83E4-C9C15AFD0E73} = {FAF0D098-0AEB-5F00-A09B-E77B072F2534}
+		{80990319-C668-59EB-BA71-10BABD07C631} = {D11A473B-784B-55CB-8F73-03AFBD27F0FF}
+		{0637FF97-E42B-555C-822B-11DBC24D5458} = {80990319-C668-59EB-BA71-10BABD07C631}
+		{0EB557A2-694A-546C-AFB0-9E8889F9CD00} = {80990319-C668-59EB-BA71-10BABD07C631}
+		{97DDA7BB-0125-5E95-AF7C-BAE52A6EADD8} = {D11A473B-784B-55CB-8F73-03AFBD27F0FF}
+		{9B75DC89-4794-54BA-AEC6-8E2AD9C47982} = {97DDA7BB-0125-5E95-AF7C-BAE52A6EADD8}
+		{A5366CBC-255B-5B52-94C3-E751762198A8} = {9B75DC89-4794-54BA-AEC6-8E2AD9C47982}
+		{4501EDB6-107E-5333-A2FA-A0AE7F707169} = {9B75DC89-4794-54BA-AEC6-8E2AD9C47982}
+		{233BB714-AB58-59A0-A69F-A9246A0FB7F6} = {9B75DC89-4794-54BA-AEC6-8E2AD9C47982}
+		{815D8EE2-F30C-5E57-B92D-12D9EDC7DCAD} = {97DDA7BB-0125-5E95-AF7C-BAE52A6EADD8}
 	EndGlobalSection
 EndGlobal

@@ -4,6 +4,10 @@
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <!-- This project sits in the repo root, so by default it would include every file in the repo.
+             The test project and everything that is not part of the API live in the solution's
+             "Solution Items" folder instead (see CargoHUB.sln). -->
+        <DefaultItemExcludes>$(DefaultItemExcludes);CargoHUB.Tests\**;docs\**;infra\**;legacy\**;.dockerignore;.editorconfig;.gitignore;Dockerfile;dotnet-tools.json</DefaultItemExcludes>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,11 +27,8 @@
 
     <ItemGroup>
       <Content Include="swagger-ui\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-      <EmbeddedResource Include="legacy\data\client.json" LogicalName="CargoHUB.LegacyData.ClientJson" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="CargoHUB.Tests\**\*.cs" />
+      <!-- Seed data for the migrations. Shown under Solution Items > legacy > data. -->
+      <EmbeddedResource Include="legacy\data\*.json" LogicalName="CargoHUB.LegacyData.%(Filename)Json" Visible="false" />
     </ItemGroup>
 
 </Project>
