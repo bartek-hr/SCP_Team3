@@ -1,0 +1,19 @@
+{
+  "id": 1,
+  "code": "ITM-000001",
+  "description": "Jumbo Summer Sprinkles IJsjes 6 Stuks (nieuwe verpakking)",
+  "barcode": "4313291212776",
+  "model_number": "VS-10414",
+  "commodity_code": 6268604,
+  "unit_weight": 0.336,
+  "item_line_id": 5,
+  "item_group_id": 3,
+  "item_type_id": 2,
+  "min_purchase_qty": 24,
+  "case_size": 6,
+  "packaging_type": "Case",
+  "order_multiple": 1,
+  "supplier_id": 17,
+  "supplier_sku": "SKU-9642297",
+  "created_at": "2025-12-04T08:02:10Z"
+}

@@ -1,0 +1,13 @@
+{
+  "id": 9001,
+  "code": "TST-WH-01",
+  "name": "Jumbo DC Test Warehouse",
+  "address": "Teststraat 1",
+  "city": "Rotterdam",
+  "zip_code": "3011 AB",
+  "province": "Zuid-Holland",
+  "country": "Netherlands",
+  "contact_name": "Test Persoon",
+  "contact_phone": "(010) 1234567",
+  "contact_email": "test-wh@jumbo-logistiek.nl"
+}

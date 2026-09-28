@@ -90,6 +90,248 @@ internal partial class CargoHubDbContextModelSnapshot : ModelSnapshot
 
                 b.ToTable("Clients", (string)null);
             });
+
+        modelBuilder.Entity("CargoHUB.Models.Location", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("id")
+                    .HasJsonPropertyName("id");
+
+                b.Property<string>("Code")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("code")
+                    .HasJsonPropertyName("code");
+
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("created_at")
+                    .HasJsonPropertyName("created_at");
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("name")
+                    .HasJsonPropertyName("name");
+
+                b.Property<DateTime>("UpdatedAt")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("updated_at")
+                    .HasJsonPropertyName("updated_at");
+
+                b.Property<int>("WarehouseId")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("warehouse_id")
+                    .HasJsonPropertyName("warehouse_id");
+
+                b.HasKey("Id");
+
+                b.HasIndex("WarehouseId");
+
+                b.ToTable("Locations", (string)null);
+            });
+
+        modelBuilder.Entity("CargoHUB.Models.Transfer", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("id")
+                    .HasJsonPropertyName("id");
+
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("created_at")
+                    .HasJsonPropertyName("created_at");
+
+                b.Property<int>("FromLocationId")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("from_location_id")
+                    .HasJsonPropertyName("from_location_id");
+
+                b.Property<string>("Reference")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("reference")
+                    .HasJsonPropertyName("reference");
+
+                b.Property<int>("ToLocationId")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("to_location_id")
+                    .HasJsonPropertyName("to_location_id");
+
+                b.Property<string>("TransferStatus")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("transfer_status")
+                    .HasJsonPropertyName("transfer_status");
+
+                b.Property<DateTime>("UpdatedAt")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("updated_at")
+                    .HasJsonPropertyName("updated_at");
+
+                b.HasKey("Id");
+
+                b.HasIndex("FromLocationId");
+
+                b.HasIndex("ToLocationId");
+
+                b.ToTable("Transfers", (string)null);
+            });
+
+        modelBuilder.Entity("CargoHUB.Models.TransferItem", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("id");
+
+                b.Property<int>("Amount")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("amount")
+                    .HasJsonPropertyName("amount");
+
+                b.Property<int>("ItemId")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("item_id")
+                    .HasJsonPropertyName("item_id");
+
+                b.Property<int>("TransferId")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("transfer_id");
+
+                b.HasKey("Id");
+
+                b.HasIndex("TransferId");
+
+                b.ToTable("TransferItems", (string)null);
+
+                b.HasAnnotation("Relational:JsonPropertyName", "items");
+            });
+
+        modelBuilder.Entity("CargoHUB.Models.Warehouse", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("id")
+                    .HasJsonPropertyName("id");
+
+                b.Property<string>("Address")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("address")
+                    .HasJsonPropertyName("address");
+
+                b.Property<string>("City")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("city")
+                    .HasJsonPropertyName("city");
+
+                b.Property<string>("Code")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("code")
+                    .HasJsonPropertyName("code");
+
+                b.Property<string>("ContactEmail")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("contact_email")
+                    .HasJsonPropertyName("contact_email");
+
+                b.Property<string>("ContactName")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("contact_name")
+                    .HasJsonPropertyName("contact_name");
+
+                b.Property<string>("ContactPhone")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("contact_phone")
+                    .HasJsonPropertyName("contact_phone");
+
+                b.Property<string>("Country")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("country")
+                    .HasJsonPropertyName("country");
+
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("created_at")
+                    .HasJsonPropertyName("created_at");
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("name")
+                    .HasJsonPropertyName("name");
+
+                b.Property<string>("Province")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("province")
+                    .HasJsonPropertyName("province");
+
+                b.Property<DateTime>("UpdatedAt")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("updated_at")
+                    .HasJsonPropertyName("updated_at");
+
+                b.Property<string>("ZipCode")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("zip_code")
+                    .HasJsonPropertyName("zip_code");
+
+                b.HasKey("Id");
+
+                b.ToTable("Warehouses", (string)null);
+            });
+
+        modelBuilder.Entity("CargoHUB.Models.Location", b =>
+            {
+                b.HasOne("CargoHUB.Models.Warehouse", null)
+                    .WithMany()
+                    .HasForeignKey("WarehouseId")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("CargoHUB.Models.Transfer", b =>
+            {
+                b.HasOne("CargoHUB.Models.Location", null)
+                    .WithMany()
+                    .HasForeignKey("FromLocationId")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired();
+
+                b.HasOne("CargoHUB.Models.Location", null)
+                    .WithMany()
+                    .HasForeignKey("ToLocationId")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("CargoHUB.Models.TransferItem", b =>
+            {
+                b.HasOne("CargoHUB.Models.Transfer", null)
+                    .WithMany("Items")
+                    .HasForeignKey("TransferId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("CargoHUB.Models.Transfer", b =>
+            {
+                b.Navigation("Items");
+            });
 #pragma warning restore 612, 618
     }
 }

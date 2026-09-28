@@ -1,0 +1,559 @@
+@host = http://localhost:3000
+@base = {{host}}/api/v1
+
+# API keys uit legacy/data/user.json
+@key_readonly = d4s2a0b0a1n4a0l0y7t
+@key_smartglass = s8m3a9r2t7g1l4a5s0s
+@key_orderpicker = o3r5d4e2r1p6i8c0k0e
+@key_receiving = r2e4c6e8i0v3i5n7g9s
+@key_shipping = s1h3i5p7p9i2n4g6s8t
+@key_facility = f4a5c6i7l8i9t0y1m2a3n4a5g6
+
+##############################################
+### WAREHOUSES
+##############################################
+
+### Alle warehouses
+GET {{base}}/warehouses
+API_KEY: {{key_readonly}}
+
+### Eén warehouse
+GET {{base}}/warehouses/1
+API_KEY: {{key_readonly}}
+
+### Locations in warehouse
+GET {{base}}/warehouses/1/locations
+API_KEY: {{key_readonly}}
+
+### Warehouse aanmaken (alleen facility key mag dit)
+POST {{base}}/warehouses
+API_KEY: {{key_facility}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "code": "TST-WH-01",
+  "name": "Jumbo DC Test Warehouse",
+  "address": "Teststraat 1",
+  "city": "Rotterdam",
+  "zip_code": "3011 AB",
+  "province": "Zuid-Holland",
+  "country": "Netherlands",
+  "contact_name": "Test Persoon",
+  "contact_phone": "(010) 1234567",
+  "contact_email": "test-wh@jumbo-logistiek.nl"
+}
+
+### Warehouse bijwerken (full replace: stuur ook id + created_at mee!)
+PUT {{base}}/warehouses/9001
+API_KEY: {{key_facility}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "code": "TST-WH-01",
+  "name": "Jumbo DC Test Warehouse (bijgewerkt)",
+  "address": "Teststraat 1",
+  "city": "Rotterdam",
+  "zip_code": "3011 AB",
+  "province": "Zuid-Holland",
+  "country": "Netherlands",
+  "contact_name": "Nieuwe Contactpersoon",
+  "contact_phone": "(010) 1234567",
+  "contact_email": "test-wh@jumbo-logistiek.nl",
+  "created_at": "2026-09-07T10:00:00Z"
+}
+
+### Warehouse verwijderen
+DELETE {{base}}/warehouses/9001
+API_KEY: {{key_facility}}
+
+##############################################
+### LOCATIONS
+##############################################
+
+### Alle locations
+GET {{base}}/locations
+API_KEY: {{key_readonly}}
+
+### Eén location
+GET {{base}}/locations/1
+API_KEY: {{key_readonly}}
+
+### Location aanmaken
+POST {{base}}/locations
+API_KEY: {{key_facility}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "warehouse_id": 1,
+  "code": "VGH-AMB-B99-R1-B1",
+  "name": "Zone B Aisle 99 Rack 1 Bin 1"
+}
+
+### Location bijwerken
+PUT {{base}}/locations/9001
+API_KEY: {{key_facility}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "warehouse_id": 1,
+  "code": "VGH-AMB-B99-R1-B2",
+  "name": "Zone B Aisle 99 Rack 1 Bin 2",
+  "created_at": "2026-09-07T10:00:00Z"
+}
+
+### Location verwijderen
+DELETE {{base}}/locations/9001
+API_KEY: {{key_facility}}
+
+##############################################
+### TRANSFERS
+##############################################
+
+### Alle transfers
+GET {{base}}/transfers
+API_KEY: {{key_readonly}}
+
+### Eén transfer (incl. items)
+GET {{base}}/transfers/1
+API_KEY: {{key_readonly}}
+
+### Items in transfer
+GET {{base}}/transfers/1/items
+API_KEY: {{key_readonly}}
+
+### Transfer aanmaken (status wordt server-side "Scheduled")
+POST {{base}}/transfers
+API_KEY: {{key_receiving}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "reference": "TRF-009001",
+  "from_location_id": 1,
+  "to_location_id": 2,
+  "items": [
+    { "item_id": 1, "amount": 10 },
+    { "item_id": 2, "amount": 5 }
+  ]
+}
+
+### Transfer bijwerken ("items" optioneel; indien aanwezig worden regels vervangen)
+PUT {{base}}/transfers/9001
+API_KEY: {{key_receiving}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "reference": "TRF-009001",
+  "from_location_id": 1,
+  "to_location_id": 3,
+  "transfer_status": "Scheduled",
+  "created_at": "2026-09-07T10:00:00Z",
+  "items": [
+    { "item_id": 1, "amount": 15 }
+  ]
+}
+
+### Transfer committen — GEEN body; verplaatst voorraad, status -> "Processed"
+PUT {{base}}/transfers/9001/commit
+API_KEY: {{key_receiving}}
+
+### Transfer verwijderen — verwacht 403: geen enkele key heeft delete-rechten
+DELETE {{base}}/transfers/9001
+API_KEY: {{key_facility}}
+
+##############################################
+### ITEMS
+##############################################
+
+### Alle items
+GET {{base}}/items
+API_KEY: {{key_readonly}}
+
+### Eén item
+GET {{base}}/items/1
+API_KEY: {{key_readonly}}
+
+### Inventory-regels van item
+GET {{base}}/items/1/inventory
+API_KEY: {{key_readonly}}
+
+### Inventory-totalen van item
+GET {{base}}/items/1/inventory/totals
+API_KEY: {{key_readonly}}
+
+### Item aanmaken
+POST {{base}}/items
+API_KEY: {{key_receiving}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "code": "ITM-009001",
+  "description": "Jumbo Testartikel Hagelslag Melk 400g",
+  "barcode": "8718452839201",
+  "model_number": "TST-0001",
+  "commodity_code": 1806909,
+  "unit_weight": 0.4,
+  "item_line_id": 5,
+  "item_group_id": 3,
+  "item_type_id": 2,
+  "min_purchase_qty": 12,
+  "case_size": 6,
+  "packaging_type": "Case",
+  "order_multiple": 1,
+  "supplier_id": 17,
+  "supplier_sku": "SKU-9001001"
+}
+
+### Item bijwerken
+PUT {{base}}/items/9001
+API_KEY: {{key_receiving}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "code": "ITM-009001",
+  "description": "Jumbo Testartikel Hagelslag Puur 400g",
+  "barcode": "8718452839201",
+  "model_number": "TST-0001",
+  "commodity_code": 1806909,
+  "unit_weight": 0.4,
+  "item_line_id": 5,
+  "item_group_id": 3,
+  "item_type_id": 2,
+  "min_purchase_qty": 12,
+  "case_size": 6,
+  "packaging_type": "Case",
+  "order_multiple": 1,
+  "supplier_id": 17,
+  "supplier_sku": "SKU-9001001",
+  "created_at": "2026-09-07T10:00:00Z"
+}
+
+##############################################
+### ITEM LINES / GROUPS / TYPES
+##############################################
+
+### Alle item lines
+GET {{base}}/item_lines
+API_KEY: {{key_readonly}}
+
+### Item-ids binnen een item line
+GET {{base}}/item_lines/1/items
+API_KEY: {{key_readonly}}
+
+### Item line aanmaken
+POST {{base}}/item_lines
+API_KEY: {{key_receiving}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "name": "Testassortiment",
+  "description": "Jumbo assortment line: Testassortiment"
+}
+
+### Item line bijwerken
+PUT {{base}}/item_lines/9001
+API_KEY: {{key_receiving}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "name": "Testassortiment",
+  "description": "Jumbo assortment line: Testassortiment (bijgewerkt)",
+  "created_at": "2026-09-07T10:00:00Z"
+}
+
+### Item line verwijderen
+DELETE {{base}}/item_lines/9001
+API_KEY: {{key_facility}}
+
+### Item group aanmaken
+POST {{base}}/item_groups
+API_KEY: {{key_receiving}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "name": "Diepvries Test",
+  "description": "Temperature/handling regime: Diepvries Test"
+}
+
+### Item type aanmaken
+POST {{base}}/item_types
+API_KEY: {{key_receiving}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "name": "Multipack",
+  "description": "Packaging tier: Multipack"
+}
+
+##############################################
+### INVENTORIES
+##############################################
+
+### Alle inventories
+GET {{base}}/inventories
+API_KEY: {{key_readonly}}
+
+### Inventory op id — verwacht 404 (composite key item_id+location_id)
+GET {{base}}/inventories/1
+API_KEY: {{key_readonly}}
+
+### Inventory aanmaken — upsert op (item_id, location_id)
+POST {{base}}/inventories
+API_KEY: {{key_receiving}}
+Content-Type: application/json
+
+{
+  "item_id": 1,
+  "location_id": 1,
+  "quantity_on_hand": 100,
+  "quantity_expected": 20,
+  "quantity_ordered": 10,
+  "quantity_allocated": 5
+}
+
+##############################################
+### SUPPLIERS
+##############################################
+
+### Alle suppliers
+GET {{base}}/suppliers
+API_KEY: {{key_readonly}}
+
+### Items van supplier (volledige objecten)
+GET {{base}}/suppliers/1/items
+API_KEY: {{key_readonly}}
+
+### Supplier aanmaken (let op: phone_number + reference i.p.v. contact_phone/email)
+POST {{base}}/suppliers
+API_KEY: {{key_receiving}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "code": "SUP-9001",
+  "name": "Test Leverancier B.V.",
+  "address": "Leveranciersweg 12",
+  "city": "Utrecht",
+  "zip_code": "3521 AL",
+  "province": "Utrecht",
+  "country": "Netherlands",
+  "contact_name": "Jan Jansen",
+  "phone_number": "+3130-1234567",
+  "reference": "TestLev"
+}
+
+### Supplier verwijderen
+DELETE {{base}}/suppliers/9001
+API_KEY: {{key_facility}}
+
+##############################################
+### ORDERS
+##############################################
+
+### Alle orders
+GET {{base}}/orders
+API_KEY: {{key_readonly}}
+
+### Eén order (incl. items)
+GET {{base}}/orders/1
+API_KEY: {{key_readonly}}
+
+### Items in order
+GET {{base}}/orders/1/items
+API_KEY: {{key_readonly}}
+
+### Order aanmaken (unit_price per regel is optioneel)
+POST {{base}}/orders
+API_KEY: {{key_receiving}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "client_id": 123,
+  "order_date": "2026-09-07T10:00:00Z",
+  "request_date": "2026-09-10T10:00:00Z",
+  "reference": "ORD-009001",
+  "customer_po_number": "PO-900001",
+  "order_status": "Pending",
+  "shipping_notes": "Achterom leveren",
+  "warehouse_id": 1,
+  "ship_to_client_id": 123,
+  "bill_to_client_id": 87,
+  "items": [
+    { "item_id": 82, "amount": 24, "unit_price": 21.34 },
+    { "item_id": 119, "amount": 6 }
+  ]
+}
+
+### Order bijwerken
+PUT {{base}}/orders/9001
+API_KEY: {{key_orderpicker}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "client_id": 123,
+  "order_date": "2026-09-07T10:00:00Z",
+  "request_date": "2026-09-12T10:00:00Z",
+  "reference": "ORD-009001",
+  "customer_po_number": "PO-900001",
+  "order_status": "Shipped",
+  "shipping_notes": null,
+  "warehouse_id": 1,
+  "ship_to_client_id": 123,
+  "bill_to_client_id": 87,
+  "created_at": "2026-09-07T10:00:00Z"
+}
+
+### Alleen orderregels vervangen — body is een KALE ARRAY (muteert ook inventory!)
+PUT {{base}}/orders/9001/items
+API_KEY: {{key_orderpicker}}
+Content-Type: application/json
+
+[
+  { "item_id": 82, "amount": 12, "unit_price": 21.34 },
+  { "item_id": 190, "amount": 3 }
+]
+
+##############################################
+### CLIENTS
+##############################################
+
+### Alle clients
+GET {{base}}/clients
+API_KEY: {{key_readonly}}
+
+### Orders van client (als koper, ontvanger of betaler)
+GET {{base}}/clients/1/orders
+API_KEY: {{key_readonly}}
+
+### Client aanmaken
+POST {{base}}/clients
+API_KEY: {{key_shipping}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "name": "Jumbo Test Filiaal Rotterdam",
+  "address": "Teststraat 100",
+  "city": "Rotterdam",
+  "zip_code": "3011AB",
+  "province": "Zuid-Holland",
+  "country": "Netherlands",
+  "contact_name": "Piet Tester",
+  "contact_phone": "(010) 7654321",
+  "contact_email": "test@jumbo-filiaal.nl"
+}
+
+### Client verwijderen
+DELETE {{base}}/clients/9001
+API_KEY: {{key_facility}}
+
+##############################################
+### SHIPMENTS
+##############################################
+
+### Alle shipments
+GET {{base}}/shipments
+API_KEY: {{key_readonly}}
+
+### Eén shipment (incl. items)
+GET {{base}}/shipments/1
+API_KEY: {{key_readonly}}
+
+### Order-id(s) in shipment (max 1)
+GET {{base}}/shipments/1/orders
+API_KEY: {{key_readonly}}
+
+### Items in shipment
+GET {{base}}/shipments/1/items
+API_KEY: {{key_readonly}}
+
+### Shipment aanmaken
+POST {{base}}/shipments
+API_KEY: {{key_shipping}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "reference": "SHP-009001",
+  "order_id": 1,
+  "shipment_date": "2026-09-08T09:00:00Z",
+  "shipment_type": "Outgoing",
+  "shipment_status": "Scheduled",
+  "carrier_name": "PostNL",
+  "shipping_method": "Standard",
+  "payment_type": "Automated",
+  "items": [
+    { "item_id": 82, "amount": 6 },
+    { "item_id": 119, "amount": 2 }
+  ]
+}
+
+### Shipment bijwerken
+PUT {{base}}/shipments/9001
+API_KEY: {{key_shipping}}
+Content-Type: application/json
+
+{
+  "id": 9001,
+  "reference": "SHP-009001",
+  "order_id": 1,
+  "shipment_date": "2026-09-09T09:00:00Z",
+  "shipment_type": "Outgoing",
+  "shipment_status": "Transit",
+  "carrier_name": "DHL Parcel",
+  "shipping_method": "Express",
+  "payment_type": "Automated",
+  "created_at": "2026-09-07T10:00:00Z"
+}
+
+### Ordersnelkoppeling van shipment vervangen — KALE ARRAY van order-ids (alleen 1e telt)
+PUT {{base}}/shipments/9001/orders
+API_KEY: {{key_shipping}}
+Content-Type: application/json
+
+[4]
+
+### Shipmentregels vervangen — KALE ARRAY (muteert ook inventory!)
+PUT {{base}}/shipments/9001/items
+API_KEY: {{key_shipping}}
+Content-Type: application/json
+
+[
+  { "item_id": 82, "amount": 10 },
+  { "item_id": 190, "amount": 2 }
+]
+
+##############################################
+### AUTH-GEDRAG (voor tests)
+##############################################
+
+### Zonder API key — verwacht 401
+GET {{base}}/warehouses
+
+### Onbekende API key — verwacht 401
+GET {{base}}/warehouses
+API_KEY: bestaat-niet
+
+### Key zonder POST-recht — verwacht 403
+POST {{base}}/warehouses
+API_KEY: {{key_readonly}}
+Content-Type: application/json
+
+{ "id": 9099, "code": "X", "name": "mag niet" }
+
+### Onbestaand id — verwacht 200 met body "null" (geen 404!)
+GET {{base}}/warehouses/999999
+API_KEY: {{key_readonly}}
