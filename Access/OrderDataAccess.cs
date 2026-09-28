@@ -6,20 +6,28 @@ namespace CargoHUB.Access;
 
 public sealed class OrderDataAccess(CargoHubDbContext context)
 {
-    public IReadOnlyList<Order> GetAll() =>
-        context.Orders.AsNoTracking().Include(row => row.Items).OrderBy(row => row.Id).ToList();
+    public IReadOnlyList<Order> GetAll()
+    {
+        return context.Orders.AsNoTracking().Include(row => row.Items).OrderBy(row => row.Id).ToList();
+    }
 
-    public Order? GetById(int id) =>
-        context.Orders.AsNoTracking().Include(row => row.Items).SingleOrDefault(row => row.Id == id);
+    public Order? GetById(int id)
+    {
+        return context.Orders.AsNoTracking().Include(row => row.Items).SingleOrDefault(row => row.Id == id);
+    }
 
-    public IReadOnlyList<OrderItem> GetItems(int id) =>
-        context.Set<OrderItem>().AsNoTracking().Where(item => item.OrderId == id)
+    public IReadOnlyList<OrderItem> GetItems(int id)
+    {
+        return context.Set<OrderItem>().AsNoTracking().Where(item => item.OrderId == id)
             .OrderBy(item => item.ItemId).ToList();
+    }
 
-    public IReadOnlyList<Order> GetByClientId(int clientId) =>
-        context.Orders.AsNoTracking().Include(row => row.Items)
+    public IReadOnlyList<Order> GetByClientId(int clientId)
+    {
+        return context.Orders.AsNoTracking().Include(row => row.Items)
             .Where(row => row.ClientId == clientId || row.ShipToClientId == clientId || row.BillToClientId == clientId)
             .OrderBy(row => row.Id).ToList();
+    }
 
     public void Add(Order order)
     {

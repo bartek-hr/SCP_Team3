@@ -5,15 +5,25 @@ namespace CargoHUB.Logics;
 
 public sealed class OrderLogic(OrderDataAccess dataAccess)
 {
-    public IReadOnlyList<Order> GetAll() => dataAccess.GetAll();
+    public IReadOnlyList<Order> GetAll()
+    {
+        return dataAccess.GetAll();
+    }
 
-    public Order? GetById(int id) => id > 0 ? dataAccess.GetById(id) : null;
+    public Order? GetById(int id)
+    {
+        return id > 0 ? dataAccess.GetById(id) : null;
+    }
 
-    public IReadOnlyList<OrderItem> GetItems(int orderId) =>
-        orderId > 0 ? dataAccess.GetItems(orderId) : [];
+    public IReadOnlyList<OrderItem> GetItems(int orderId)
+    {
+        return orderId > 0 ? dataAccess.GetItems(orderId) : [];
+    }
 
-    public IReadOnlyList<Order> GetByClientId(int clientId) =>
-        clientId > 0 ? dataAccess.GetByClientId(clientId) : [];
+    public IReadOnlyList<Order> GetByClientId(int clientId)
+    {
+        return clientId > 0 ? dataAccess.GetByClientId(clientId) : [];
+    }
 
     public void Add(Order order)
     {
