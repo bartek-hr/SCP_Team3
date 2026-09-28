@@ -8,21 +8,27 @@ public sealed class InventoryDataAccess(CargoHubDbContext context)
 {
     private DbSet<Inventory> Inventories => context.Inventories;
 
-    public IReadOnlyList<Inventory> GetAll() =>
-        Inventories.AsNoTracking()
+    public IReadOnlyList<Inventory> GetAll()
+    {
+        return Inventories.AsNoTracking()
             .OrderBy(inventory => inventory.ItemId)
             .ThenBy(inventory => inventory.LocationId)
             .ToList();
+    }
 
-    public Inventory? GetByKey(int itemId, int locationId) =>
-        Inventories.AsNoTracking().SingleOrDefault(inventory =>
+    public Inventory? GetByKey(int itemId, int locationId)
+    {
+        return Inventories.AsNoTracking().SingleOrDefault(inventory =>
             inventory.ItemId == itemId && inventory.LocationId == locationId);
+    }
 
-    public IReadOnlyList<Inventory> GetByItemId(int itemId) =>
-        Inventories.AsNoTracking()
+    public IReadOnlyList<Inventory> GetByItemId(int itemId)
+    {
+        return Inventories.AsNoTracking()
             .Where(inventory => inventory.ItemId == itemId)
             .OrderBy(inventory => inventory.LocationId)
             .ToList();
+    }
 
     public void AddOrUpdate(Inventory inventory)
     {

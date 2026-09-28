@@ -5,13 +5,20 @@ namespace CargoHUB.Logics;
 
 public sealed class InventoryLogic(InventoryDataAccess dataAccess)
 {
-    public IReadOnlyList<Inventory> GetAll() => dataAccess.GetAll();
+    public IReadOnlyList<Inventory> GetAll()
+    {
+        return dataAccess.GetAll();
+    }
 
-    public Inventory? GetByKey(int itemId, int locationId) =>
-        itemId > 0 && locationId > 0 ? dataAccess.GetByKey(itemId, locationId) : null;
+    public Inventory? GetByKey(int itemId, int locationId)
+    {
+        return itemId > 0 && locationId > 0 ? dataAccess.GetByKey(itemId, locationId) : null;
+    }
 
-    public IReadOnlyList<Inventory> GetByItemId(int itemId) =>
-        itemId > 0 ? dataAccess.GetByItemId(itemId) : [];
+    public IReadOnlyList<Inventory> GetByItemId(int itemId)
+    {
+        return itemId > 0 ? dataAccess.GetByItemId(itemId) : [];
+    }
 
     public InventoryTotals GetTotalsByItemId(int itemId)
     {
