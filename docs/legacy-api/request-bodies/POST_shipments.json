@@ -1,0 +1,15 @@
+{
+  "id": 9001,
+  "reference": "SHP-009001",
+  "order_id": 1,
+  "shipment_date": "2026-09-08T09:00:00Z",
+  "shipment_type": "Outgoing",
+  "shipment_status": "Scheduled",
+  "carrier_name": "PostNL",
+  "shipping_method": "Standard",
+  "payment_type": "Automated",
+  "items": [
+    { "item_id": 82, "amount": 6 },
+    { "item_id": 119, "amount": 2 }
+  ]
+}

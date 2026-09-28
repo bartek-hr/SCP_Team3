@@ -1,0 +1,14 @@
+{
+  "id": 1,
+  "code": "SUP-0001",
+  "name": "FrieslandCampina Nederland B.V.",
+  "address": "Jaydreef 711",
+  "city": "Amersfoort",
+  "zip_code": "9322HU",
+  "province": "Utrecht",
+  "country": "Netherlands",
+  "contact_name": "Nieuwe Contactpersoon",
+  "phone_number": "+31459-606339",
+  "reference": "Campina",
+  "created_at": "2026-05-09T04:44:30Z"
+}
