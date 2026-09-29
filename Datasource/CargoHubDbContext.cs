@@ -16,6 +16,10 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
 
     public DbSet<Inventory> Inventories => Set<Inventory>();
 
+    public DbSet<ItemLine> ItemLines => Set<ItemLine>();
+    public DbSet<ItemGroup> ItemGroups => Set<ItemGroup>();
+    public DbSet<Item> Items => Set<Item>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -99,6 +103,60 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
             entity.Property(client => client.ContactEmail).HasColumnName("contact_email").IsRequired();
             entity.Property(client => client.CreatedAt).HasColumnName("created_at").IsRequired();
             entity.Property(client => client.UpdatedAt).HasColumnName("updated_at").IsRequired();
+        });
+
+        modelBuilder.Entity<ItemLine>(entity =>
+        {
+            entity.ToTable("ItemLines");
+            entity.HasKey(itemLine => itemLine.Id);
+            entity.Property(itemLine => itemLine.Id).HasColumnName("id");
+            entity.Property(itemLine => itemLine.Name).HasColumnName("name").IsRequired();
+            entity.Property(itemLine => itemLine.Description).HasColumnName("description");
+            entity.Property(itemLine => itemLine.CreatedAt).HasColumnName("created_at").IsRequired();
+            entity.Property(itemLine => itemLine.UpdatedAt).HasColumnName("updated_at").IsRequired();
+        });
+
+        modelBuilder.Entity<ItemGroup>(entity =>
+        {
+            entity.ToTable("ItemGroups");
+            entity.HasKey(itemGroup => itemGroup.Id);
+            entity.Property(itemGroup => itemGroup.Id).HasColumnName("id");
+            entity.Property(itemGroup => itemGroup.Name).HasColumnName("name").IsRequired();
+            entity.Property(itemGroup => itemGroup.Description).HasColumnName("description");
+            entity.Property(itemGroup => itemGroup.CreatedAt).HasColumnName("created_at").IsRequired();
+            entity.Property(itemGroup => itemGroup.UpdatedAt).HasColumnName("updated_at").IsRequired();
+        });
+
+        modelBuilder.Entity<Item>(entity =>
+        {
+            entity.ToTable("Items");
+            entity.HasKey(item => item.Id);
+            entity.Property(item => item.Id).HasColumnName("id");
+            entity.Property(item => item.Code).HasColumnName("code").IsRequired();
+            entity.Property(item => item.Description).HasColumnName("description").IsRequired();
+            entity.Property(item => item.Barcode).HasColumnName("barcode");
+            entity.Property(item => item.ModelNumber).HasColumnName("model_number");
+            entity.Property(item => item.CommodityCode).HasColumnName("commodity_code");
+            entity.Property(item => item.UnitWeight).HasColumnName("unit_weight");
+            entity.Property(item => item.ItemLineId).HasColumnName("item_line_id").IsRequired();
+            entity.Property(item => item.ItemGroupId).HasColumnName("item_group_id").IsRequired();
+            entity.Property(item => item.ItemTypeId).HasColumnName("item_type_id");
+            entity.Property(item => item.MinPurchaseQty).HasColumnName("min_purchase_qty");
+            entity.Property(item => item.CaseSize).HasColumnName("case_size");
+            entity.Property(item => item.PackagingType).HasColumnName("packaging_type");
+            entity.Property(item => item.OrderMultiple).HasColumnName("order_multiple");
+            entity.Property(item => item.SupplierId).HasColumnName("supplier_id");
+            entity.Property(item => item.SupplierSku).HasColumnName("supplier_sku");
+            entity.Property(item => item.CreatedAt).HasColumnName("created_at").IsRequired();
+            entity.Property(item => item.UpdatedAt).HasColumnName("updated_at").IsRequired();
+            entity.HasOne<ItemLine>()
+                .WithMany()
+                .HasForeignKey(item => item.ItemLineId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<ItemGroup>()
+                .WithMany()
+                .HasForeignKey(item => item.ItemGroupId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Warehouse>(entity =>
