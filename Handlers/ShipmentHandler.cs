@@ -1,0 +1,135 @@
+using CargoHUB.Framework;
+using CargoHUB.Logics;
+using CargoHUB.Models;
+
+namespace CargoHUB.Handlers;
+
+public sealed class ShipmentHandler(ShipmentLogic logic)
+{
+    [Get("/shipments")]
+    [Describe("Geeft alle zendingen terug.", Tags = ["Shipments"], OperationId = "getShipments")]
+    public Response<IReadOnlyList<Shipment>> GetAll() => Response.Ok(logic.GetAll());
+
+    [Get("/shipments/{id}")]
+    [Describe("Geeft één record terug.", Tags = ["Shipments"], OperationId = "getShipment")]
+    public Response<Shipment> GetById(Request request)
+    {
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
+            return Response<Shipment>.BadRequest();
+
+        Shipment? record = logic.GetById(id);
+        return record is null ? Response<Shipment>.NotFound() : Response.Ok(record);
+    }
+
+    [Get("/shipments/{id}/items")]
+    [Describe("Geeft de artikelen terug.", Tags = ["Shipments"], OperationId = "getShipmentItems")]
+    public Response<IReadOnlyList<ShipmentItem>> GetItems(Request request)
+    {
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
+            return Response<IReadOnlyList<ShipmentItem>>.BadRequest();
+
+        return Response.Ok(logic.GetItems(id));
+    }
+
+    [Post("/shipments")]
+    [Describe("Maakt een record aan.", Tags = ["Shipments"], OperationId = "createShipment", SuccessStatus = StatusCodes.Status201Created)]
+    public Response Add(Request<Shipment> request)
+    {
+        try
+        {
+            logic.Add(request.Data);
+            return Response.Created();
+        }
+        catch (ArgumentException)
+        {
+            return Response.BadRequest();
+        }
+        catch (InvalidOperationException)
+        {
+            return Response.Conflict();
+        }
+    }
+
+    [Put("/shipments/{id}")]
+    [Describe("Wijzigt een record.", Tags = ["Shipments"], OperationId = "updateShipment")]
+    public Response Update(Request<Shipment> request)
+    {
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
+            return Response.BadRequest();
+        if (logic.GetById(id) is null)
+            return Response.NotFound();
+
+        try
+        {
+            logic.Update(id, request.Data);
+            return Response.Ok();
+        }
+        catch (ArgumentException)
+        {
+            return Response.BadRequest();
+        }
+    }
+
+    [Put("/shipments/{id}/items")]
+    [Describe("Vervangt de artikelen en werkt de voorraad bij.", Tags = ["Shipments"], OperationId = "replaceShipmentItems")]
+    public Response ReplaceItems(Request<List<ShipmentItem>> request)
+    {
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
+            return Response.BadRequest();
+        if (logic.GetById(id) is null)
+            return Response.NotFound();
+
+        try
+        {
+            logic.ReplaceItems(id, request.Data);
+            return Response.Ok();
+        }
+        catch (ArgumentException)
+        {
+            return Response.BadRequest();
+        }
+    }
+
+    [Delete("/shipments/{id}")]
+    [Describe("Verwijdert een record.", Tags = ["Shipments"], OperationId = "deleteShipment")]
+    public Response Remove(Request request)
+    {
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
+            return Response.BadRequest();
+        if (logic.GetById(id) is null)
+            return Response.NotFound();
+
+        logic.Remove(id);
+        return Response.Ok();
+    }
+
+    [Get("/shipments/{id}/orders")]
+    [Describe("Geeft de gekoppelde order terug.", Tags = ["Shipments"], OperationId = "getShipmentOrders")]
+    public Response<IReadOnlyList<int>> GetOrderIds(Request request)
+    {
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
+            return Response<IReadOnlyList<int>>.BadRequest();
+
+        return Response.Ok(logic.GetOrderIds(id));
+    }
+
+    [Put("/shipments/{id}/orders")]
+    [Describe("Koppelt de eerste order uit de lijst; een lege lijst wist de koppeling.", Tags = ["Shipments"], OperationId = "replaceShipmentOrders")]
+    public Response ReplaceOrders(Request<List<int>> request)
+    {
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
+            return Response.BadRequest();
+        if (logic.GetById(id) is null)
+            return Response.NotFound();
+
+        try
+        {
+            logic.ReplaceOrders(id, request.Data);
+            return Response.Ok();
+        }
+        catch (ArgumentException)
+        {
+            return Response.BadRequest();
+        }
+    }
+}
