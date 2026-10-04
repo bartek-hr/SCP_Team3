@@ -45,6 +45,9 @@ public sealed class DatabaseMigrationExtensionsTests
         await using AsyncServiceScope scope = services.CreateAsyncScope();
         CargoHubDbContext context = scope.ServiceProvider.GetRequiredService<CargoHubDbContext>();
 
+        Assert.AreEqual(4800, await context.Inventories.CountAsync());
+        Assert.AreEqual(458, (await context.Inventories.FindAsync(119, 124))!.QuantityOnHand);
+
         Assert.AreEqual(10, await context.Warehouses.CountAsync());
         Assert.AreEqual(400, await context.Locations.CountAsync());
         Assert.AreEqual(800, await context.Transfers.CountAsync());

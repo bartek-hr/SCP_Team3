@@ -12,12 +12,22 @@ public sealed class InventoryLogic(InventoryDataAccess dataAccess)
 
     public Inventory? GetByKey(int itemId, int locationId)
     {
-        return itemId > 0 && locationId > 0 ? dataAccess.GetByKey(itemId, locationId) : null;
+        if (itemId <= 0 || locationId <= 0)
+        {
+            return null;
+        }
+
+        return dataAccess.GetByKey(itemId, locationId);
     }
 
     public IReadOnlyList<Inventory> GetByItemId(int itemId)
     {
-        return itemId > 0 ? dataAccess.GetByItemId(itemId) : [];
+        if (itemId <= 0)
+        {
+            return [];
+        }
+
+        return dataAccess.GetByItemId(itemId);
     }
 
     public InventoryTotals GetTotalsByItemId(int itemId)
@@ -39,7 +49,14 @@ public sealed class InventoryLogic(InventoryDataAccess dataAccess)
 
         Inventory? existing = dataAccess.GetByKey(inventory.ItemId, inventory.LocationId);
         DateTime now = DateTime.UtcNow;
-        inventory.CreatedAt = existing?.CreatedAt ?? now;
+        if (existing is null)
+        {
+            inventory.CreatedAt = now;
+        }
+        else
+        {
+            inventory.CreatedAt = existing.CreatedAt;
+        }
         inventory.UpdatedAt = now;
         dataAccess.AddOrUpdate(inventory);
     }

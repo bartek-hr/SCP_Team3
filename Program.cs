@@ -26,6 +26,8 @@ builder.Services.AddDbContext<CargoHubDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services.AddScoped<ClientDataAccess>();
 builder.Services.AddScoped<ClientLogic>();
+builder.Services.AddScoped<InventoryDataAccess>();
+builder.Services.AddScoped<InventoryLogic>();
 builder.Services.AddScoped<WarehouseAccess>();
 builder.Services.AddScoped<WarehouseLogic>();
 builder.Services.AddScoped<LocationAccess>();

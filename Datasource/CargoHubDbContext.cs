@@ -13,6 +13,7 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
     public DbSet<TransferItem> TransferItems => Set<TransferItem>();
 
     public DbSet<Order> Orders => Set<Order>();
+    public DbSet<Shipment> Shipments => Set<Shipment>();
 
     public DbSet<Inventory> Inventories => Set<Inventory>();
 
@@ -22,7 +23,7 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.ToTable("Orders");
+            entity.ToTable("Orders", table => table.ExcludeFromMigrations());
             entity.HasKey(row => row.Id);
             entity.Property(row => row.Id).HasColumnName("id");
             entity.Property(row => row.ClientId).HasColumnName("client_id");
@@ -43,7 +44,7 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
 
         modelBuilder.Entity<OrderItem>(entity =>
         {
-            entity.ToTable("OrderItems");
+            entity.ToTable("OrderItems", table => table.ExcludeFromMigrations());
             entity.HasKey(item => item.Id);
             entity.HasIndex(item => new { item.OrderId, item.ItemId }).IsUnique();
             entity.Property(item => item.Id).HasColumnName("id");
@@ -55,7 +56,7 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
 
         modelBuilder.Entity<Shipment>(entity =>
         {
-            entity.ToTable("Shipments");
+            entity.ToTable("Shipments", table => table.ExcludeFromMigrations());
             entity.HasKey(row => row.Id);
             entity.Property(row => row.Id).HasColumnName("id");
             entity.Property(row => row.Reference).HasColumnName("reference");
@@ -74,7 +75,7 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
 
         modelBuilder.Entity<ShipmentItem>(entity =>
         {
-            entity.ToTable("ShipmentItems");
+            entity.ToTable("ShipmentItems", table => table.ExcludeFromMigrations());
             entity.HasKey(item => item.Id);
             entity.HasIndex(item => new { item.ShipmentId, item.ItemId }).IsUnique();
             entity.Property(item => item.Id).HasColumnName("id");
