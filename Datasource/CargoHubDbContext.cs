@@ -13,6 +13,7 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
     public DbSet<TransferItem> TransferItems => Set<TransferItem>();
 
     public DbSet<Order> Orders => Set<Order>();
+    public DbSet<Shipment> Shipments => Set<Shipment>();
 
     public DbSet<Inventory> Inventories => Set<Inventory>();
 

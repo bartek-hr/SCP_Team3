@@ -45,6 +45,18 @@ public sealed class DatabaseMigrationExtensionsTests
         await using AsyncServiceScope scope = services.CreateAsyncScope();
         CargoHubDbContext context = scope.ServiceProvider.GetRequiredService<CargoHubDbContext>();
 
+        Assert.AreEqual(6132, await context.Shipments.CountAsync());
+        Assert.AreEqual(33660, await context.Set<ShipmentItem>().CountAsync());
+        Shipment shipment = await context.Shipments.Include(row => row.Items).SingleAsync(row => row.Id == 1);
+        Assert.AreEqual(1, shipment.OrderId);
+        Assert.AreEqual(6, shipment.Items.Single(item => item.ItemId == 82).Amount);
+        Assert.AreEqual(4854, await context.Orders.CountAsync());
+        Assert.AreEqual(26498, await context.Set<OrderItem>().CountAsync());
+        Order order = await context.Orders.Include(row => row.Items).SingleAsync(row => row.Id == 1);
+        Assert.AreEqual(21.34m, order.Items.Single(item => item.ItemId == 82).UnitPrice);
+        Assert.AreEqual(4800, await context.Inventories.CountAsync());
+        Assert.AreEqual(458, (await context.Inventories.FindAsync(119, 124))!.QuantityOnHand);
+
         Assert.AreEqual(10, await context.Warehouses.CountAsync());
         Assert.AreEqual(400, await context.Locations.CountAsync());
         Assert.AreEqual(800, await context.Transfers.CountAsync());
