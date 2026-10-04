@@ -245,10 +245,7 @@ internal partial class CargoHubDbContextModelSnapshot : ModelSnapshot
 
                 b.HasKey("Id");
 
-                b.ToTable("Orders", null, t =>
-                    {
-                        t.ExcludeFromMigrations();
-                    });
+                b.ToTable("Orders", (string)null);
             });
 
         modelBuilder.Entity("CargoHUB.Models.OrderItem", b =>
@@ -282,10 +279,7 @@ internal partial class CargoHubDbContextModelSnapshot : ModelSnapshot
                 b.HasIndex("OrderId", "ItemId")
                     .IsUnique();
 
-                b.ToTable("OrderItems", null, t =>
-                    {
-                        t.ExcludeFromMigrations();
-                    });
+                b.ToTable("OrderItems", (string)null);
 
                 b.HasAnnotation("Relational:JsonPropertyName", "items");
             });
@@ -356,10 +350,7 @@ internal partial class CargoHubDbContextModelSnapshot : ModelSnapshot
 
                 b.HasKey("Id");
 
-                b.ToTable("Shipments", null, t =>
-                    {
-                        t.ExcludeFromMigrations();
-                    });
+                b.ToTable("Shipments", (string)null);
             });
 
         modelBuilder.Entity("CargoHUB.Models.ShipmentItem", b =>
@@ -388,10 +379,7 @@ internal partial class CargoHubDbContextModelSnapshot : ModelSnapshot
                 b.HasIndex("ShipmentId", "ItemId")
                     .IsUnique();
 
-                b.ToTable("ShipmentItems", null, t =>
-                    {
-                        t.ExcludeFromMigrations();
-                    });
+                b.ToTable("ShipmentItems", (string)null);
 
                 b.HasAnnotation("Relational:JsonPropertyName", "items");
             });

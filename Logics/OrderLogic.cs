@@ -12,24 +12,41 @@ public sealed class OrderLogic(OrderDataAccess dataAccess)
 
     public Order? GetById(int id)
     {
-        return id > 0 ? dataAccess.GetById(id) : null;
+        if (id <= 0)
+        {
+            return null;
+        }
+
+        return dataAccess.GetById(id);
     }
 
     public IReadOnlyList<OrderItem> GetItems(int orderId)
     {
-        return orderId > 0 ? dataAccess.GetItems(orderId) : [];
+        if (orderId <= 0)
+        {
+            return [];
+        }
+
+        return dataAccess.GetItems(orderId);
     }
 
     public IReadOnlyList<Order> GetByClientId(int clientId)
     {
-        return clientId > 0 ? dataAccess.GetByClientId(clientId) : [];
+        if (clientId <= 0)
+        {
+            return [];
+        }
+
+        return dataAccess.GetByClientId(clientId);
     }
 
     public void Add(Order order)
     {
         Validate(order);
         if (order.Id > 0 && GetById(order.Id) is not null)
+        {
             throw new InvalidOperationException($"An order with ID {order.Id} already exists.");
+        }
 
         order.CreatedAt = DateTime.UtcNow;
         order.UpdatedAt = order.CreatedAt;
@@ -41,11 +58,15 @@ public sealed class OrderLogic(OrderDataAccess dataAccess)
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
         Validate(order);
         if (order.Id != 0 && order.Id != id)
+        {
             throw new ArgumentException("The order ID must match the requested ID.", nameof(order));
+        }
 
         Order? existing = GetById(id);
         if (existing is null)
+        {
             return;
+        }
 
         order.CreatedAt = existing.CreatedAt;
         order.UpdatedAt = DateTime.UtcNow;
