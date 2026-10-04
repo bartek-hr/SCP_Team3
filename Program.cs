@@ -30,6 +30,8 @@ builder.Services.AddScoped<InventoryDataAccess>();
 builder.Services.AddScoped<InventoryLogic>();
 builder.Services.AddScoped<OrderDataAccess>();
 builder.Services.AddScoped<OrderLogic>();
+builder.Services.AddScoped<ShipmentDataAccess>();
+builder.Services.AddScoped<ShipmentLogic>();
 builder.Services.AddScoped<WarehouseAccess>();
 builder.Services.AddScoped<WarehouseLogic>();
 builder.Services.AddScoped<LocationAccess>();
