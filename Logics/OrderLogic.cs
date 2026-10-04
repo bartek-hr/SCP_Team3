@@ -12,24 +12,41 @@ public sealed class OrderLogic(OrderDataAccess dataAccess)
 
     public Order? GetById(int id)
     {
-        return id > 0 ? dataAccess.GetById(id) : null;
+        if (id <= 0)
+        {
+            return null;
+        }
+
+        return dataAccess.GetById(id);
     }
 
     public IReadOnlyList<OrderItem> GetItems(int orderId)
     {
-        return orderId > 0 ? dataAccess.GetItems(orderId) : [];
+        if (orderId <= 0)
+        {
+            return [];
+        }
+
+        return dataAccess.GetItems(orderId);
     }
 
     public IReadOnlyList<Order> GetByClientId(int clientId)
     {
-        return clientId > 0 ? dataAccess.GetByClientId(clientId) : [];
+        if (clientId <= 0)
+        {
+            return [];
+        }
+
+        return dataAccess.GetByClientId(clientId);
     }
 
     public void Add(Order order)
     {
         Validate(order);
         if (order.Id > 0 && GetById(order.Id) is not null)
+        {
             throw new InvalidOperationException($"An order with ID {order.Id} already exists.");
+        }
 
         order.CreatedAt = DateTime.UtcNow;
         order.UpdatedAt = order.CreatedAt;
@@ -41,11 +58,15 @@ public sealed class OrderLogic(OrderDataAccess dataAccess)
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
         Validate(order);
         if (order.Id != 0 && order.Id != id)
+        {
             throw new ArgumentException("The order ID must match the requested ID.", nameof(order));
+        }
 
         Order? existing = GetById(id);
         if (existing is null)
+        {
             return;
+        }
 
         order.CreatedAt = existing.CreatedAt;
         order.UpdatedAt = DateTime.UtcNow;
@@ -71,15 +92,25 @@ public sealed class OrderLogic(OrderDataAccess dataAccess)
         ArgumentOutOfRangeException.ThrowIfNegative(order.Id);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(order.ClientId);
         if (order.OrderDate == default)
+        {
             throw new ArgumentException("OrderDate is required.", nameof(order.OrderDate));
+        }
         if (order.RequestDate == default)
+        {
             throw new ArgumentException("RequestDate is required.", nameof(order.RequestDate));
+        }
         if (string.IsNullOrWhiteSpace(order.Reference))
+        {
             throw new ArgumentException("Reference is required.", nameof(order.Reference));
+        }
         if (string.IsNullOrWhiteSpace(order.CustomerPoNumber))
+        {
             throw new ArgumentException("CustomerPoNumber is required.", nameof(order.CustomerPoNumber));
+        }
         if (string.IsNullOrWhiteSpace(order.OrderStatus))
+        {
             throw new ArgumentException("OrderStatus is required.", nameof(order.OrderStatus));
+        }
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(order.WarehouseId);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(order.ShipToClientId);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(order.BillToClientId);
@@ -96,9 +127,13 @@ public sealed class OrderLogic(OrderDataAccess dataAccess)
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.ItemId);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.Amount);
             if (!itemIds.Add(item.ItemId))
+            {
                 throw new ArgumentException("Each item may appear only once.", nameof(items));
+            }
             if (item.UnitPrice is < 0)
+            {
                 throw new ArgumentOutOfRangeException(nameof(item.UnitPrice));
+            }
         }
     }
 }

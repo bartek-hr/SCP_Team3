@@ -216,8 +216,11 @@ namespace CargoHUB.Migrations
             (string Name, Type Type)[] columns)
         {
             using Stream stream = typeof(VoorraadOrdersEnZendingen).Assembly
-                .GetManifestResourceStream($"CargoHUB.LegacyData.{file}Json")
-                ?? throw new InvalidOperationException($"Legacybestand {file}.json ontbreekt.");
+                .GetManifestResourceStream($"CargoHUB.LegacyData.{file}Json");
+            if (stream is null)
+            {
+                throw new InvalidOperationException($"Legacybestand {file}.json ontbreekt.");
+            }
             using JsonDocument document = JsonDocument.Parse(stream);
             var values = new object[document.RootElement.GetArrayLength(), columns.Length];
             int index = 0;
@@ -226,9 +229,14 @@ namespace CargoHUB.Migrations
                 for (int column = 0; column < columns.Length; column++)
                 {
                     JsonElement value = row.GetProperty(JsonNamingPolicy.SnakeCaseLower.ConvertName(columns[column].Name));
-                    values[index, column] = value.ValueKind == JsonValueKind.Null
-                        ? null
-                        : value.Deserialize(columns[column].Type);
+                    if (value.ValueKind == JsonValueKind.Null)
+                    {
+                        values[index, column] = null;
+                    }
+                    else
+                    {
+                        values[index, column] = value.Deserialize(columns[column].Type);
+                    }
                 }
                 index++;
             }

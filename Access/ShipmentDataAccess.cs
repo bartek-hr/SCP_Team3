@@ -32,7 +32,9 @@ public sealed class ShipmentDataAccess(CargoHubDbContext context)
     {
         Shipment? existing = context.Shipments.Include(row => row.Items).SingleOrDefault(row => row.Id == id);
         if (existing is null)
+        {
             return;
+        }
 
         existing.Reference = shipment.Reference;
         existing.OrderId = shipment.OrderId;
@@ -51,7 +53,9 @@ public sealed class ShipmentDataAccess(CargoHubDbContext context)
     {
         Shipment? existing = context.Shipments.Include(row => row.Items).SingleOrDefault(row => row.Id == id);
         if (existing is null)
+        {
             return;
+        }
 
         SetItems(existing, items);
         existing.UpdatedAt = updatedAt;
@@ -62,7 +66,9 @@ public sealed class ShipmentDataAccess(CargoHubDbContext context)
     {
         Shipment? existing = context.Shipments.Find(id);
         if (existing is null)
+        {
             return;
+        }
 
         existing.OrderId = orderId;
         existing.UpdatedAt = updatedAt;
@@ -73,7 +79,9 @@ public sealed class ShipmentDataAccess(CargoHubDbContext context)
     {
         Shipment? existing = context.Shipments.Find(id);
         if (existing is null)
+        {
             return;
+        }
 
         context.Shipments.Remove(existing);
         context.SaveChanges();
@@ -88,12 +96,16 @@ public sealed class ShipmentDataAccess(CargoHubDbContext context)
         {
             int delta = current.GetValueOrDefault(itemId) - previous.GetValueOrDefault(itemId);
             if (delta == 0)
+            {
                 continue;
+            }
 
             Inventory? inventory = context.Inventories.Where(row => row.ItemId == itemId)
                 .OrderByDescending(row => row.QuantityOnHand).ThenBy(row => row.LocationId).FirstOrDefault();
             if (inventory is null)
+            {
                 continue;
+            }
 
             inventory.QuantityOrdered = checked((int)Math.Max(0L, (long)inventory.QuantityOrdered + delta));
             inventory.UpdatedAt = DateTime.UtcNow;
@@ -106,7 +118,10 @@ public sealed class ShipmentDataAccess(CargoHubDbContext context)
             ShipmentItem? stored = existing.Items.SingleOrDefault(row => row.ItemId == item.ItemId);
             if (stored is null)
             {
-                stored = new ShipmentItem { ItemId = item.ItemId };
+                stored = new ShipmentItem
+                {
+                    ItemId = item.ItemId
+                };
                 existing.Items.Add(stored);
             }
 

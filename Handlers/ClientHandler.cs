@@ -40,7 +40,9 @@ public sealed class ClientHandler
     public Response<IReadOnlyList<Order>> GetOrders(Request request, OrderLogic orderLogic)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
             return Response<IReadOnlyList<Order>>.BadRequest();
+        }
 
         return Response.Ok(orderLogic.GetByClientId(id));
     }

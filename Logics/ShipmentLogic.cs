@@ -12,24 +12,42 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
 
     public Shipment? GetById(int id)
     {
-        return id > 0 ? dataAccess.GetById(id) : null;
+        if (id <= 0)
+        {
+            return null;
+        }
+
+        return dataAccess.GetById(id);
     }
 
     public IReadOnlyList<ShipmentItem> GetItems(int shipmentId)
     {
-        return shipmentId > 0 ? dataAccess.GetItems(shipmentId) : [];
+        if (shipmentId <= 0)
+        {
+            return [];
+        }
+
+        return dataAccess.GetItems(shipmentId);
     }
 
     public IReadOnlyList<int> GetOrderIds(int shipmentId)
     {
-        return GetById(shipmentId)?.OrderId is int orderId ? [orderId] : [];
+        Shipment? shipment = GetById(shipmentId);
+        if (shipment is null || shipment.OrderId is null)
+        {
+            return [];
+        }
+
+        return [shipment.OrderId.Value];
     }
 
     public void Add(Shipment shipment)
     {
         Validate(shipment);
         if (shipment.Id > 0 && GetById(shipment.Id) is not null)
+        {
             throw new InvalidOperationException($"A shipment with ID {shipment.Id} already exists.");
+        }
 
         shipment.CreatedAt = DateTime.UtcNow;
         shipment.UpdatedAt = shipment.CreatedAt;
@@ -41,11 +59,15 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
         Validate(shipment);
         if (shipment.Id != 0 && shipment.Id != id)
+        {
             throw new ArgumentException("The shipment ID must match the requested ID.", nameof(shipment));
+        }
 
         Shipment? existing = GetById(id);
         if (existing is null)
+        {
             return;
+        }
 
         shipment.CreatedAt = existing.CreatedAt;
         shipment.UpdatedAt = DateTime.UtcNow;
@@ -64,10 +86,18 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(shipmentId);
         ArgumentNullException.ThrowIfNull(orderIds);
         foreach (int orderId in orderIds)
+        {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(orderId);
+        }
 
         // The legacy API accepts a list but stores only the first order ID.
-        dataAccess.ReplaceOrders(shipmentId, orderIds.Count > 0 ? orderIds[0] : null, DateTime.UtcNow);
+        int? firstOrderId = null;
+        if (orderIds.Count > 0)
+        {
+            firstOrderId = orderIds[0];
+        }
+
+        dataAccess.ReplaceOrders(shipmentId, firstOrderId, DateTime.UtcNow);
     }
 
     public void Remove(int id)
@@ -81,21 +111,37 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
         ArgumentNullException.ThrowIfNull(shipment);
         ArgumentOutOfRangeException.ThrowIfNegative(shipment.Id);
         if (string.IsNullOrWhiteSpace(shipment.Reference))
+        {
             throw new ArgumentException("Reference is required.", nameof(shipment.Reference));
+        }
         if (shipment.OrderId is int orderId)
+        {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(orderId);
+        }
         if (shipment.ShipmentDate == default)
+        {
             throw new ArgumentException("ShipmentDate is required.", nameof(shipment.ShipmentDate));
+        }
         if (string.IsNullOrWhiteSpace(shipment.ShipmentType))
+        {
             throw new ArgumentException("ShipmentType is required.", nameof(shipment.ShipmentType));
+        }
         if (string.IsNullOrWhiteSpace(shipment.ShipmentStatus))
+        {
             throw new ArgumentException("ShipmentStatus is required.", nameof(shipment.ShipmentStatus));
+        }
         if (string.IsNullOrWhiteSpace(shipment.CarrierName))
+        {
             throw new ArgumentException("CarrierName is required.", nameof(shipment.CarrierName));
+        }
         if (string.IsNullOrWhiteSpace(shipment.ShippingMethod))
+        {
             throw new ArgumentException("ShippingMethod is required.", nameof(shipment.ShippingMethod));
+        }
         if (string.IsNullOrWhiteSpace(shipment.PaymentType))
+        {
             throw new ArgumentException("PaymentType is required.", nameof(shipment.PaymentType));
+        }
         ValidateItems(shipment.Items);
     }
 
@@ -109,7 +155,9 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.ItemId);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.Amount);
             if (!itemIds.Add(item.ItemId))
+            {
                 throw new ArgumentException("Each item may appear only once.", nameof(items));
+            }
         }
     }
 }

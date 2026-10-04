@@ -15,10 +15,17 @@ public sealed class InventoryHandler(InventoryLogic logic)
     public Response<Inventory> GetByKey(Request request)
     {
         if (!TryKey(request, out int itemId, out int locationId))
+        {
             return Response<Inventory>.BadRequest();
+        }
 
         Inventory? inventory = logic.GetByKey(itemId, locationId);
-        return inventory is null ? Response<Inventory>.NotFound() : Response.Ok(inventory);
+        if (inventory is null)
+        {
+            return Response<Inventory>.NotFound();
+        }
+
+        return Response.Ok(inventory);
     }
 
     [Get("/items/{id}/inventory")]
@@ -26,7 +33,9 @@ public sealed class InventoryHandler(InventoryLogic logic)
     public Response<IReadOnlyList<Inventory>> GetByItemId(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
             return Response<IReadOnlyList<Inventory>>.BadRequest();
+        }
 
         return Response.Ok(logic.GetByItemId(id));
     }
@@ -36,7 +45,9 @@ public sealed class InventoryHandler(InventoryLogic logic)
     public Response<InventoryTotals> GetTotalsByItemId(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
             return Response<InventoryTotals>.BadRequest();
+        }
 
         return Response.Ok(logic.GetTotalsByItemId(id));
     }
@@ -61,9 +72,13 @@ public sealed class InventoryHandler(InventoryLogic logic)
     public Response Update(Request<Inventory> request)
     {
         if (!TryKey(request, out int itemId, out int locationId))
+        {
             return Response.BadRequest();
+        }
         if (logic.GetByKey(itemId, locationId) is null)
+        {
             return Response.NotFound();
+        }
 
         try
         {
@@ -81,9 +96,13 @@ public sealed class InventoryHandler(InventoryLogic logic)
     public Response Remove(Request request)
     {
         if (!TryKey(request, out int itemId, out int locationId))
+        {
             return Response.BadRequest();
+        }
         if (logic.GetByKey(itemId, locationId) is null)
+        {
             return Response.NotFound();
+        }
 
         logic.Remove(itemId, locationId);
         return Response.Ok();

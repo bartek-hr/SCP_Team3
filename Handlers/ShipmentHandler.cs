@@ -15,10 +15,17 @@ public sealed class ShipmentHandler(ShipmentLogic logic)
     public Response<Shipment> GetById(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
             return Response<Shipment>.BadRequest();
+        }
 
         Shipment? record = logic.GetById(id);
-        return record is null ? Response<Shipment>.NotFound() : Response.Ok(record);
+        if (record is null)
+        {
+            return Response<Shipment>.NotFound();
+        }
+
+        return Response.Ok(record);
     }
 
     [Get("/shipments/{id}/items")]
@@ -26,7 +33,9 @@ public sealed class ShipmentHandler(ShipmentLogic logic)
     public Response<IReadOnlyList<ShipmentItem>> GetItems(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
             return Response<IReadOnlyList<ShipmentItem>>.BadRequest();
+        }
 
         return Response.Ok(logic.GetItems(id));
     }
@@ -55,9 +64,13 @@ public sealed class ShipmentHandler(ShipmentLogic logic)
     public Response Update(Request<Shipment> request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
             return Response.BadRequest();
+        }
         if (logic.GetById(id) is null)
+        {
             return Response.NotFound();
+        }
 
         try
         {
@@ -75,9 +88,13 @@ public sealed class ShipmentHandler(ShipmentLogic logic)
     public Response ReplaceItems(Request<List<ShipmentItem>> request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
             return Response.BadRequest();
+        }
         if (logic.GetById(id) is null)
+        {
             return Response.NotFound();
+        }
 
         try
         {
@@ -95,9 +112,13 @@ public sealed class ShipmentHandler(ShipmentLogic logic)
     public Response Remove(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
             return Response.BadRequest();
+        }
         if (logic.GetById(id) is null)
+        {
             return Response.NotFound();
+        }
 
         logic.Remove(id);
         return Response.Ok();
@@ -108,7 +129,9 @@ public sealed class ShipmentHandler(ShipmentLogic logic)
     public Response<IReadOnlyList<int>> GetOrderIds(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
             return Response<IReadOnlyList<int>>.BadRequest();
+        }
 
         return Response.Ok(logic.GetOrderIds(id));
     }
@@ -118,9 +141,13 @@ public sealed class ShipmentHandler(ShipmentLogic logic)
     public Response ReplaceOrders(Request<List<int>> request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
             return Response.BadRequest();
+        }
         if (logic.GetById(id) is null)
+        {
             return Response.NotFound();
+        }
 
         try
         {

@@ -15,10 +15,17 @@ public sealed class OrderHandler(OrderLogic logic)
     public Response<Order> GetById(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
             return Response<Order>.BadRequest();
+        }
 
         Order? record = logic.GetById(id);
-        return record is null ? Response<Order>.NotFound() : Response.Ok(record);
+        if (record is null)
+        {
+            return Response<Order>.NotFound();
+        }
+
+        return Response.Ok(record);
     }
 
     [Get("/orders/{id}/items")]
@@ -26,7 +33,9 @@ public sealed class OrderHandler(OrderLogic logic)
     public Response<IReadOnlyList<OrderItem>> GetItems(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
             return Response<IReadOnlyList<OrderItem>>.BadRequest();
+        }
 
         return Response.Ok(logic.GetItems(id));
     }
@@ -55,9 +64,13 @@ public sealed class OrderHandler(OrderLogic logic)
     public Response Update(Request<Order> request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
             return Response.BadRequest();
+        }
         if (logic.GetById(id) is null)
+        {
             return Response.NotFound();
+        }
 
         try
         {
@@ -75,9 +88,13 @@ public sealed class OrderHandler(OrderLogic logic)
     public Response ReplaceItems(Request<List<OrderItem>> request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
             return Response.BadRequest();
+        }
         if (logic.GetById(id) is null)
+        {
             return Response.NotFound();
+        }
 
         try
         {
@@ -95,9 +112,13 @@ public sealed class OrderHandler(OrderLogic logic)
     public Response Remove(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
             return Response.BadRequest();
+        }
         if (logic.GetById(id) is null)
+        {
             return Response.NotFound();
+        }
 
         logic.Remove(id);
         return Response.Ok();

@@ -39,7 +39,9 @@ public sealed class OrderDataAccess(CargoHubDbContext context)
     {
         Order? existing = context.Orders.Include(row => row.Items).SingleOrDefault(row => row.Id == id);
         if (existing is null)
+        {
             return;
+        }
 
         existing.ClientId = order.ClientId;
         existing.OrderDate = order.OrderDate;
@@ -60,7 +62,9 @@ public sealed class OrderDataAccess(CargoHubDbContext context)
     {
         Order? existing = context.Orders.Include(row => row.Items).SingleOrDefault(row => row.Id == id);
         if (existing is null)
+        {
             return;
+        }
 
         SetItems(existing, items);
         existing.UpdatedAt = updatedAt;
@@ -71,7 +75,9 @@ public sealed class OrderDataAccess(CargoHubDbContext context)
     {
         Order? existing = context.Orders.Find(id);
         if (existing is null)
+        {
             return;
+        }
 
         context.Orders.Remove(existing);
         context.SaveChanges();
@@ -86,12 +92,16 @@ public sealed class OrderDataAccess(CargoHubDbContext context)
         {
             int delta = current.GetValueOrDefault(itemId) - previous.GetValueOrDefault(itemId);
             if (delta == 0)
+            {
                 continue;
+            }
 
             Inventory? inventory = context.Inventories.Where(row => row.ItemId == itemId)
                 .OrderByDescending(row => row.QuantityOnHand).ThenBy(row => row.LocationId).FirstOrDefault();
             if (inventory is null)
+            {
                 continue;
+            }
 
             inventory.QuantityAllocated = checked((int)Math.Max(0L, (long)inventory.QuantityAllocated + delta));
             inventory.UpdatedAt = DateTime.UtcNow;
@@ -104,7 +114,10 @@ public sealed class OrderDataAccess(CargoHubDbContext context)
             OrderItem? stored = existing.Items.SingleOrDefault(row => row.ItemId == item.ItemId);
             if (stored is null)
             {
-                stored = new OrderItem { ItemId = item.ItemId };
+                stored = new OrderItem
+                {
+                    ItemId = item.ItemId
+                };
                 existing.Items.Add(stored);
             }
 
