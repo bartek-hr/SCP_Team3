@@ -12,24 +12,42 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
 
     public Shipment? GetById(int id)
     {
-        return id > 0 ? dataAccess.GetById(id) : null;
+        if (id <= 0)
+        {
+            return null;
+        }
+
+        return dataAccess.GetById(id);
     }
 
     public IReadOnlyList<ShipmentItem> GetItems(int shipmentId)
     {
-        return shipmentId > 0 ? dataAccess.GetItems(shipmentId) : [];
+        if (shipmentId <= 0)
+        {
+            return [];
+        }
+
+        return dataAccess.GetItems(shipmentId);
     }
 
     public IReadOnlyList<int> GetOrderIds(int shipmentId)
     {
-        return GetById(shipmentId)?.OrderId is int orderId ? [orderId] : [];
+        Shipment? shipment = GetById(shipmentId);
+        if (shipment is null || shipment.OrderId is null)
+        {
+            return [];
+        }
+
+        return [shipment.OrderId.Value];
     }
 
     public void Add(Shipment shipment)
     {
         Validate(shipment);
         if (shipment.Id > 0 && GetById(shipment.Id) is not null)
+        {
             throw new InvalidOperationException($"A shipment with ID {shipment.Id} already exists.");
+        }
 
         shipment.CreatedAt = DateTime.UtcNow;
         shipment.UpdatedAt = shipment.CreatedAt;
@@ -41,11 +59,15 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
         Validate(shipment);
         if (shipment.Id != 0 && shipment.Id != id)
+        {
             throw new ArgumentException("The shipment ID must match the requested ID.", nameof(shipment));
+        }
 
         Shipment? existing = GetById(id);
         if (existing is null)
+        {
             return;
+        }
 
         shipment.CreatedAt = existing.CreatedAt;
         shipment.UpdatedAt = DateTime.UtcNow;
@@ -64,10 +86,18 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(shipmentId);
         ArgumentNullException.ThrowIfNull(orderIds);
         foreach (int orderId in orderIds)
+        {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(orderId);
+        }
 
         // The legacy API accepts a list but stores only the first order ID.
-        dataAccess.ReplaceOrders(shipmentId, orderIds.Count > 0 ? orderIds[0] : null, DateTime.UtcNow);
+        int? firstOrderId = null;
+        if (orderIds.Count > 0)
+        {
+            firstOrderId = orderIds[0];
+        }
+
+        dataAccess.ReplaceOrders(shipmentId, firstOrderId, DateTime.UtcNow);
     }
 
     public void Remove(int id)

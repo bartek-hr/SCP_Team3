@@ -79,8 +79,30 @@ public sealed class ShipmentDataAccess(CargoHubDbContext context)
         context.SaveChanges();
     }
 
-    private static void SetItems(Shipment existing, IReadOnlyList<ShipmentItem> items)
+    private void SetItems(Shipment existing, IReadOnlyList<ShipmentItem> items)
     {
+        // Net als in de Python-versie: verwerk het verschil op de locatie met de meeste voorraad.
+        var previous = existing.Items.ToDictionary(item => item.ItemId, item => item.Amount);
+        var current = items.ToDictionary(item => item.ItemId, item => item.Amount);
+        foreach (int itemId in previous.Keys.Union(current.Keys))
+        {
+            int delta = current.GetValueOrDefault(itemId) - previous.GetValueOrDefault(itemId);
+            if (delta == 0)
+            {
+                continue;
+            }
+
+            Inventory? inventory = context.Inventories.Where(row => row.ItemId == itemId)
+                .OrderByDescending(row => row.QuantityOnHand).ThenBy(row => row.LocationId).FirstOrDefault();
+            if (inventory is null)
+            {
+                continue;
+            }
+
+            inventory.QuantityOrdered = checked((int)Math.Max(0L, (long)inventory.QuantityOrdered + delta));
+            inventory.UpdatedAt = DateTime.UtcNow;
+        }
+
         var itemIds = items.Select(item => item.ItemId).ToHashSet();
         existing.Items.RemoveAll(item => !itemIds.Contains(item.ItemId));
         foreach (ShipmentItem item in items)
@@ -88,7 +110,10 @@ public sealed class ShipmentDataAccess(CargoHubDbContext context)
             ShipmentItem? stored = existing.Items.SingleOrDefault(row => row.ItemId == item.ItemId);
             if (stored is null)
             {
-                stored = new ShipmentItem { ItemId = item.ItemId };
+                stored = new ShipmentItem
+                {
+                    ItemId = item.ItemId
+                };
                 existing.Items.Add(stored);
             }
 
