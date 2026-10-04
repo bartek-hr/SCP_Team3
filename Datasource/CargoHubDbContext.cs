@@ -23,7 +23,7 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.ToTable("Orders", table => table.ExcludeFromMigrations());
+            entity.ToTable("Orders");
             entity.HasKey(row => row.Id);
             entity.Property(row => row.Id).HasColumnName("id");
             entity.Property(row => row.ClientId).HasColumnName("client_id");
@@ -44,7 +44,7 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
 
         modelBuilder.Entity<OrderItem>(entity =>
         {
-            entity.ToTable("OrderItems", table => table.ExcludeFromMigrations());
+            entity.ToTable("OrderItems");
             entity.HasKey(item => item.Id);
             entity.HasIndex(item => new { item.OrderId, item.ItemId }).IsUnique();
             entity.Property(item => item.Id).HasColumnName("id");
