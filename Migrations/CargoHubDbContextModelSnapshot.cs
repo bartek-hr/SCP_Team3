@@ -91,6 +91,45 @@ internal partial class CargoHubDbContextModelSnapshot : ModelSnapshot
                 b.ToTable("Clients", (string)null);
             });
 
+        modelBuilder.Entity("CargoHUB.Models.Inventory", b =>
+            {
+                b.Property<int>("ItemId")
+                    .HasColumnType("INTEGER")
+                    .HasJsonPropertyName("item_id");
+
+                b.Property<int>("LocationId")
+                    .HasColumnType("INTEGER")
+                    .HasJsonPropertyName("location_id");
+
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("TEXT")
+                    .HasJsonPropertyName("created_at");
+
+                b.Property<int>("QuantityAllocated")
+                    .HasColumnType("INTEGER")
+                    .HasJsonPropertyName("quantity_allocated");
+
+                b.Property<int>("QuantityExpected")
+                    .HasColumnType("INTEGER")
+                    .HasJsonPropertyName("quantity_expected");
+
+                b.Property<int>("QuantityOnHand")
+                    .HasColumnType("INTEGER")
+                    .HasJsonPropertyName("quantity_on_hand");
+
+                b.Property<int>("QuantityOrdered")
+                    .HasColumnType("INTEGER")
+                    .HasJsonPropertyName("quantity_ordered");
+
+                b.Property<DateTime>("UpdatedAt")
+                    .HasColumnType("TEXT")
+                    .HasJsonPropertyName("updated_at");
+
+                b.HasKey("ItemId", "LocationId");
+
+                b.ToTable("Inventories");
+            });
+
         modelBuilder.Entity("CargoHUB.Models.Location", b =>
             {
                 b.Property<int>("Id")
@@ -131,6 +170,230 @@ internal partial class CargoHubDbContextModelSnapshot : ModelSnapshot
                 b.HasIndex("WarehouseId");
 
                 b.ToTable("Locations", (string)null);
+            });
+
+        modelBuilder.Entity("CargoHUB.Models.Order", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("id")
+                    .HasJsonPropertyName("id");
+
+                b.Property<int>("BillToClientId")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("bill_to_client_id")
+                    .HasJsonPropertyName("bill_to_client_id");
+
+                b.Property<int>("ClientId")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("client_id")
+                    .HasJsonPropertyName("client_id");
+
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("created_at")
+                    .HasJsonPropertyName("created_at");
+
+                b.Property<string>("CustomerPoNumber")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("customer_po_number")
+                    .HasJsonPropertyName("customer_po_number");
+
+                b.Property<DateTime>("OrderDate")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("order_date")
+                    .HasJsonPropertyName("order_date");
+
+                b.Property<string>("OrderStatus")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("order_status")
+                    .HasJsonPropertyName("order_status");
+
+                b.Property<string>("Reference")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("reference")
+                    .HasJsonPropertyName("reference");
+
+                b.Property<DateTime>("RequestDate")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("request_date")
+                    .HasJsonPropertyName("request_date");
+
+                b.Property<int>("ShipToClientId")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("ship_to_client_id")
+                    .HasJsonPropertyName("ship_to_client_id");
+
+                b.Property<string>("ShippingNotes")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("shipping_notes")
+                    .HasJsonPropertyName("shipping_notes");
+
+                b.Property<DateTime>("UpdatedAt")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("updated_at")
+                    .HasJsonPropertyName("updated_at");
+
+                b.Property<int>("WarehouseId")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("warehouse_id")
+                    .HasJsonPropertyName("warehouse_id");
+
+                b.HasKey("Id");
+
+                b.ToTable("Orders", null, t =>
+                    {
+                        t.ExcludeFromMigrations();
+                    });
+            });
+
+        modelBuilder.Entity("CargoHUB.Models.OrderItem", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("id");
+
+                b.Property<int>("Amount")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("amount")
+                    .HasJsonPropertyName("amount");
+
+                b.Property<int>("ItemId")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("item_id")
+                    .HasJsonPropertyName("item_id");
+
+                b.Property<int>("OrderId")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("order_id");
+
+                b.Property<decimal?>("UnitPrice")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("unit_price")
+                    .HasJsonPropertyName("unit_price");
+
+                b.HasKey("Id");
+
+                b.HasIndex("OrderId", "ItemId")
+                    .IsUnique();
+
+                b.ToTable("OrderItems", null, t =>
+                    {
+                        t.ExcludeFromMigrations();
+                    });
+
+                b.HasAnnotation("Relational:JsonPropertyName", "items");
+            });
+
+        modelBuilder.Entity("CargoHUB.Models.Shipment", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("id")
+                    .HasJsonPropertyName("id");
+
+                b.Property<string>("CarrierName")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("carrier_name")
+                    .HasJsonPropertyName("carrier_name");
+
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("created_at")
+                    .HasJsonPropertyName("created_at");
+
+                b.Property<int?>("OrderId")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("order_id")
+                    .HasJsonPropertyName("order_id");
+
+                b.Property<string>("PaymentType")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("payment_type")
+                    .HasJsonPropertyName("payment_type");
+
+                b.Property<string>("Reference")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("reference")
+                    .HasJsonPropertyName("reference");
+
+                b.Property<DateTime>("ShipmentDate")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("shipment_date")
+                    .HasJsonPropertyName("shipment_date");
+
+                b.Property<string>("ShipmentStatus")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("shipment_status")
+                    .HasJsonPropertyName("shipment_status");
+
+                b.Property<string>("ShipmentType")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("shipment_type")
+                    .HasJsonPropertyName("shipment_type");
+
+                b.Property<string>("ShippingMethod")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("shipping_method")
+                    .HasJsonPropertyName("shipping_method");
+
+                b.Property<DateTime>("UpdatedAt")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("updated_at")
+                    .HasJsonPropertyName("updated_at");
+
+                b.HasKey("Id");
+
+                b.ToTable("Shipments", null, t =>
+                    {
+                        t.ExcludeFromMigrations();
+                    });
+            });
+
+        modelBuilder.Entity("CargoHUB.Models.ShipmentItem", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("id");
+
+                b.Property<int>("Amount")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("amount")
+                    .HasJsonPropertyName("amount");
+
+                b.Property<int>("ItemId")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("item_id")
+                    .HasJsonPropertyName("item_id");
+
+                b.Property<int>("ShipmentId")
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("shipment_id");
+
+                b.HasKey("Id");
+
+                b.HasIndex("ShipmentId", "ItemId")
+                    .IsUnique();
+
+                b.ToTable("ShipmentItems", null, t =>
+                    {
+                        t.ExcludeFromMigrations();
+                    });
+
+                b.HasAnnotation("Relational:JsonPropertyName", "items");
             });
 
         modelBuilder.Entity("CargoHUB.Models.Transfer", b =>
@@ -304,6 +567,24 @@ internal partial class CargoHubDbContextModelSnapshot : ModelSnapshot
                     .IsRequired();
             });
 
+        modelBuilder.Entity("CargoHUB.Models.OrderItem", b =>
+            {
+                b.HasOne("CargoHUB.Models.Order", null)
+                    .WithMany("Items")
+                    .HasForeignKey("OrderId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("CargoHUB.Models.ShipmentItem", b =>
+            {
+                b.HasOne("CargoHUB.Models.Shipment", null)
+                    .WithMany("Items")
+                    .HasForeignKey("ShipmentId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
         modelBuilder.Entity("CargoHUB.Models.Transfer", b =>
             {
                 b.HasOne("CargoHUB.Models.Location", null)
@@ -326,6 +607,16 @@ internal partial class CargoHubDbContextModelSnapshot : ModelSnapshot
                     .HasForeignKey("TransferId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
+            });
+
+        modelBuilder.Entity("CargoHUB.Models.Order", b =>
+            {
+                b.Navigation("Items");
+            });
+
+        modelBuilder.Entity("CargoHUB.Models.Shipment", b =>
+            {
+                b.Navigation("Items");
             });
 
         modelBuilder.Entity("CargoHUB.Models.Transfer", b =>
