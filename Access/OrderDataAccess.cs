@@ -39,9 +39,7 @@ public sealed class OrderDataAccess(CargoHubDbContext context)
     {
         Order? existing = context.Orders.Include(row => row.Items).SingleOrDefault(row => row.Id == id);
         if (existing is null)
-        {
             return;
-        }
 
         existing.ClientId = order.ClientId;
         existing.OrderDate = order.OrderDate;
@@ -62,9 +60,7 @@ public sealed class OrderDataAccess(CargoHubDbContext context)
     {
         Order? existing = context.Orders.Include(row => row.Items).SingleOrDefault(row => row.Id == id);
         if (existing is null)
-        {
             return;
-        }
 
         SetItems(existing, items);
         existing.UpdatedAt = updatedAt;
@@ -75,9 +71,7 @@ public sealed class OrderDataAccess(CargoHubDbContext context)
     {
         Order? existing = context.Orders.Find(id);
         if (existing is null)
-        {
             return;
-        }
 
         context.Orders.Remove(existing);
         context.SaveChanges();

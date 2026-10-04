@@ -56,15 +56,7 @@ public sealed class InventoryHandler(InventoryLogic logic)
     [Describe("Voegt voorraad toe of vervangt de bestaande voorraadregel.", Tags = ["Inventories"], OperationId = "upsertInventory", SuccessStatus = StatusCodes.Status201Created)]
     public Response AddOrUpdate(Request<Inventory> request)
     {
-        try
-        {
-            logic.AddOrUpdate(request.Data);
-            return Response.Created();
-        }
-        catch (ArgumentException)
-        {
-            return Response.BadRequest();
-        }
+        return WriteResponse.Save(() => logic.AddOrUpdate(request.Data), StatusCodes.Status201Created);
     }
 
     [Put("/inventories/{itemId}/{locationId}")]
@@ -80,15 +72,7 @@ public sealed class InventoryHandler(InventoryLogic logic)
             return Response.NotFound();
         }
 
-        try
-        {
-            logic.Update(itemId, locationId, request.Data);
-            return Response.Ok();
-        }
-        catch (ArgumentException)
-        {
-            return Response.BadRequest();
-        }
+        return WriteResponse.Save(() => logic.Update(itemId, locationId, request.Data), StatusCodes.Status200OK);
     }
 
     [Delete("/inventories/{itemId}/{locationId}")]

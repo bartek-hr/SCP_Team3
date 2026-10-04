@@ -111,37 +111,21 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
         ArgumentNullException.ThrowIfNull(shipment);
         ArgumentOutOfRangeException.ThrowIfNegative(shipment.Id);
         if (string.IsNullOrWhiteSpace(shipment.Reference))
-        {
             throw new ArgumentException("Reference is required.", nameof(shipment.Reference));
-        }
         if (shipment.OrderId is int orderId)
-        {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(orderId);
-        }
         if (shipment.ShipmentDate == default)
-        {
             throw new ArgumentException("ShipmentDate is required.", nameof(shipment.ShipmentDate));
-        }
         if (string.IsNullOrWhiteSpace(shipment.ShipmentType))
-        {
             throw new ArgumentException("ShipmentType is required.", nameof(shipment.ShipmentType));
-        }
         if (string.IsNullOrWhiteSpace(shipment.ShipmentStatus))
-        {
             throw new ArgumentException("ShipmentStatus is required.", nameof(shipment.ShipmentStatus));
-        }
         if (string.IsNullOrWhiteSpace(shipment.CarrierName))
-        {
             throw new ArgumentException("CarrierName is required.", nameof(shipment.CarrierName));
-        }
         if (string.IsNullOrWhiteSpace(shipment.ShippingMethod))
-        {
             throw new ArgumentException("ShippingMethod is required.", nameof(shipment.ShippingMethod));
-        }
         if (string.IsNullOrWhiteSpace(shipment.PaymentType))
-        {
             throw new ArgumentException("PaymentType is required.", nameof(shipment.PaymentType));
-        }
         ValidateItems(shipment.Items);
     }
 
@@ -155,9 +139,7 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.ItemId);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.Amount);
             if (!itemIds.Add(item.ItemId))
-            {
                 throw new ArgumentException("Each item may appear only once.", nameof(items));
-            }
         }
     }
 }

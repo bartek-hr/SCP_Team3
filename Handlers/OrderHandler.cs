@@ -44,19 +44,7 @@ public sealed class OrderHandler(OrderLogic logic)
     [Describe("Maakt een record aan.", Tags = ["Orders"], OperationId = "createOrder", SuccessStatus = StatusCodes.Status201Created)]
     public Response Add(Request<Order> request)
     {
-        try
-        {
-            logic.Add(request.Data);
-            return Response.Created();
-        }
-        catch (ArgumentException)
-        {
-            return Response.BadRequest();
-        }
-        catch (InvalidOperationException)
-        {
-            return Response.Conflict();
-        }
+        return WriteResponse.Save(() => logic.Add(request.Data), StatusCodes.Status201Created);
     }
 
     [Put("/orders/{id}")]
@@ -72,15 +60,7 @@ public sealed class OrderHandler(OrderLogic logic)
             return Response.NotFound();
         }
 
-        try
-        {
-            logic.Update(id, request.Data);
-            return Response.Ok();
-        }
-        catch (ArgumentException)
-        {
-            return Response.BadRequest();
-        }
+        return WriteResponse.Save(() => logic.Update(id, request.Data), StatusCodes.Status200OK);
     }
 
     [Put("/orders/{id}/items")]
@@ -96,15 +76,7 @@ public sealed class OrderHandler(OrderLogic logic)
             return Response.NotFound();
         }
 
-        try
-        {
-            logic.ReplaceItems(id, request.Data);
-            return Response.Ok();
-        }
-        catch (ArgumentException)
-        {
-            return Response.BadRequest();
-        }
+        return WriteResponse.Save(() => logic.ReplaceItems(id, request.Data), StatusCodes.Status200OK);
     }
 
     [Delete("/orders/{id}")]

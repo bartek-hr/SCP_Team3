@@ -44,19 +44,7 @@ public sealed class ShipmentHandler(ShipmentLogic logic)
     [Describe("Maakt een record aan.", Tags = ["Shipments"], OperationId = "createShipment", SuccessStatus = StatusCodes.Status201Created)]
     public Response Add(Request<Shipment> request)
     {
-        try
-        {
-            logic.Add(request.Data);
-            return Response.Created();
-        }
-        catch (ArgumentException)
-        {
-            return Response.BadRequest();
-        }
-        catch (InvalidOperationException)
-        {
-            return Response.Conflict();
-        }
+        return WriteResponse.Save(() => logic.Add(request.Data), StatusCodes.Status201Created);
     }
 
     [Put("/shipments/{id}")]
@@ -72,15 +60,7 @@ public sealed class ShipmentHandler(ShipmentLogic logic)
             return Response.NotFound();
         }
 
-        try
-        {
-            logic.Update(id, request.Data);
-            return Response.Ok();
-        }
-        catch (ArgumentException)
-        {
-            return Response.BadRequest();
-        }
+        return WriteResponse.Save(() => logic.Update(id, request.Data), StatusCodes.Status200OK);
     }
 
     [Put("/shipments/{id}/items")]
@@ -96,15 +76,7 @@ public sealed class ShipmentHandler(ShipmentLogic logic)
             return Response.NotFound();
         }
 
-        try
-        {
-            logic.ReplaceItems(id, request.Data);
-            return Response.Ok();
-        }
-        catch (ArgumentException)
-        {
-            return Response.BadRequest();
-        }
+        return WriteResponse.Save(() => logic.ReplaceItems(id, request.Data), StatusCodes.Status200OK);
     }
 
     [Delete("/shipments/{id}")]
@@ -149,14 +121,6 @@ public sealed class ShipmentHandler(ShipmentLogic logic)
             return Response.NotFound();
         }
 
-        try
-        {
-            logic.ReplaceOrders(id, request.Data);
-            return Response.Ok();
-        }
-        catch (ArgumentException)
-        {
-            return Response.BadRequest();
-        }
+        return WriteResponse.Save(() => logic.ReplaceOrders(id, request.Data), StatusCodes.Status200OK);
     }
 }

@@ -32,9 +32,7 @@ public sealed class ShipmentDataAccess(CargoHubDbContext context)
     {
         Shipment? existing = context.Shipments.Include(row => row.Items).SingleOrDefault(row => row.Id == id);
         if (existing is null)
-        {
             return;
-        }
 
         existing.Reference = shipment.Reference;
         existing.OrderId = shipment.OrderId;
@@ -53,9 +51,7 @@ public sealed class ShipmentDataAccess(CargoHubDbContext context)
     {
         Shipment? existing = context.Shipments.Include(row => row.Items).SingleOrDefault(row => row.Id == id);
         if (existing is null)
-        {
             return;
-        }
 
         SetItems(existing, items);
         existing.UpdatedAt = updatedAt;
@@ -66,9 +62,7 @@ public sealed class ShipmentDataAccess(CargoHubDbContext context)
     {
         Shipment? existing = context.Shipments.Find(id);
         if (existing is null)
-        {
             return;
-        }
 
         existing.OrderId = orderId;
         existing.UpdatedAt = updatedAt;
@@ -79,9 +73,7 @@ public sealed class ShipmentDataAccess(CargoHubDbContext context)
     {
         Shipment? existing = context.Shipments.Find(id);
         if (existing is null)
-        {
             return;
-        }
 
         context.Shipments.Remove(existing);
         context.SaveChanges();

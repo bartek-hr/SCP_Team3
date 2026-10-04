@@ -92,25 +92,15 @@ public sealed class OrderLogic(OrderDataAccess dataAccess)
         ArgumentOutOfRangeException.ThrowIfNegative(order.Id);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(order.ClientId);
         if (order.OrderDate == default)
-        {
             throw new ArgumentException("OrderDate is required.", nameof(order.OrderDate));
-        }
         if (order.RequestDate == default)
-        {
             throw new ArgumentException("RequestDate is required.", nameof(order.RequestDate));
-        }
         if (string.IsNullOrWhiteSpace(order.Reference))
-        {
             throw new ArgumentException("Reference is required.", nameof(order.Reference));
-        }
         if (string.IsNullOrWhiteSpace(order.CustomerPoNumber))
-        {
             throw new ArgumentException("CustomerPoNumber is required.", nameof(order.CustomerPoNumber));
-        }
         if (string.IsNullOrWhiteSpace(order.OrderStatus))
-        {
             throw new ArgumentException("OrderStatus is required.", nameof(order.OrderStatus));
-        }
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(order.WarehouseId);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(order.ShipToClientId);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(order.BillToClientId);
@@ -127,13 +117,9 @@ public sealed class OrderLogic(OrderDataAccess dataAccess)
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.ItemId);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.Amount);
             if (!itemIds.Add(item.ItemId))
-            {
                 throw new ArgumentException("Each item may appear only once.", nameof(items));
-            }
             if (item.UnitPrice is < 0)
-            {
                 throw new ArgumentOutOfRangeException(nameof(item.UnitPrice));
-            }
         }
     }
 }
