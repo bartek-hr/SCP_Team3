@@ -40,13 +40,38 @@ public sealed class ItemTypeHandlerTests : HandlerTest
     }
 
     [TestMethod]
-    public async Task ItemsRouteReturns501OnlyForExistingItemTypeAsync()
+    public async Task ItemsRouteReturnsEmptyArrayAndExpectedErrorsAsync()
     {
         await using WebApplication app = CreateApplication();
 
-        Assert.AreEqual(501, (await InvokeAsync(app, "/api/v1/item_types/{id}/items", "1")).Response.StatusCode);
+        DefaultHttpContext response = await InvokeAsync(app, "/api/v1/item_types/{id}/items", "1");
+        Assert.AreEqual(200, response.Response.StatusCode);
+        Assert.AreEqual("[]", await HttpContextTestHelpers.ReadResponseBodyAsync(response));
         Assert.AreEqual(404, (await InvokeAsync(app, "/api/v1/item_types/{id}/items", "999")).Response.StatusCode);
         Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/item_types/{id}/items", "abc")).Response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task ItemsRouteReturnsOnlyMatchingItemIdsInOrderAcrossSuppliersAsync()
+    {
+        Context.ItemLines.Add(new ItemLine { Id = 1, Name = "Test Line" });
+        Context.ItemGroups.Add(new ItemGroup { Id = 1, Name = "Test Group" });
+        Context.Items.AddRange(
+            CreateItem(3, itemTypeId: 1, supplierId: 1),
+            CreateItem(2, itemTypeId: 2),
+            CreateItem(1, itemTypeId: 1, supplierId: 2),
+            CreateItem(4, itemTypeId: 999));
+        Context.SaveChanges();
+        Context.ChangeTracker.Clear();
+        await using WebApplication app = CreateApplication();
+
+        DefaultHttpContext response = await InvokeAsync(app, "/api/v1/item_types/{id}/items", "1");
+
+        Assert.AreEqual(200, response.Response.StatusCode);
+        using JsonDocument json = await ReadJsonAsync(response);
+        CollectionAssert.AreEqual(new[] { 1, 3 }, json.RootElement.EnumerateArray()
+            .Select(itemId => itemId.GetInt32()).ToArray());
+        Assert.AreEqual(404, (await InvokeAsync(app, "/api/v1/item_types/{id}/items", "999")).Response.StatusCode);
     }
 
     [TestMethod]
@@ -125,7 +150,22 @@ public sealed class ItemTypeHandlerTests : HandlerTest
 
     private WebApplication CreateApplication() => CreateApplication(services => services
         .AddTransient<ItemTypeAccess>()
-        .AddTransient<ItemTypeLogic>());
+        .AddTransient<ItemTypeLogic>()
+        .AddTransient<ItemAccess>()
+        .AddTransient<ItemLineAccess>()
+        .AddTransient<ItemGroupAccess>()
+        .AddTransient<ItemLogic>());
+
+    private static Item CreateItem(int id, int itemTypeId, int supplierId = 1) => new()
+    {
+        Id = id,
+        Code = $"ITEM-{id}",
+        Description = $"Test Item {id}",
+        ItemLineId = 1,
+        ItemGroupId = 1,
+        ItemTypeId = itemTypeId,
+        SupplierId = supplierId,
+    };
 
     private static ItemType CreateItemType(int id = 0) => new()
     {

@@ -56,13 +56,56 @@ public sealed class SupplierHandlerTests : HandlerTest
     }
 
     [TestMethod]
-    public async Task ItemsRouteReturns501OnlyForExistingSupplierAsync()
+    public async Task ItemsRouteReturnsEmptyArrayAndExpectedErrorsAsync()
     {
         await using WebApplication app = CreateApplication();
 
-        Assert.AreEqual(501, (await InvokeAsync(app, "/api/v1/suppliers/{id}/items", "1")).Response.StatusCode);
+        DefaultHttpContext response = await InvokeAsync(app, "/api/v1/suppliers/{id}/items", "1");
+        Assert.AreEqual(200, response.Response.StatusCode);
+        Assert.AreEqual("[]", await HttpContextTestHelpers.ReadResponseBodyAsync(response));
         Assert.AreEqual(404, (await InvokeAsync(app, "/api/v1/suppliers/{id}/items", "999")).Response.StatusCode);
         Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/suppliers/{id}/items", "abc")).Response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task ItemsRouteReturnsOnlyTheSuppliersFullItemsInIdOrderAsync()
+    {
+        Context.ItemLines.Add(new ItemLine { Id = 1, Name = "Test Line" });
+        Context.ItemGroups.Add(new ItemGroup { Id = 1, Name = "Test Group" });
+        Context.Items.AddRange(
+            CreateItem(3, supplierId: 1, itemTypeId: 2),
+            CreateItem(2, supplierId: 2),
+            CreateItem(1, supplierId: 1),
+            CreateItem(4, supplierId: 999));
+        Context.SaveChanges();
+        Context.ChangeTracker.Clear();
+        await using WebApplication app = CreateApplication();
+
+        DefaultHttpContext response = await InvokeAsync(app, "/api/v1/suppliers/{id}/items", "1");
+
+        Assert.AreEqual(200, response.Response.StatusCode);
+        using JsonDocument json = await ReadJsonAsync(response);
+        CollectionAssert.AreEqual(new[] { 1, 3 }, json.RootElement.EnumerateArray()
+            .Select(item => item.GetProperty("id").GetInt32()).ToArray());
+        JsonElement first = json.RootElement[0];
+        Assert.AreEqual("ITEM-1", first.GetProperty("code").GetString());
+        Assert.AreEqual("Test Item 1", first.GetProperty("description").GetString());
+        Assert.AreEqual("0012345678901", first.GetProperty("barcode").GetString());
+        Assert.AreEqual("MODEL-1", first.GetProperty("model_number").GetString());
+        Assert.AreEqual(100, first.GetProperty("commodity_code").GetInt32());
+        Assert.AreEqual(1.25m, first.GetProperty("unit_weight").GetDecimal());
+        Assert.AreEqual(1, first.GetProperty("item_line_id").GetInt32());
+        Assert.AreEqual(1, first.GetProperty("item_group_id").GetInt32());
+        Assert.AreEqual(1, first.GetProperty("item_type_id").GetInt32());
+        Assert.AreEqual(2, first.GetProperty("min_purchase_qty").GetInt32());
+        Assert.AreEqual(6, first.GetProperty("case_size").GetInt32());
+        Assert.AreEqual("Case", first.GetProperty("packaging_type").GetString());
+        Assert.AreEqual(6, first.GetProperty("order_multiple").GetInt32());
+        Assert.AreEqual(1, first.GetProperty("supplier_id").GetInt32());
+        Assert.AreEqual("SKU-1", first.GetProperty("supplier_sku").GetString());
+        Assert.AreEqual(TestData.CreatedAt, first.GetProperty("created_at").GetDateTime());
+        Assert.AreEqual(TestData.UpdatedAt, first.GetProperty("updated_at").GetDateTime());
+        Assert.AreEqual(404, (await InvokeAsync(app, "/api/v1/suppliers/{id}/items", "999")).Response.StatusCode);
     }
 
     [TestMethod]
@@ -150,7 +193,33 @@ public sealed class SupplierHandlerTests : HandlerTest
 
     private WebApplication CreateApplication() => CreateApplication(services => services
         .AddTransient<SupplierAccess>()
-        .AddTransient<SupplierLogic>());
+        .AddTransient<SupplierLogic>()
+        .AddTransient<ItemAccess>()
+        .AddTransient<ItemLineAccess>()
+        .AddTransient<ItemGroupAccess>()
+        .AddTransient<ItemLogic>());
+
+    private static Item CreateItem(int id, int supplierId, int itemTypeId = 1) => new()
+    {
+        Id = id,
+        Code = $"ITEM-{id}",
+        Description = $"Test Item {id}",
+        Barcode = "0012345678901",
+        ModelNumber = $"MODEL-{id}",
+        CommodityCode = 100,
+        UnitWeight = 1.25m,
+        ItemLineId = 1,
+        ItemGroupId = 1,
+        ItemTypeId = itemTypeId,
+        MinPurchaseQty = 2,
+        CaseSize = 6,
+        PackagingType = "Case",
+        OrderMultiple = 6,
+        SupplierId = supplierId,
+        SupplierSku = $"SKU-{id}",
+        CreatedAt = TestData.CreatedAt,
+        UpdatedAt = TestData.UpdatedAt,
+    };
 
     private static Supplier CreateDuplicateSupplier() => new()
     {
