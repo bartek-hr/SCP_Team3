@@ -6,9 +6,9 @@ namespace CargoHUB.Logics;
 
 public sealed class ClientLogic
 {
-    private readonly ClientDataAccess _dataAccess;
+    private readonly ClientAccess _dataAccess;
 
-    public ClientLogic(ClientDataAccess dataAccess)
+    public ClientLogic(ClientAccess dataAccess)
     {
         _dataAccess = dataAccess ?? throw new ArgumentNullException(nameof(dataAccess));
     }

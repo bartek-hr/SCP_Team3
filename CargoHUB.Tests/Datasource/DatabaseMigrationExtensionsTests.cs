@@ -28,6 +28,13 @@ public sealed class DatabaseMigrationExtensionsTests
         Assert.AreEqual("Microsoft.EntityFrameworkCore.Sqlite", context.Database.ProviderName);
         Assert.IsTrue(await context.Database.CanConnectAsync());
         Assert.AreEqual(300, await context.Clients.CountAsync());
+        Assert.AreEqual(3, await context.ItemTypes.CountAsync());
+        Assert.AreEqual(
+            "Single",
+            await context.ItemTypes
+                .Where(itemType => itemType.Id == 1)
+                .Select(itemType => itemType.Name)
+                .SingleAsync());
         Assert.AreEqual(
             "Jumbo Amersfoort Leusderweg",
             await context.Clients
@@ -44,6 +51,18 @@ public sealed class DatabaseMigrationExtensionsTests
         await using ServiceProvider services = await MigrateAsync(connection);
         await using AsyncServiceScope scope = services.CreateAsyncScope();
         CargoHubDbContext context = scope.ServiceProvider.GetRequiredService<CargoHubDbContext>();
+
+        Assert.AreEqual(6132, await context.Shipments.CountAsync());
+        Assert.AreEqual(33660, await context.Set<ShipmentItem>().CountAsync());
+        Shipment shipment = await context.Shipments.Include(row => row.Items).SingleAsync(row => row.Id == 1);
+        Assert.AreEqual(1, shipment.OrderId);
+        Assert.AreEqual(6, shipment.Items.Single(item => item.ItemId == 82).Amount);
+        Assert.AreEqual(4854, await context.Orders.CountAsync());
+        Assert.AreEqual(26498, await context.Set<OrderItem>().CountAsync());
+        Order order = await context.Orders.Include(row => row.Items).SingleAsync(row => row.Id == 1);
+        Assert.AreEqual(21.34m, order.Items.Single(item => item.ItemId == 82).UnitPrice);
+        Assert.AreEqual(4800, await context.Inventories.CountAsync());
+        Assert.AreEqual(458, (await context.Inventories.FindAsync(119, 124))!.QuantityOnHand);
 
         Assert.AreEqual(10, await context.Warehouses.CountAsync());
         Assert.AreEqual(400, await context.Locations.CountAsync());

@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CargoHUB.Access;
 
-public sealed class ClientDataAccess
+public sealed class ClientAccess
 {
     private readonly CargoHubDbContext _context;
 
-    public ClientDataAccess(CargoHubDbContext context)
+    public ClientAccess(CargoHubDbContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }

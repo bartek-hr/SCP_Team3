@@ -7,12 +7,15 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
     : DbContext(options)
 {
     public DbSet<Client> Clients => Set<Client>();
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
+    public DbSet<ItemType> ItemTypes => Set<ItemType>();
     public DbSet<Warehouse> Warehouses => Set<Warehouse>();
     public DbSet<Location> Locations => Set<Location>();
     public DbSet<Transfer> Transfers => Set<Transfer>();
     public DbSet<TransferItem> TransferItems => Set<TransferItem>();
 
     public DbSet<Order> Orders => Set<Order>();
+    public DbSet<Shipment> Shipments => Set<Shipment>();
 
     public DbSet<Inventory> Inventories => Set<Inventory>();
 
@@ -103,6 +106,36 @@ public sealed class CargoHubDbContext(DbContextOptions<CargoHubDbContext> option
             entity.Property(client => client.ContactEmail).HasColumnName("contact_email").IsRequired();
             entity.Property(client => client.CreatedAt).HasColumnName("created_at").IsRequired();
             entity.Property(client => client.UpdatedAt).HasColumnName("updated_at").IsRequired();
+        });
+
+        modelBuilder.Entity<Supplier>(entity =>
+        {
+            entity.ToTable("Suppliers");
+            entity.HasKey(supplier => supplier.Id);
+            entity.Property(supplier => supplier.Id).HasColumnName("id");
+            entity.Property(supplier => supplier.Code).HasColumnName("code").IsRequired();
+            entity.Property(supplier => supplier.Name).HasColumnName("name").IsRequired();
+            entity.Property(supplier => supplier.Address).HasColumnName("address").IsRequired();
+            entity.Property(supplier => supplier.City).HasColumnName("city").IsRequired();
+            entity.Property(supplier => supplier.ZipCode).HasColumnName("zip_code").IsRequired();
+            entity.Property(supplier => supplier.Province).HasColumnName("province").IsRequired();
+            entity.Property(supplier => supplier.Country).HasColumnName("country").IsRequired();
+            entity.Property(supplier => supplier.ContactName).HasColumnName("contact_name").IsRequired();
+            entity.Property(supplier => supplier.PhoneNumber).HasColumnName("phone_number").IsRequired();
+            entity.Property(supplier => supplier.Reference).HasColumnName("reference").IsRequired();
+            entity.Property(supplier => supplier.CreatedAt).HasColumnName("created_at").IsRequired();
+            entity.Property(supplier => supplier.UpdatedAt).HasColumnName("updated_at").IsRequired();
+        });
+
+        modelBuilder.Entity<ItemType>(entity =>
+        {
+            entity.ToTable("ItemTypes");
+            entity.HasKey(itemType => itemType.Id);
+            entity.Property(itemType => itemType.Id).HasColumnName("id");
+            entity.Property(itemType => itemType.Name).HasColumnName("name").IsRequired();
+            entity.Property(itemType => itemType.Description).HasColumnName("description").IsRequired();
+            entity.Property(itemType => itemType.CreatedAt).HasColumnName("created_at").IsRequired();
+            entity.Property(itemType => itemType.UpdatedAt).HasColumnName("updated_at").IsRequired();
         });
 
         modelBuilder.Entity<ItemLine>(entity =>
