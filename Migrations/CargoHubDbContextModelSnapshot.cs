@@ -611,6 +611,88 @@ internal partial class CargoHubDbContextModelSnapshot : ModelSnapshot
             {
                 b.Navigation("Items");
             });
+        modelBuilder.Entity("CargoHUB.Models.Supplier", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("INTEGER")
+                    .HasColumnName("id")
+                    .HasJsonPropertyName("id");
+
+                b.Property<string>("Address")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("address")
+                    .HasJsonPropertyName("address");
+
+                b.Property<string>("City")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("city")
+                    .HasJsonPropertyName("city");
+
+                b.Property<string>("Code")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("code")
+                    .HasJsonPropertyName("code");
+
+                b.Property<string>("ContactName")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("contact_name")
+                    .HasJsonPropertyName("contact_name");
+
+                b.Property<string>("Country")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("country")
+                    .HasJsonPropertyName("country");
+
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("created_at")
+                    .HasJsonPropertyName("created_at");
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("name")
+                    .HasJsonPropertyName("name");
+
+                b.Property<string>("PhoneNumber")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("phone_number")
+                    .HasJsonPropertyName("phone_number");
+
+                b.Property<string>("Province")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("province")
+                    .HasJsonPropertyName("province");
+
+                b.Property<string>("Reference")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("reference")
+                    .HasJsonPropertyName("reference");
+
+                b.Property<DateTime>("UpdatedAt")
+                    .HasColumnType("TEXT")
+                    .HasColumnName("updated_at")
+                    .HasJsonPropertyName("updated_at");
+
+                b.Property<string>("ZipCode")
+                    .IsRequired()
+                    .HasColumnType("TEXT")
+                    .HasColumnName("zip_code")
+                    .HasJsonPropertyName("zip_code");
+
+                b.HasKey("Id");
+
+                b.ToTable("Suppliers", (string)null);
+            });
 #pragma warning restore 612, 618
     }
 }
