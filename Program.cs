@@ -11,6 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 var swaggerUiPath = Path.Combine(builder.Environment.ContentRootPath, "swagger-ui");
 var swaggerUiIndexPath = Path.Combine(swaggerUiPath, "index.html");
+var documentationPath = Path.Combine(builder.Environment.ContentRootPath, "docfx", "_site", "docs");
+var apiReferencePath = Path.Combine(builder.Environment.ContentRootPath, "docfx", "_site", "api");
 
 // A container mounts this directory as its only writable persistent storage. The
 // development default preserves the existing local SQLite location.
@@ -82,6 +84,7 @@ app.UseStaticFiles(new StaticFileOptions
     FileProvider = new PhysicalFileProvider(swaggerUiPath),
     RequestPath = string.Empty,
 });
+app.UseDocumentationFileServers(documentationPath, apiReferencePath);
 
 await app.Services.ApplyMigrationsAsync();
 
