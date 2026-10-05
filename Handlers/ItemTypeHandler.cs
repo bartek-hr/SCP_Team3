@@ -12,11 +12,11 @@ public sealed class ItemTypeHandler(ItemTypeLogic logic)
 
     [Get("/item_types/{id}")]
     [Describe("Gets an item type.", Tags = ["ItemTypes"])]
-    public Response GetById(Request request)
+    public Response<ItemType> GetById(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
         {
-            return Response.BadRequest();
+            return Response<ItemType>.BadRequest();
         }
 
         ItemType? itemType = logic.GetById(id);

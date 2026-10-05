@@ -12,11 +12,11 @@ public sealed class SupplierHandler(SupplierLogic logic)
 
     [Get("/suppliers/{id}")]
     [Describe("Gets a supplier.", Tags = ["Suppliers"])]
-    public Response GetById(Request request)
+    public Response<Supplier> GetById(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
         {
-            return Response.BadRequest();
+            return Response<Supplier>.BadRequest();
         }
 
         Supplier? supplier = logic.GetById(id);
