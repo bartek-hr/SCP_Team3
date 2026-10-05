@@ -1,0 +1,15 @@
+{
+  "id": 9001,
+  "reference": "SHP-009001",
+  "order_id": 1,
+  "shipment_date": "2026-09-09T09:00:00Z",
+  "shipment_type": "Outgoing",
+  "shipment_status": "Transit",
+  "carrier_name": "DHL Parcel",
+  "shipping_method": "Express",
+  "payment_type": "Automated",
+  "created_at": "2026-09-07T10:00:00Z",
+  "items": [
+    { "item_id": 82, "amount": 6 }
+  ]
+}

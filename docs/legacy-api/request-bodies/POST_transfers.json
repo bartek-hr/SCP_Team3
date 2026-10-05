@@ -1,0 +1,10 @@
+{
+  "id": 9001,
+  "reference": "TRF-009001",
+  "from_location_id": 1,
+  "to_location_id": 2,
+  "items": [
+    { "item_id": 1, "amount": 10 },
+    { "item_id": 2, "amount": 5 }
+  ]
+}

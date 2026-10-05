@@ -1,0 +1,18 @@
+{
+  "id": 9001,
+  "code": "ITM-009001",
+  "description": "Jumbo Testartikel Hagelslag Melk 400g",
+  "barcode": "8718452839201",
+  "model_number": "TST-0001",
+  "commodity_code": 1806909,
+  "unit_weight": 0.4,
+  "item_line_id": 5,
+  "item_group_id": 3,
+  "item_type_id": 2,
+  "min_purchase_qty": 12,
+  "case_size": 6,
+  "packaging_type": "Case",
+  "order_multiple": 1,
+  "supplier_id": 17,
+  "supplier_sku": "SKU-9001001"
+}

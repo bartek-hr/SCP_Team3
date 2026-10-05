@@ -1,0 +1,17 @@
+{
+  "id": 9001,
+  "client_id": 123,
+  "order_date": "2026-09-07T10:00:00Z",
+  "request_date": "2026-09-12T10:00:00Z",
+  "reference": "ORD-009001",
+  "customer_po_number": "PO-900001",
+  "order_status": "Shipped",
+  "shipping_notes": null,
+  "warehouse_id": 1,
+  "ship_to_client_id": 123,
+  "bill_to_client_id": 87,
+  "created_at": "2026-09-07T10:00:00Z",
+  "items": [
+    { "item_id": 82, "amount": 12, "unit_price": 21.34 }
+  ]
+}

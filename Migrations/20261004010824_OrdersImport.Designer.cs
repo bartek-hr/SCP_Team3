@@ -3,6 +3,7 @@ using System;
 using CargoHUB.Datasource;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CargoHUB.Migrations
 {
     [DbContext(typeof(CargoHubDbContext))]
-    partial class CargoHubDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261004010824_OrdersImport")]
+    partial class OrdersImport
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.12");
@@ -131,41 +134,6 @@ namespace CargoHUB.Migrations
                     b.HasKey("ItemId", "LocationId");
 
                     b.ToTable("Inventories");
-                });
-
-            modelBuilder.Entity("CargoHUB.Models.ItemType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("id")
-                        .HasJsonPropertyName("id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("created_at")
-                        .HasJsonPropertyName("created_at");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("description")
-                        .HasJsonPropertyName("description");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("name")
-                        .HasJsonPropertyName("name");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("updated_at")
-                        .HasJsonPropertyName("updated_at");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ItemTypes", (string)null);
                 });
 
             modelBuilder.Entity("CargoHUB.Models.Location", b =>
@@ -388,7 +356,10 @@ namespace CargoHUB.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Shipments", (string)null);
+                    b.ToTable("Shipments", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("CargoHUB.Models.ShipmentItem", b =>
@@ -417,92 +388,12 @@ namespace CargoHUB.Migrations
                     b.HasIndex("ShipmentId", "ItemId")
                         .IsUnique();
 
-                    b.ToTable("ShipmentItems", (string)null);
+                    b.ToTable("ShipmentItems", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
 
                     b.HasAnnotation("Relational:JsonPropertyName", "items");
-                });
-
-            modelBuilder.Entity("CargoHUB.Models.Supplier", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("id")
-                        .HasJsonPropertyName("id");
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("address")
-                        .HasJsonPropertyName("address");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("city")
-                        .HasJsonPropertyName("city");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("code")
-                        .HasJsonPropertyName("code");
-
-                    b.Property<string>("ContactName")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("contact_name")
-                        .HasJsonPropertyName("contact_name");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("country")
-                        .HasJsonPropertyName("country");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("created_at")
-                        .HasJsonPropertyName("created_at");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("name")
-                        .HasJsonPropertyName("name");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("phone_number")
-                        .HasJsonPropertyName("phone_number");
-
-                    b.Property<string>("Province")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("province")
-                        .HasJsonPropertyName("province");
-
-                    b.Property<string>("Reference")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("reference")
-                        .HasJsonPropertyName("reference");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("updated_at")
-                        .HasJsonPropertyName("updated_at");
-
-                    b.Property<string>("ZipCode")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("zip_code")
-                        .HasJsonPropertyName("zip_code");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Suppliers", (string)null);
                 });
 
             modelBuilder.Entity("CargoHUB.Models.Transfer", b =>

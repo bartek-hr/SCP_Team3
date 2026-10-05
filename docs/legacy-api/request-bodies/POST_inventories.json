@@ -1,0 +1,8 @@
+{
+  "item_id": 1,
+  "location_id": 1,
+  "quantity_on_hand": 100,
+  "quantity_expected": 20,
+  "quantity_ordered": 10,
+  "quantity_allocated": 5
+}
