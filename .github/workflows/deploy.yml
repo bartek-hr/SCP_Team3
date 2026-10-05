@@ -31,14 +31,13 @@ jobs:
       - name: Generate static documentation
         run: |
           docker run --rm \
-            --user "$(id -u):$(id -g)" \
-            --env HOME=/tmp \
-            --env DOTNET_CLI_HOME=/tmp \
+            --env RUNNER_UID="$(id -u)" \
+            --env RUNNER_GID="$(id -g)" \
             --volume "${GITHUB_WORKSPACE}:/src" \
             --workdir /src \
             --entrypoint /bin/sh \
             mcr.microsoft.com/dotnet/sdk:10.0 \
-            -c 'dotnet tool restore && dotnet restore CargoHUB.sln && dotnet tool run docfx docfx/docs.json && dotnet tool run docfx metadata docfx/api.json --noRestore && dotnet tool run docfx build docfx/api.json'
+            -c 'dotnet tool restore && dotnet restore CargoHUB.sln && dotnet tool run docfx docfx/docs.json && dotnet tool run docfx metadata docfx/api.json --noRestore && dotnet tool run docfx build docfx/api.json && chown -R "$RUNNER_UID:$RUNNER_GID" docfx/api docfx/_site'
       - name: Build, test, and promote local runtime
         env:
           FV_SOURCE_DIR: ${{ github.workspace }}
