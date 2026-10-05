@@ -28,6 +28,8 @@ builder.Services.AddScoped<ClientAccess>();
 builder.Services.AddScoped<ClientLogic>();
 builder.Services.AddScoped<SupplierAccess>();
 builder.Services.AddScoped<SupplierLogic>();
+builder.Services.AddScoped<ItemTypeAccess>();
+builder.Services.AddScoped<ItemTypeLogic>();
 builder.Services.AddScoped<InventoryDataAccess>();
 builder.Services.AddScoped<InventoryLogic>();
 builder.Services.AddScoped<OrderDataAccess>();
