@@ -23,20 +23,6 @@ public sealed class ItemHandler(ItemLogic itemLogic)
         return item is null ? Response<Item>.NotFound() : Response.Ok(item);
     }
 
-    [Get("/items/{id}/inventory")]
-    [Describe("Lists the inventory for an item.", Tags = ["Items"], OperationId = "getItemInventory")]
-    public Response GetInventory()
-    {
-        return Response.NotImplemented();
-    }
-
-    [Get("/items/{id}/inventory/totals")]
-    [Describe("Gets the inventory totals for an item.", Tags = ["Items"], OperationId = "getItemInventoryTotals")]
-    public Response GetInventoryTotals()
-    {
-        return Response.NotImplemented();
-    }
-
     [Post("/items")]
     [Describe("Creates an item.", Tags = ["Items"], OperationId = "createItem", SuccessStatus = StatusCodes.Status201Created)]
     public Response Add(Request<Item> request)
