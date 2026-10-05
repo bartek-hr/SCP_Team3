@@ -57,6 +57,23 @@ with_lock() { ( flock -x 9; "$@" ) 9>"$LOCK_FILE"; }
 bootstrap() {
   init
   docker compose -f "$COMPOSE_FILE" up -d nginx
+  while IFS= read -r key; do
+    [[ $key =~ ^(main|dev|pr-[1-9][0-9]*)$ ]] || continue
+    local network="fv-$key"
+    docker network inspect "$network" >/dev/null 2>&1 || continue
+    if ! docker network inspect "$network" --format '{{range .Containers}}{{println .Name}}{{end}}' | rg -qx 'fv-nginx'; then
+      docker network connect "$network" fv-nginx
+    fi
+  done < <(python3 - "$STATE_FILE" <<'PY'
+import json, sys
+try:
+    state = json.load(open(sys.argv[1]))
+except FileNotFoundError:
+    state = {"deployments": {}}
+for key in state.get("deployments", {}):
+    print(key)
+PY
+)
   printf 'nginx is listening only on 127.0.0.1:8080\n'
 }
 
