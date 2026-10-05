@@ -1,0 +1,12 @@
+{
+  "id": 9001,
+  "name": "Jumbo Test Filiaal Rotterdam",
+  "address": "Teststraat 100",
+  "city": "Rotterdam",
+  "zip_code": "3011AB",
+  "province": "Zuid-Holland",
+  "country": "Netherlands",
+  "contact_name": "Piet Tester",
+  "contact_phone": "(010) 7654321",
+  "contact_email": "test@jumbo-filiaal.nl"
+}

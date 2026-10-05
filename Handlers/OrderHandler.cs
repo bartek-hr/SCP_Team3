@@ -1,0 +1,98 @@
+using CargoHUB.Framework;
+using CargoHUB.Logics;
+using CargoHUB.Models;
+
+namespace CargoHUB.Handlers;
+
+public sealed class OrderHandler(OrderLogic logic)
+{
+    [Get("/orders")]
+    [Describe("Geeft alle orders terug.", Tags = ["Orders"], OperationId = "getOrders")]
+    public Response<IReadOnlyList<Order>> GetAll() => Response.Ok(logic.GetAll());
+
+    [Get("/orders/{id}")]
+    [Describe("Geeft één record terug.", Tags = ["Orders"], OperationId = "getOrder")]
+    public Response<Order> GetById(Request request)
+    {
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
+            return Response<Order>.BadRequest();
+        }
+
+        Order? record = logic.GetById(id);
+        if (record is null)
+        {
+            return Response<Order>.NotFound();
+        }
+
+        return Response.Ok(record);
+    }
+
+    [Get("/orders/{id}/items")]
+    [Describe("Geeft de artikelen terug.", Tags = ["Orders"], OperationId = "getOrderItems")]
+    public Response<IReadOnlyList<OrderItem>> GetItems(Request request)
+    {
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
+            return Response<IReadOnlyList<OrderItem>>.BadRequest();
+        }
+
+        return Response.Ok(logic.GetItems(id));
+    }
+
+    [Post("/orders")]
+    [Describe("Maakt een record aan.", Tags = ["Orders"], OperationId = "createOrder", SuccessStatus = StatusCodes.Status201Created)]
+    public Response Add(Request<Order> request)
+    {
+        return WriteResponse.Save(() => logic.Add(request.Data), StatusCodes.Status201Created);
+    }
+
+    [Put("/orders/{id}")]
+    [Describe("Wijzigt een record.", Tags = ["Orders"], OperationId = "updateOrder")]
+    public Response Update(Request<Order> request)
+    {
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
+            return Response.BadRequest();
+        }
+        if (logic.GetById(id) is null)
+        {
+            return Response.NotFound();
+        }
+
+        return WriteResponse.Save(() => logic.Update(id, request.Data), StatusCodes.Status200OK);
+    }
+
+    [Put("/orders/{id}/items")]
+    [Describe("Vervangt de artikelen en werkt de voorraad bij.", Tags = ["Orders"], OperationId = "replaceOrderItems")]
+    public Response ReplaceItems(Request<List<OrderItem>> request)
+    {
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
+            return Response.BadRequest();
+        }
+        if (logic.GetById(id) is null)
+        {
+            return Response.NotFound();
+        }
+
+        return WriteResponse.Save(() => logic.ReplaceItems(id, request.Data), StatusCodes.Status200OK);
+    }
+
+    [Delete("/orders/{id}")]
+    [Describe("Verwijdert een record.", Tags = ["Orders"], OperationId = "deleteOrder")]
+    public Response Remove(Request request)
+    {
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
+            return Response.BadRequest();
+        }
+        if (logic.GetById(id) is null)
+        {
+            return Response.NotFound();
+        }
+
+        logic.Remove(id);
+        return Response.Ok();
+    }
+}

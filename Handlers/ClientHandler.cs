@@ -37,9 +37,14 @@ public sealed class ClientHandler
 
     [Get("/clients/{id}/orders")]
     [Describe("Returns orders for a client.", Tags = ["Clients"], OperationId = "getClientOrders")]
-    public Response GetOrders()
+    public Response<IReadOnlyList<Order>> GetOrders(Request request, OrderLogic orderLogic)
     {
-        return Response.NotImplemented();
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
+        {
+            return Response<IReadOnlyList<Order>>.BadRequest();
+        }
+
+        return Response.Ok(orderLogic.GetByClientId(id));
     }
 
     [Post("/clients")]

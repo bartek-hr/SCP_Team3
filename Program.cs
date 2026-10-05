@@ -28,6 +28,18 @@ builder.Services.AddScoped<ClientAccess>();
 builder.Services.AddScoped<ClientLogic>();
 builder.Services.AddScoped<SupplierAccess>();
 builder.Services.AddScoped<SupplierLogic>();
+builder.Services.AddScoped<InventoryDataAccess>();
+builder.Services.AddScoped<InventoryLogic>();
+builder.Services.AddScoped<OrderDataAccess>();
+builder.Services.AddScoped<OrderLogic>();
+builder.Services.AddScoped<ShipmentDataAccess>();
+builder.Services.AddScoped<ShipmentLogic>();
+builder.Services.AddScoped<WarehouseAccess>();
+builder.Services.AddScoped<WarehouseLogic>();
+builder.Services.AddScoped<LocationAccess>();
+builder.Services.AddScoped<LocationLogic>();
+builder.Services.AddScoped<TransferAccess>();
+builder.Services.AddScoped<TransferLogic>();
 
 // Production traffic can reach the app only through the local nginx proxy, which
 // sets the original scheme and client IP. App containers have no published ports.
