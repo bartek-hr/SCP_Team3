@@ -73,3 +73,7 @@ obj/
 
 # Local SQLite database
 Datasource/*.sqlite
+
+# Generated DocFX metadata and static sites
+docfx/api/
+docfx/_site/

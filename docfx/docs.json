@@ -1,0 +1,18 @@
+{
+  "build": {
+    "content": [
+      {
+        "files": [
+          "**/*.md",
+          "toc.yml"
+        ],
+        "src": "../docs"
+      }
+    ],
+    "dest": "_site/docs",
+    "globalMetadata": {
+      "_appTitle": "CargoHUB Documentation",
+      "_enableSearch": true
+    }
+  }
+}
