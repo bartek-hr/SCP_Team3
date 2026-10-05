@@ -25,14 +25,16 @@ public sealed class SupplierHandler(SupplierLogic logic)
 
     [Get("/suppliers/{id}/items")]
     [Describe("Gets a supplier's items.", Tags = ["Suppliers"])]
-    public Response GetItems(Request request)
+    public Response<IReadOnlyList<Item>> GetItems(Request request, ItemLogic itemLogic)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
         {
-            return Response.BadRequest();
+            return Response<IReadOnlyList<Item>>.BadRequest();
         }
 
-        return logic.GetById(id) is null ? Response.NotFound() : Response.NotImplemented();
+        return logic.GetById(id) is null
+            ? Response<IReadOnlyList<Item>>.NotFound()
+            : Response.Ok(itemLogic.GetForSupplier(id));
     }
 
     [Post("/suppliers")]
