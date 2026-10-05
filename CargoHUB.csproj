@@ -27,6 +27,7 @@
 
     <ItemGroup>
       <Content Include="swagger-ui\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+      <Content Update="docfx\_site\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
       <!-- Seed data for the migrations. Shown under Solution Items > legacy > data. -->
       <EmbeddedResource Include="legacy\data\*.json" LogicalName="CargoHUB.LegacyData.%(Filename)Json" Visible="false" />
     </ItemGroup>

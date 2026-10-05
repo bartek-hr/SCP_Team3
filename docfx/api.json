@@ -1,0 +1,29 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": [
+            "CargoHUB.csproj"
+          ],
+          "src": ".."
+        }
+      ],
+      "dest": "api"
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "api/**.yml"
+        ]
+      }
+    ],
+    "dest": "_site/api",
+    "globalMetadata": {
+      "_appTitle": "CargoHUB API Reference",
+      "_enableSearch": true
+    }
+  }
+}
