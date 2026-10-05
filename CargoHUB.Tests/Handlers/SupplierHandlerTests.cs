@@ -1,23 +1,18 @@
-using System.Text;
 using System.Text.Json;
 using CargoHUB.Access;
-using CargoHUB.Datasource;
-using CargoHUB.Framework;
-using CargoHUB.Handlers;
 using CargoHUB.Logics;
 using CargoHUB.Models;
 using CargoHUB.Tests.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CargoHUB.Tests.Handlers;
 
 [TestClass]
-public sealed class SupplierHandlerTests : DatabaseTest
+public sealed class SupplierHandlerTests : HandlerTest
 {
     protected override void SeedDatabase()
     {
@@ -112,43 +107,63 @@ public sealed class SupplierHandlerTests : DatabaseTest
         Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/suppliers/{id}", "1", "{", "PUT")).Response.StatusCode);
     }
 
-    private WebApplication CreateApplication()
+    [DataTestMethod]
+    [DataRow("abc")]
+    [DataRow("0")]
+    [DataRow("-1")]
+    [DataRow("2147483648")]
+    public async Task InvalidIdsReturn400WithoutChangingStoredRecordsAsync(string id)
     {
-        WebApplicationBuilder builder = WebApplication.CreateBuilder(new WebApplicationOptions
-        {
-            ContentRootPath = AppContext.BaseDirectory,
-            EnvironmentName = Environments.Production,
-        });
-        builder.Services.AddSingleton<CargoHubDbContext>(Context);
-        builder.Services.AddTransient<SupplierAccess>();
-        builder.Services.AddTransient<SupplierLogic>();
-        WebApplication app = builder.Build();
-        app.MapDiscoveredRoutes(typeof(SupplierHandler).Assembly);
-        return app;
+        await using WebApplication app = CreateApplication();
+        string body = JsonSerializer.Serialize(CreateDuplicateSupplier());
+
+        Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/suppliers/{id}", id)).Response.StatusCode);
+        Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/suppliers/{id}/items", id)).Response.StatusCode);
+        Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/suppliers/{id}", id, body, "PUT")).Response.StatusCode);
+        Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/suppliers/{id}", id, method: "DELETE")).Response.StatusCode);
+        Assert.AreEqual(1, Context.Suppliers.Count());
     }
 
-    private static async Task<DefaultHttpContext> InvokeAsync(
-        WebApplication app, string route, string? id = null, string? body = null, string method = "GET")
+    [TestMethod]
+    public async Task DuplicateIdReturns409WithoutChangingStoredRecordAsync()
     {
-        RouteEndpoint endpoint = ((IEndpointRouteBuilder)app).DataSources
-            .SelectMany(source => source.Endpoints)
-            .OfType<RouteEndpoint>()
-            .Single(candidate => candidate.RoutePattern.RawText == route
-                                 && candidate.Metadata.GetMetadata<HttpMethodMetadata>()!.HttpMethods.Contains(method));
-        DefaultHttpContext context = HttpContextTestHelpers.CreateContext(app.Services);
-        context.Request.Path = route;
-        if (id is not null)
-        {
-            context.Request.RouteValues["id"] = id;
-        }
+        await using WebApplication app = CreateApplication();
+        string body = JsonSerializer.Serialize(CreateDuplicateSupplier());
 
-        if (body is not null)
-        {
-            context.Request.ContentType = "application/json";
-            context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
-        }
-
-        await endpoint.RequestDelegate!(context);
-        return context;
+        Assert.AreEqual(409, (await InvokeAsync(app, "/api/v1/suppliers", body: body, method: "POST")).Response.StatusCode);
+        Assert.AreEqual(1, Context.Suppliers.Count());
+        Assert.AreEqual("Test Supplier", Context.Suppliers.AsNoTracking().Single().Name);
     }
+
+    [DataTestMethod]
+    [DataRow("null")]
+    [DataRow("{}")]
+    public async Task InvalidDataReturns400WithoutChangingStoredRecordAsync(string body)
+    {
+        await using WebApplication app = CreateApplication();
+
+        Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/suppliers", body: body, method: "POST")).Response.StatusCode);
+        Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/suppliers/{id}", "1", body, "PUT")).Response.StatusCode);
+        Assert.AreEqual(1, Context.Suppliers.Count());
+        Assert.AreEqual("Test Supplier", Context.Suppliers.AsNoTracking().Single().Name);
+    }
+
+    private WebApplication CreateApplication() => CreateApplication(services => services
+        .AddTransient<SupplierAccess>()
+        .AddTransient<SupplierLogic>());
+
+    private static Supplier CreateDuplicateSupplier() => new()
+    {
+        Id = 1,
+        Code = "SUP-DUPLICATE",
+        Name = "Duplicate Supplier",
+        Address = "Street 2",
+        City = "Amsterdam",
+        ZipCode = "1000AA",
+        Province = "Noord-Holland",
+        Country = "Netherlands",
+        ContactName = "New Contact",
+        PhoneNumber = "987654321",
+        Reference = "New"
+    };
 }
