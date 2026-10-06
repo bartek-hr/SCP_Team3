@@ -30,7 +30,7 @@ jobs:
           fetch-depth: 1
       - name: Generate static documentation
         run: |
-          docker run --rm \
+          docker run --rm --network host \
             --env RUNNER_UID="$(id -u)" \
             --env RUNNER_GID="$(id -g)" \
             --volume "${GITHUB_WORKSPACE}:/src" \
