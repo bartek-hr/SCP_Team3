@@ -9,18 +9,24 @@
           "src": ".."
         }
       ],
-      "dest": "api"
+      "dest": "reference"
     }
   ],
   "build": {
     "content": [
       {
         "files": [
-          "api/**.yml"
+          "reference/**.yml",
+          "index.md",
+          "toc.yml"
         ]
       }
     ],
     "dest": "_site/api",
+    "template": [
+      "default",
+      "modern"
+    ],
     "globalMetadata": {
       "_appTitle": "CargoHUB API Reference",
       "_enableSearch": true
