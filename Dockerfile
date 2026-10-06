@@ -29,6 +29,7 @@ RUN apt-get update \
 
 WORKDIR /app
 COPY --from=publish --chown=cargohub:cargohub /app/publish ./
+COPY --from=build --chown=cargohub:cargohub /src/docfx/_site ./docfx/_site
 RUN mkdir /app/data && chown cargohub:cargohub /app/data
 
 USER cargohub
