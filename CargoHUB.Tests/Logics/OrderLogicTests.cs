@@ -14,15 +14,15 @@ public sealed class OrderLogicTests : DatabaseTest
 
     protected override void SeedDatabase()
     {
-        Context.Inventories.AddRange(TestData.CreateInventoriesForItem1());
-        Context.Orders.Add(TestData.CreateOrder(1, TestData.CreateOrderItem(1, 4)));
+        Context.Inventories.AddRange(OrderShipmentTestData.CreateInventoriesForItem1());
+        Context.Orders.Add(OrderShipmentTestData.CreateOrder(1, OrderShipmentTestData.CreateOrderItem(1, 4)));
         Context.SaveChanges();
     }
 
     [TestMethod]
     public void AddStoresTheItemsWithoutChangingStock()
     {
-        Logic.Add(TestData.CreateOrder(2, TestData.CreateOrderItem(1, 3)));
+        Logic.Add(OrderShipmentTestData.CreateOrder(2, OrderShipmentTestData.CreateOrderItem(1, 3)));
 
         Assert.AreEqual(3, Logic.GetById(2)!.Items!.Single().Amount);
         Assert.AreEqual(2, Context.Inventories.Find(1, 2)!.QuantityAllocated);
@@ -31,7 +31,7 @@ public sealed class OrderLogicTests : DatabaseTest
     [TestMethod]
     public void AddWithoutItemsStoresAnEmptyList()
     {
-        Order order = TestData.CreateOrder(2);
+        Order order = OrderShipmentTestData.CreateOrder(2);
         order.Items = null;
 
         Logic.Add(order);
@@ -42,7 +42,7 @@ public sealed class OrderLogicTests : DatabaseTest
     [TestMethod]
     public void UpdateWithoutItemsKeepsTheItemsAndStock()
     {
-        Order order = TestData.CreateOrder(1);
+        Order order = OrderShipmentTestData.CreateOrder(1);
         order.Items = null;
         order.Reference = "ORD-CHANGED";
 
@@ -57,7 +57,7 @@ public sealed class OrderLogicTests : DatabaseTest
     [TestMethod]
     public void UpdateWithItemsReplacesThemAndUpdatesStock()
     {
-        Logic.Update(1, TestData.CreateOrder(1, TestData.CreateOrderItem(1, 7)));
+        Logic.Update(1, OrderShipmentTestData.CreateOrder(1, OrderShipmentTestData.CreateOrderItem(1, 7)));
 
         Assert.AreEqual(7, Logic.GetById(1)!.Items!.Single().Amount);
         Assert.AreEqual(5, Context.Inventories.Find(1, 2)!.QuantityAllocated);
@@ -69,6 +69,6 @@ public sealed class OrderLogicTests : DatabaseTest
         Logic.Remove(1);
 
         Assert.IsNull(Logic.GetById(1));
-        Assert.AreEqual(0, Context.OrderItems.Count());
+        Assert.AreEqual(0, Context.Set<OrderItem>().Count());
     }
 }

@@ -8,7 +8,7 @@ public sealed class OrderItemDataAccess(CargoHubDbContext context)
 {
     public IReadOnlyList<OrderItem> GetByOrderId(int orderId)
     {
-        return context.OrderItems.AsNoTracking().Where(item => item.OrderId == orderId)
+        return context.Set<OrderItem>().AsNoTracking().Where(item => item.OrderId == orderId)
             .OrderBy(item => item.ItemId).ToList();
     }
 
@@ -25,8 +25,8 @@ public sealed class OrderItemDataAccess(CargoHubDbContext context)
             return;
         }
 
-        context.OrderItems.RemoveRange(context.OrderItems.Where(item => item.OrderId == orderId));
-        context.OrderItems.AddRange(items.Select(item => new OrderItem
+        context.Set<OrderItem>().RemoveRange(context.Set<OrderItem>().Where(item => item.OrderId == orderId));
+        context.Set<OrderItem>().AddRange(items.Select(item => new OrderItem
         {
             OrderId = orderId,
             ItemId = item.ItemId,

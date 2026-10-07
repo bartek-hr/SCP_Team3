@@ -14,15 +14,15 @@ public sealed class ShipmentLogicTests : DatabaseTest
 
     protected override void SeedDatabase()
     {
-        Context.Inventories.AddRange(TestData.CreateInventoriesForItem1());
-        Context.Shipments.Add(TestData.CreateShipment(1, TestData.CreateShipmentItem(1, 3)));
+        Context.Inventories.AddRange(OrderShipmentTestData.CreateInventoriesForItem1());
+        Context.Shipments.Add(OrderShipmentTestData.CreateShipment(1, OrderShipmentTestData.CreateShipmentItem(1, 3)));
         Context.SaveChanges();
     }
 
     [TestMethod]
     public void UpdateWithoutItemsKeepsTheItemsAndStock()
     {
-        Shipment shipment = TestData.CreateShipment(1);
+        Shipment shipment = OrderShipmentTestData.CreateShipment(1);
         shipment.Items = null;
         shipment.CarrierName = "PostNL";
 
@@ -37,7 +37,7 @@ public sealed class ShipmentLogicTests : DatabaseTest
     [TestMethod]
     public void UpdateWithItemsReplacesThemAndUpdatesStock()
     {
-        Logic.Update(1, TestData.CreateShipment(1, TestData.CreateShipmentItem(1, 5)));
+        Logic.Update(1, OrderShipmentTestData.CreateShipment(1, OrderShipmentTestData.CreateShipmentItem(1, 5)));
 
         Assert.AreEqual(5, Logic.GetById(1)!.Items!.Single().Amount);
         Assert.AreEqual(4, Context.Inventories.Find(1, 2)!.QuantityOrdered);

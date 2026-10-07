@@ -13,15 +13,15 @@ public sealed class ShipmentItemLogicTests : DatabaseTest
 
     protected override void SeedDatabase()
     {
-        Context.Inventories.AddRange(TestData.CreateInventoriesForItem1());
-        Context.Shipments.Add(TestData.CreateShipment(1));
+        Context.Inventories.AddRange(OrderShipmentTestData.CreateInventoriesForItem1());
+        Context.Shipments.Add(OrderShipmentTestData.CreateShipment(1));
         Context.SaveChanges();
     }
 
     [TestMethod]
     public void GetByShipmentIdReturnsItemsSortedByItemId()
     {
-        Logic.Replace(1, [TestData.CreateShipmentItem(30, 1), TestData.CreateShipmentItem(1, 3)]);
+        Logic.Replace(1, [OrderShipmentTestData.CreateShipmentItem(30, 1), OrderShipmentTestData.CreateShipmentItem(1, 3)]);
 
         CollectionAssert.AreEqual(new[] { 1, 30 }, Logic.GetByShipmentId(1).Select(item => item.ItemId).ToArray());
         Assert.AreEqual(0, Logic.GetByShipmentId(0).Count);
@@ -31,7 +31,7 @@ public sealed class ShipmentItemLogicTests : DatabaseTest
     [TestMethod]
     public void ReplaceUpdatesOrderedQuantityOnTheLocationWithMostStock()
     {
-        Logic.Replace(1, [TestData.CreateShipmentItem(1, 3)]);
+        Logic.Replace(1, [OrderShipmentTestData.CreateShipmentItem(1, 3)]);
 
         Assert.AreEqual(5, Context.Inventories.Find(1, 2)!.QuantityOrdered);
         Assert.AreEqual(0, Context.Inventories.Find(1, 1)!.QuantityOrdered);
@@ -45,7 +45,7 @@ public sealed class ShipmentItemLogicTests : DatabaseTest
     [TestMethod]
     public void ReplaceNeverMakesOrderedQuantityNegative()
     {
-        Context.ShipmentItems.Add(new ShipmentItem { ShipmentId = 1, ItemId = 1, Amount = 10 });
+        Context.Set<ShipmentItem>().Add(new ShipmentItem { ShipmentId = 1, ItemId = 1, Amount = 10 });
         Context.SaveChanges();
 
         Logic.Replace(1, []);
@@ -56,7 +56,7 @@ public sealed class ShipmentItemLogicTests : DatabaseTest
     [TestMethod]
     public void ReplaceForMissingShipmentChangesNothing()
     {
-        Logic.Replace(999, [TestData.CreateShipmentItem(1, 50)]);
+        Logic.Replace(999, [OrderShipmentTestData.CreateShipmentItem(1, 50)]);
 
         Assert.AreEqual(2, Context.Inventories.Find(1, 2)!.QuantityOrdered);
         Assert.AreEqual(0, Logic.GetByShipmentId(999).Count);
@@ -66,8 +66,8 @@ public sealed class ShipmentItemLogicTests : DatabaseTest
     public void ReplaceRejectsInvalidItems()
     {
         Assert.ThrowsException<ArgumentOutOfRangeException>(() => Logic.Replace(0, []));
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => Logic.Replace(1, [TestData.CreateShipmentItem(0, 1)]));
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => Logic.Replace(1, [TestData.CreateShipmentItem(1, -2)]));
-        Assert.ThrowsException<ArgumentException>(() => Logic.Replace(1, [TestData.CreateShipmentItem(1, 1), TestData.CreateShipmentItem(1, 2)]));
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => Logic.Replace(1, [OrderShipmentTestData.CreateShipmentItem(0, 1)]));
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => Logic.Replace(1, [OrderShipmentTestData.CreateShipmentItem(1, -2)]));
+        Assert.ThrowsException<ArgumentException>(() => Logic.Replace(1, [OrderShipmentTestData.CreateShipmentItem(1, 1), OrderShipmentTestData.CreateShipmentItem(1, 2)]));
     }
 }
