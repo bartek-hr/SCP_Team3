@@ -9,47 +9,47 @@ namespace CargoHUB.Tests.Logics;
 [TestClass]
 public sealed class ShipmentLogicTests : DatabaseTest
 {
-    [TestMethod]
-    public void ShipmentItemsEnOrderkoppelingKunnenWijzigen()
-    {
-        SeedVoorraad();
-        Context.Shipments.Add(new Shipment
-        {
-            Id = 1
-        });
-        Context.SaveChanges();
-        var logic = new ShipmentLogic(new ShipmentDataAccess(Context));
+    private ShipmentLogic Logic => new(new ShipmentDataAccess(Context),
+        new ShipmentItemLogic(new ShipmentItemDataAccess(Context), new InventoryDataAccess(Context)));
 
-        logic.ReplaceItems(1, [new ShipmentItem
-        {
-            ItemId = 1,
-            Amount = 3
-        }]);
-        Assert.AreEqual(5, Context.Inventories.Find(1, 2)!.QuantityOrdered);
-        logic.ReplaceItems(1, []);
-        Assert.AreEqual(2, Context.Inventories.Find(1, 2)!.QuantityOrdered);
-        logic.ReplaceOrders(1, [12, 13]);
-        CollectionAssert.AreEqual(new[] { 12 }, logic.GetOrderIds(1).ToArray());
-        logic.ReplaceOrders(1, []);
-        Assert.AreEqual(0, logic.GetOrderIds(1).Count);
+    protected override void SeedDatabase()
+    {
+        Context.Inventories.AddRange(TestData.CreateInventoriesForItem1());
+        Context.Shipments.Add(TestData.CreateShipment(1, TestData.CreateShipmentItem(1, 3)));
+        Context.SaveChanges();
     }
 
-    private void SeedVoorraad()
+    [TestMethod]
+    public void UpdateWithoutItemsKeepsTheItemsAndStock()
     {
-        Context.Inventories.AddRange(new Inventory
-        {
-            ItemId = 1,
-            LocationId = 1,
-            QuantityOnHand = 5,
-            QuantityAllocated = 1
-        }, new Inventory
-        {
-            ItemId = 1,
-            LocationId = 2,
-            QuantityOnHand = 10,
-            QuantityAllocated = 2,
-            QuantityOrdered = 2
-        });
-        Context.SaveChanges();
+        Shipment shipment = TestData.CreateShipment(1);
+        shipment.Items = null;
+        shipment.CarrierName = "PostNL";
+
+        Logic.Update(1, shipment);
+
+        Shipment stored = Logic.GetById(1)!;
+        Assert.AreEqual("PostNL", stored.CarrierName);
+        Assert.AreEqual(3, stored.Items!.Single().Amount);
+        Assert.AreEqual(2, Context.Inventories.Find(1, 2)!.QuantityOrdered);
+    }
+
+    [TestMethod]
+    public void UpdateWithItemsReplacesThemAndUpdatesStock()
+    {
+        Logic.Update(1, TestData.CreateShipment(1, TestData.CreateShipmentItem(1, 5)));
+
+        Assert.AreEqual(5, Logic.GetById(1)!.Items!.Single().Amount);
+        Assert.AreEqual(4, Context.Inventories.Find(1, 2)!.QuantityOrdered);
+    }
+
+    [TestMethod]
+    public void ReplaceOrdersKeepsOnlyTheFirstOrder()
+    {
+        Logic.ReplaceOrders(1, [12, 13]);
+        CollectionAssert.AreEqual(new[] { 12 }, Logic.GetOrderIds(1).ToArray());
+
+        Logic.ReplaceOrders(1, []);
+        Assert.AreEqual(0, Logic.GetOrderIds(1).Count);
     }
 }

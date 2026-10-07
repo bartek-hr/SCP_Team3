@@ -9,49 +9,66 @@ namespace CargoHUB.Tests.Logics;
 [TestClass]
 public sealed class OrderLogicTests : DatabaseTest
 {
-    [TestMethod]
-    public void OrderItemsWerkenGereserveerdeVoorraadBij()
-    {
-        SeedVoorraad();
-        Context.Orders.Add(new Order
-        {
-            Id = 1,
-            Items = [new OrderItem
-            {
-                ItemId = 1,
-                Amount = 4
-            }]
-        });
-        Context.SaveChanges();
-        var logic = new OrderLogic(new OrderDataAccess(Context));
+    private OrderLogic Logic => new(new OrderDataAccess(Context),
+        new OrderItemLogic(new OrderItemDataAccess(Context), new InventoryDataAccess(Context)));
 
-        logic.ReplaceItems(1, [new OrderItem
-        {
-            ItemId = 1,
-            Amount = 7
-        }]);
-        Assert.AreEqual(5, Context.Inventories.Find(1, 2)!.QuantityAllocated);
-        Assert.AreEqual(1, Context.Inventories.Find(1, 1)!.QuantityAllocated);
-        logic.ReplaceItems(1, []);
-        Assert.AreEqual(0, Context.Inventories.Find(1, 2)!.QuantityAllocated);
+    protected override void SeedDatabase()
+    {
+        Context.Inventories.AddRange(TestData.CreateInventoriesForItem1());
+        Context.Orders.Add(TestData.CreateOrder(1, TestData.CreateOrderItem(1, 4)));
+        Context.SaveChanges();
     }
 
-    private void SeedVoorraad()
+    [TestMethod]
+    public void AddStoresTheItemsWithoutChangingStock()
     {
-        Context.Inventories.AddRange(new Inventory
-        {
-            ItemId = 1,
-            LocationId = 1,
-            QuantityOnHand = 5,
-            QuantityAllocated = 1
-        }, new Inventory
-        {
-            ItemId = 1,
-            LocationId = 2,
-            QuantityOnHand = 10,
-            QuantityAllocated = 2,
-            QuantityOrdered = 2
-        });
-        Context.SaveChanges();
+        Logic.Add(TestData.CreateOrder(2, TestData.CreateOrderItem(1, 3)));
+
+        Assert.AreEqual(3, Logic.GetById(2)!.Items!.Single().Amount);
+        Assert.AreEqual(2, Context.Inventories.Find(1, 2)!.QuantityAllocated);
+    }
+
+    [TestMethod]
+    public void AddWithoutItemsStoresAnEmptyList()
+    {
+        Order order = TestData.CreateOrder(2);
+        order.Items = null;
+
+        Logic.Add(order);
+
+        Assert.AreEqual(0, Logic.GetById(2)!.Items!.Count);
+    }
+
+    [TestMethod]
+    public void UpdateWithoutItemsKeepsTheItemsAndStock()
+    {
+        Order order = TestData.CreateOrder(1);
+        order.Items = null;
+        order.Reference = "ORD-CHANGED";
+
+        Logic.Update(1, order);
+
+        Order stored = Logic.GetById(1)!;
+        Assert.AreEqual("ORD-CHANGED", stored.Reference);
+        Assert.AreEqual(4, stored.Items!.Single().Amount);
+        Assert.AreEqual(2, Context.Inventories.Find(1, 2)!.QuantityAllocated);
+    }
+
+    [TestMethod]
+    public void UpdateWithItemsReplacesThemAndUpdatesStock()
+    {
+        Logic.Update(1, TestData.CreateOrder(1, TestData.CreateOrderItem(1, 7)));
+
+        Assert.AreEqual(7, Logic.GetById(1)!.Items!.Single().Amount);
+        Assert.AreEqual(5, Context.Inventories.Find(1, 2)!.QuantityAllocated);
+    }
+
+    [TestMethod]
+    public void RemoveDeletesTheOrderAndItsItems()
+    {
+        Logic.Remove(1);
+
+        Assert.IsNull(Logic.GetById(1));
+        Assert.AreEqual(0, Context.OrderItems.Count());
     }
 }

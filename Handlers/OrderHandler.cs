@@ -4,7 +4,7 @@ using CargoHUB.Models;
 
 namespace CargoHUB.Handlers;
 
-public sealed class OrderHandler(OrderLogic logic)
+public sealed class OrderHandler(OrderLogic logic, OrderItemLogic itemLogic)
 {
     [Get("/orders")]
     [Describe("Geeft alle orders terug.", Tags = ["Orders"], OperationId = "getOrders")]
@@ -37,7 +37,7 @@ public sealed class OrderHandler(OrderLogic logic)
             return Response<IReadOnlyList<OrderItem>>.BadRequest();
         }
 
-        return Response.Ok(logic.GetItems(id));
+        return Response.Ok(itemLogic.GetByOrderId(id));
     }
 
     [Post("/orders")]
@@ -76,7 +76,7 @@ public sealed class OrderHandler(OrderLogic logic)
             return Response.NotFound();
         }
 
-        return WriteResponse.Save(() => logic.ReplaceItems(id, request.Data), StatusCodes.Status200OK);
+        return WriteResponse.Save(() => itemLogic.Replace(id, request.Data), StatusCodes.Status200OK);
     }
 
     [Delete("/orders/{id}")]

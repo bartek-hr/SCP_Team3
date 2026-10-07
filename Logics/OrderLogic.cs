@@ -3,7 +3,7 @@ using CargoHUB.Models;
 
 namespace CargoHUB.Logics;
 
-public sealed class OrderLogic(OrderDataAccess dataAccess)
+public sealed class OrderLogic(OrderDataAccess dataAccess, OrderItemLogic itemLogic)
 {
     public IReadOnlyList<Order> GetAll()
     {
@@ -18,16 +18,6 @@ public sealed class OrderLogic(OrderDataAccess dataAccess)
         }
 
         return dataAccess.GetById(id);
-    }
-
-    public IReadOnlyList<OrderItem> GetItems(int orderId)
-    {
-        if (orderId <= 0)
-        {
-            return [];
-        }
-
-        return dataAccess.GetItems(orderId);
     }
 
     public IReadOnlyList<Order> GetByClientId(int clientId)
@@ -48,6 +38,8 @@ public sealed class OrderLogic(OrderDataAccess dataAccess)
             throw new InvalidOperationException($"An order with ID {order.Id} already exists.");
         }
 
+        // Net als in de Python-versie past een nieuwe order de voorraad niet aan.
+        order.Items ??= [];
         order.CreatedAt = DateTime.UtcNow;
         order.UpdatedAt = order.CreatedAt;
         dataAccess.Add(order);
@@ -71,13 +63,10 @@ public sealed class OrderLogic(OrderDataAccess dataAccess)
         order.CreatedAt = existing.CreatedAt;
         order.UpdatedAt = DateTime.UtcNow;
         dataAccess.Update(id, order);
-    }
-
-    public void ReplaceItems(int orderId, IReadOnlyList<OrderItem> items)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(orderId);
-        ValidateItems(items);
-        dataAccess.ReplaceItems(orderId, items, DateTime.UtcNow);
+        if (order.Items is not null)
+        {
+            itemLogic.Replace(id, order.Items);
+        }
     }
 
     public void Remove(int id)
@@ -104,22 +93,7 @@ public sealed class OrderLogic(OrderDataAccess dataAccess)
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(order.WarehouseId);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(order.ShipToClientId);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(order.BillToClientId);
-        ValidateItems(order.Items);
-    }
-
-    private static void ValidateItems(IReadOnlyList<OrderItem> items)
-    {
-        ArgumentNullException.ThrowIfNull(items);
-        var itemIds = new HashSet<int>();
-        foreach (OrderItem item in items)
-        {
-            ArgumentNullException.ThrowIfNull(item);
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.ItemId);
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.Amount);
-            if (!itemIds.Add(item.ItemId))
-                throw new ArgumentException("Each item may appear only once.", nameof(items));
-            if (item.UnitPrice is < 0)
-                throw new ArgumentOutOfRangeException(nameof(item.UnitPrice));
-        }
+        if (order.Items is not null)
+            OrderItemLogic.Validate(order.Items);
     }
 }

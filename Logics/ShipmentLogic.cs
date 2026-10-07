@@ -3,7 +3,7 @@ using CargoHUB.Models;
 
 namespace CargoHUB.Logics;
 
-public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
+public sealed class ShipmentLogic(ShipmentDataAccess dataAccess, ShipmentItemLogic itemLogic)
 {
     public IReadOnlyList<Shipment> GetAll()
     {
@@ -18,16 +18,6 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
         }
 
         return dataAccess.GetById(id);
-    }
-
-    public IReadOnlyList<ShipmentItem> GetItems(int shipmentId)
-    {
-        if (shipmentId <= 0)
-        {
-            return [];
-        }
-
-        return dataAccess.GetItems(shipmentId);
     }
 
     public IReadOnlyList<int> GetOrderIds(int shipmentId)
@@ -49,6 +39,8 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
             throw new InvalidOperationException($"A shipment with ID {shipment.Id} already exists.");
         }
 
+        // Net als in de Python-versie past een nieuwe shipment de voorraad niet aan.
+        shipment.Items ??= [];
         shipment.CreatedAt = DateTime.UtcNow;
         shipment.UpdatedAt = shipment.CreatedAt;
         dataAccess.Add(shipment);
@@ -72,13 +64,10 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
         shipment.CreatedAt = existing.CreatedAt;
         shipment.UpdatedAt = DateTime.UtcNow;
         dataAccess.Update(id, shipment);
-    }
-
-    public void ReplaceItems(int shipmentId, IReadOnlyList<ShipmentItem> items)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(shipmentId);
-        ValidateItems(items);
-        dataAccess.ReplaceItems(shipmentId, items, DateTime.UtcNow);
+        if (shipment.Items is not null)
+        {
+            itemLogic.Replace(id, shipment.Items);
+        }
     }
 
     public void ReplaceOrders(int shipmentId, IReadOnlyList<int> orderIds)
@@ -126,20 +115,7 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
             throw new ArgumentException("ShippingMethod is required.", nameof(shipment.ShippingMethod));
         if (string.IsNullOrWhiteSpace(shipment.PaymentType))
             throw new ArgumentException("PaymentType is required.", nameof(shipment.PaymentType));
-        ValidateItems(shipment.Items);
-    }
-
-    private static void ValidateItems(IReadOnlyList<ShipmentItem> items)
-    {
-        ArgumentNullException.ThrowIfNull(items);
-        var itemIds = new HashSet<int>();
-        foreach (ShipmentItem item in items)
-        {
-            ArgumentNullException.ThrowIfNull(item);
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.ItemId);
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.Amount);
-            if (!itemIds.Add(item.ItemId))
-                throw new ArgumentException("Each item may appear only once.", nameof(items));
-        }
+        if (shipment.Items is not null)
+            ShipmentItemLogic.Validate(shipment.Items);
     }
 }

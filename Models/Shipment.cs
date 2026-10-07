@@ -37,21 +37,7 @@ public sealed class Shipment
     [JsonPropertyName("updated_at")]
     public DateTime UpdatedAt { get; set; }
 
+    // Null means "not sent": an update then keeps the stored items, like the legacy API.
     [JsonPropertyName("items")]
-    public List<ShipmentItem> Items { get; set; } = [];
-}
-
-public sealed class ShipmentItem
-{
-    [JsonIgnore]
-    public int Id { get; set; }
-
-    [JsonIgnore]
-    public int ShipmentId { get; set; }
-
-    [JsonPropertyName("item_id")]
-    public int ItemId { get; set; }
-
-    [JsonPropertyName("amount")]
-    public int Amount { get; set; }
+    public List<ShipmentItem>? Items { get; set; }
 }

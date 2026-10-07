@@ -4,7 +4,7 @@ using CargoHUB.Models;
 
 namespace CargoHUB.Handlers;
 
-public sealed class ShipmentHandler(ShipmentLogic logic)
+public sealed class ShipmentHandler(ShipmentLogic logic, ShipmentItemLogic itemLogic)
 {
     [Get("/shipments")]
     [Describe("Geeft alle zendingen terug.", Tags = ["Shipments"], OperationId = "getShipments")]
@@ -37,7 +37,7 @@ public sealed class ShipmentHandler(ShipmentLogic logic)
             return Response<IReadOnlyList<ShipmentItem>>.BadRequest();
         }
 
-        return Response.Ok(logic.GetItems(id));
+        return Response.Ok(itemLogic.GetByShipmentId(id));
     }
 
     [Post("/shipments")]
@@ -76,7 +76,7 @@ public sealed class ShipmentHandler(ShipmentLogic logic)
             return Response.NotFound();
         }
 
-        return WriteResponse.Save(() => logic.ReplaceItems(id, request.Data), StatusCodes.Status200OK);
+        return WriteResponse.Save(() => itemLogic.Replace(id, request.Data), StatusCodes.Status200OK);
     }
 
     [Delete("/shipments/{id}")]
