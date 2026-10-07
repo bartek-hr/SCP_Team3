@@ -21,7 +21,7 @@ public sealed class ClientHandler
     [Describe("Returns a client.", Tags = ["Clients"], OperationId = "getClient")]
     public Response<Client> GetById(Request request)
     {
-        if (!request.TryParam<int>("id", out int id))
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
         {
             return Response<Client>.BadRequest();
         }
@@ -60,13 +60,17 @@ public sealed class ClientHandler
         {
             return Response.BadRequest();
         }
+        catch (InvalidOperationException)
+        {
+            return Response.Conflict();
+        }
     }
 
     [Put("/clients/{id}")]
     [Describe("Updates a client.", Tags = ["Clients"], OperationId = "updateClient")]
     public Response Update(Request<Client> request)
     {
-        if (!request.TryParam<int>("id", out int id))
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
         {
             return Response.BadRequest();
         }
@@ -91,7 +95,7 @@ public sealed class ClientHandler
     [Describe("Removes a client.", Tags = ["Clients"], OperationId = "deleteClient")]
     public Response Remove(Request request)
     {
-        if (!request.TryParam<int>("id", out int id))
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
         {
             return Response.BadRequest();
         }

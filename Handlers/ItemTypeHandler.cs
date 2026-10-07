@@ -12,11 +12,11 @@ public sealed class ItemTypeHandler(ItemTypeLogic logic)
 
     [Get("/item_types/{id}")]
     [Describe("Gets an item type.", Tags = ["ItemTypes"])]
-    public Response GetById(Request request)
+    public Response<ItemType> GetById(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
         {
-            return Response.BadRequest();
+            return Response<ItemType>.BadRequest();
         }
 
         ItemType? itemType = logic.GetById(id);
@@ -25,14 +25,16 @@ public sealed class ItemTypeHandler(ItemTypeLogic logic)
 
     [Get("/item_types/{id}/items")]
     [Describe("Gets an item type's items.", Tags = ["ItemTypes"])]
-    public Response GetItems(Request request)
+    public Response<IReadOnlyList<int>> GetItems(Request request, ItemLogic itemLogic)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
         {
-            return Response.BadRequest();
+            return Response<IReadOnlyList<int>>.BadRequest();
         }
 
-        return logic.GetById(id) is null ? Response.NotFound() : Response.NotImplemented();
+        return logic.GetById(id) is null
+            ? Response<IReadOnlyList<int>>.NotFound()
+            : Response.Ok(itemLogic.GetIdsForItemType(id));
     }
 
     [Post("/item_types")]
