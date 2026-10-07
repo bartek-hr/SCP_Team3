@@ -51,4 +51,44 @@ internal static class TestData
         ItemId = itemId,
         Amount = amount,
     };
+
+    public static ItemLine CreateItemLine(int id = 0, string name = "Tech Gadgets") => new()
+    {
+        Id = id,
+        Name = name,
+        Description = "Test item line",
+        CreatedAt = CreatedAt,
+        UpdatedAt = UpdatedAt,
+    };
+
+    public static ItemGroup CreateItemGroup(int id = 0, string name = "Electronics") => new()
+    {
+        Id = id,
+        Name = name,
+        Description = "Test item group",
+        CreatedAt = CreatedAt,
+        UpdatedAt = UpdatedAt,
+    };
+
+    public static Item CreateCatalogItem(int id = 0, int itemLineId = 1, int itemGroupId = 1, string code = "TST-ITEM") => new()
+    {
+        Id = id,
+        Code = code,
+        Description = "Test item",
+        Barcode = "0012345678905",
+        ModelNumber = "TM-01",
+        CommodityCode = 1234,
+        UnitWeight = 1.5m,
+        ItemLineId = itemLineId,
+        ItemGroupId = itemGroupId,
+        ItemTypeId = 1,
+        MinPurchaseQty = 1,
+        CaseSize = 10,
+        PackagingType = "Box",
+        OrderMultiple = 1,
+        SupplierId = 1,
+        SupplierSku = "SUP-SKU-1",
+        CreatedAt = CreatedAt,
+        UpdatedAt = UpdatedAt,
+    };
 }
