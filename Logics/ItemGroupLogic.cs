@@ -15,7 +15,7 @@ public sealed class ItemGroupLogic(ItemGroupAccess itemGroupAccess, ItemAccess i
     // Python: add_item_group(item_group)
     public void Add(ItemGroup itemGroup)
     {
-        // Validate(itemGroup);
+        Validate(itemGroup);
         if (itemGroup.Id < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(itemGroup.Id));
@@ -44,7 +44,7 @@ public sealed class ItemGroupLogic(ItemGroupAccess itemGroupAccess, ItemAccess i
             return false;
         }
 
-        // Validate(itemGroup);
+        Validate(itemGroup);
         itemGroup.UpdatedAt = DateTime.UtcNow;
         return itemGroupAccess.Update(id, itemGroup);
     }
@@ -72,13 +72,13 @@ public sealed class ItemGroupLogic(ItemGroupAccess itemGroupAccess, ItemAccess i
     }
 
     // New in C#: the Python version did no validation.
-    // private static void Validate(ItemGroup itemGroup)
-    // {
-    //     ArgumentNullException.ThrowIfNull(itemGroup);
+    private static void Validate(ItemGroup itemGroup)
+    {
+        ArgumentNullException.ThrowIfNull(itemGroup);
 
-    //     if (string.IsNullOrWhiteSpace(itemGroup.Name))
-    //     {
-    //         throw new ArgumentException("Name is required.", nameof(itemGroup));
-    //     }
-    // }
+        if (string.IsNullOrWhiteSpace(itemGroup.Name))
+        {
+            throw new ArgumentException("Name is required.", nameof(itemGroup));
+        }
+    }
 }

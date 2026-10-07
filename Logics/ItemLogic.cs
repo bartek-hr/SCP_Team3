@@ -27,7 +27,7 @@ public sealed class ItemLogic(ItemAccess itemAccess, ItemLineAccess itemLineAcce
     // Python: add_item(item)
     public void Add(Item item)
     {
-        // Validate(item);
+        Validate(item);
         if (item.Id < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(item.Id));
@@ -56,7 +56,7 @@ public sealed class ItemLogic(ItemAccess itemAccess, ItemLineAccess itemLineAcce
             return false;
         }
 
-        // Validate(item);
+        Validate(item);
         item.UpdatedAt = DateTime.UtcNow;
         return itemAccess.Update(id, item);
     }
@@ -73,28 +73,28 @@ public sealed class ItemLogic(ItemAccess itemAccess, ItemLineAccess itemLineAcce
     }
 
     // New in C#: the Python version did no validation.
-    // private void Validate(Item item)
-    // {
-    //     ArgumentNullException.ThrowIfNull(item);
+    private void Validate(Item item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
 
-    //     if (string.IsNullOrWhiteSpace(item.Code) || string.IsNullOrWhiteSpace(item.Description))
-    //     {
-    //         throw new ArgumentException("Code and Description are required.", nameof(item));
-    //     }
+        if (string.IsNullOrWhiteSpace(item.Code) || string.IsNullOrWhiteSpace(item.Description))
+        {
+            throw new ArgumentException("Code and Description are required.", nameof(item));
+        }
 
-    //     if (item.UnitWeight < 0 || item.MinPurchaseQty < 0 || item.CaseSize < 0 || item.OrderMultiple < 0)
-    //     {
-    //         throw new ArgumentException("Weights and quantities cannot be negative.", nameof(item));
-    //     }
+        if (item.UnitWeight < 0 || item.MinPurchaseQty < 0 || item.CaseSize < 0 || item.OrderMultiple < 0)
+        {
+            throw new ArgumentException("Weights and quantities cannot be negative.", nameof(item));
+        }
 
-    //     if (itemLineAccess.GetById(item.ItemLineId) is null)
-    //     {
-    //         throw new ArgumentException($"Item line {item.ItemLineId} does not exist.", nameof(item));
-    //     }
+        if (itemLineAccess.GetById(item.ItemLineId) is null)
+        {
+            throw new ArgumentException($"Item line {item.ItemLineId} does not exist.", nameof(item));
+        }
 
-    //     if (itemGroupAccess.GetById(item.ItemGroupId) is null)
-    //     {
-    //         throw new ArgumentException($"Item group {item.ItemGroupId} does not exist.", nameof(item));
-    //     }
-    // }
+        if (itemGroupAccess.GetById(item.ItemGroupId) is null)
+        {
+            throw new ArgumentException($"Item group {item.ItemGroupId} does not exist.", nameof(item));
+        }
+    }
 }

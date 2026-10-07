@@ -15,7 +15,7 @@ public sealed class ItemLineLogic(ItemLineAccess itemLineAccess, ItemAccess item
     // Python: add_item_line(item_line)
     public void Add(ItemLine itemLine)
     {
-        // Validate(itemLine);
+        Validate(itemLine);
         if (itemLine.Id < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(itemLine.Id));
@@ -44,7 +44,7 @@ public sealed class ItemLineLogic(ItemLineAccess itemLineAccess, ItemAccess item
             return false;
         }
 
-        // Validate(itemLine);
+        Validate(itemLine);
         itemLine.UpdatedAt = DateTime.UtcNow;
         return itemLineAccess.Update(id, itemLine);
     }
@@ -72,13 +72,13 @@ public sealed class ItemLineLogic(ItemLineAccess itemLineAccess, ItemAccess item
     }
 
     // New in C#: the Python version did no validation.
-    // private static void Validate(ItemLine itemLine)
-    // {
-    //     ArgumentNullException.ThrowIfNull(itemLine);
+    private static void Validate(ItemLine itemLine)
+    {
+        ArgumentNullException.ThrowIfNull(itemLine);
 
-    //     if (string.IsNullOrWhiteSpace(itemLine.Name))
-    //     {
-    //         throw new ArgumentException("Name is required.", nameof(itemLine));
-    //     }
-    // }
+        if (string.IsNullOrWhiteSpace(itemLine.Name))
+        {
+            throw new ArgumentException("Name is required.", nameof(itemLine));
+        }
+    }
 }
