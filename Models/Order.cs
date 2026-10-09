@@ -47,20 +47,3 @@ public sealed class Order
     public List<OrderItem> Items { get; set; } = [];
 }
 
-public sealed class OrderItem
-{
-    [JsonIgnore]
-    public int Id { get; set; }
-
-    [JsonIgnore]
-    public int OrderId { get; set; }
-
-    [JsonPropertyName("item_id")]
-    public int ItemId { get; set; }
-
-    [JsonPropertyName("amount")]
-    public int Amount { get; set; }
-
-    [JsonPropertyName("unit_price")]
-    public decimal? UnitPrice { get; set; }
-}
