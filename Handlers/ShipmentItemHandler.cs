@@ -25,7 +25,7 @@ public sealed class ShipmentItemHandler(ShipmentItemLogic logic)
     }
 
     [Get("/ShipmentItems/{id}/items")]
-    [Describe("Geeft de artikelen terug.", Tags = ["ShipmentItems"], OperationId = "getShipmentItems")]
+    [Describe("Geeft de artikelen terug.", Tags = ["ShipmentItems"], OperationId = "GetShipmentItems")]
     public Response<IReadOnlyList<ShipmentItem>> GetItems(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
