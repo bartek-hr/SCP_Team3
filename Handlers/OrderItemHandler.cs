@@ -7,11 +7,11 @@ namespace CargoHUB.Handlers;
 public sealed class OrderItemHandler(OrderItemLogic logic)
 {
     [Get("/orderitems")]
-    [Describe("Geeft alle OrderItems terug.", Tags = ["OrderItems"], OperationId = "getItems")]
+    [Describe("Geeft alle OrderItems terug.", Tags = ["OrderItems"], OperationId = "listOrderItems")]
     public Response<IReadOnlyList<OrderItem>> GetAll() => Response.Ok(logic.GetAll());
 
     [Get("/orderitems/{id}")]
-    [Describe("Geeft één record terug.", Tags = ["orderitems"], OperationId = "getOrderItemById")]
+    [Describe("Geeft één record terug.", Tags = ["OrderItems"], OperationId = "getOrderItemById")]
     public Response<OrderItem> GetById(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
@@ -29,7 +29,7 @@ public sealed class OrderItemHandler(OrderItemLogic logic)
     }
 
     [Get("/orderitems/orders/{id}")]
-    [Describe("Geeft records terug op OrderId.", Tags = ["Orders"], OperationId = "getOrderItemsByOrderid")]
+    [Describe("Geeft records terug op OrderId.", Tags = ["OrderItems"], OperationId = "getOrderItemsByOrderId")]
     public Response<IReadOnlyList<OrderItem>> GetItems(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
@@ -40,14 +40,14 @@ public sealed class OrderItemHandler(OrderItemLogic logic)
         return Response.Ok(logic.GetItems(id));
     }
     [Post("/orderitems")]
-    [Describe("Maakt een record aan.", Tags = ["orderitems"], OperationId = "createOrderItem", SuccessStatus = StatusCodes.Status201Created)]
+    [Describe("Maakt een record aan.", Tags = ["OrderItems"], OperationId = "createOrderItem", SuccessStatus = StatusCodes.Status201Created)]
     public Response Add(Request<OrderItem> request)
     {
         return WriteResponse.Save(() => logic.Add(request.Data), StatusCodes.Status201Created);
     }
 
     [Put("/orderitems/{id}")]
-    [Describe("Wijzigt een record.", Tags = ["orderitems"], OperationId = "updateOrderItem")]
+    [Describe("Wijzigt een record.", Tags = ["OrderItems"], OperationId = "updateOrderItem")]
     public Response Update(Request<OrderItem> request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
@@ -64,7 +64,7 @@ public sealed class OrderItemHandler(OrderItemLogic logic)
 
 
     [Delete("/orderitems/{id}")]
-    [Describe("Verwijdert een record.", Tags = ["orderitems"], OperationId = "deleteOrderItem")]
+    [Describe("Verwijdert een record.", Tags = ["OrderItems"], OperationId = "deleteOrderItem")]
     public Response Remove(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)

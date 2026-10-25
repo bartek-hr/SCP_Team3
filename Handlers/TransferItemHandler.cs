@@ -25,7 +25,7 @@ public sealed class TransferItemHandler(TransferItemLogic logic)
     }
 
     [Get("/TransferItems/{id}/items")]
-    [Describe("Geeft de artikelen terug.", Tags = ["TransferItems"], OperationId = "GetTransferItems")]
+    [Describe("Geeft de artikelen terug.", Tags = ["TransferItems"], OperationId = "getTransferItemsByTransferId")]
     public Response<IReadOnlyList<TransferItem>> GetItems(Request request)
     {
         if (!request.TryParam<int>("shipment_id", out int id) || id <= 0)

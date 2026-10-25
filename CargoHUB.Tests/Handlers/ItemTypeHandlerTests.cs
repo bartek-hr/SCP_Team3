@@ -1,23 +1,18 @@
-using System.Text;
 using System.Text.Json;
 using CargoHUB.Access;
-using CargoHUB.Datasource;
-using CargoHUB.Framework;
-using CargoHUB.Handlers;
 using CargoHUB.Logics;
 using CargoHUB.Models;
 using CargoHUB.Tests.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CargoHUB.Tests.Handlers;
 
 [TestClass]
-public sealed class ItemTypeHandlerTests : DatabaseTest
+public sealed class ItemTypeHandlerTests : HandlerTest
 {
     protected override void SeedDatabase()
     {
@@ -45,13 +40,38 @@ public sealed class ItemTypeHandlerTests : DatabaseTest
     }
 
     [TestMethod]
-    public async Task ItemsRouteReturns501OnlyForExistingItemTypeAsync()
+    public async Task ItemsRouteReturnsEmptyArrayAndExpectedErrorsAsync()
     {
         await using WebApplication app = CreateApplication();
 
-        Assert.AreEqual(501, (await InvokeAsync(app, "/api/v1/item_types/{id}/items", "1")).Response.StatusCode);
+        DefaultHttpContext response = await InvokeAsync(app, "/api/v1/item_types/{id}/items", "1");
+        Assert.AreEqual(200, response.Response.StatusCode);
+        Assert.AreEqual("[]", await HttpContextTestHelpers.ReadResponseBodyAsync(response));
         Assert.AreEqual(404, (await InvokeAsync(app, "/api/v1/item_types/{id}/items", "999")).Response.StatusCode);
         Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/item_types/{id}/items", "abc")).Response.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task ItemsRouteReturnsOnlyMatchingItemIdsInOrderAcrossSuppliersAsync()
+    {
+        Context.ItemLines.Add(new ItemLine { Id = 1, Name = "Test Line" });
+        Context.ItemGroups.Add(new ItemGroup { Id = 1, Name = "Test Group" });
+        Context.Items.AddRange(
+            CreateItem(3, itemTypeId: 1, supplierId: 1),
+            CreateItem(2, itemTypeId: 2),
+            CreateItem(1, itemTypeId: 1, supplierId: 2),
+            CreateItem(4, itemTypeId: 999));
+        Context.SaveChanges();
+        Context.ChangeTracker.Clear();
+        await using WebApplication app = CreateApplication();
+
+        DefaultHttpContext response = await InvokeAsync(app, "/api/v1/item_types/{id}/items", "1");
+
+        Assert.AreEqual(200, response.Response.StatusCode);
+        using JsonDocument json = await ReadJsonAsync(response);
+        CollectionAssert.AreEqual(new[] { 1, 3 }, json.RootElement.EnumerateArray()
+            .Select(itemId => itemId.GetInt32()).ToArray());
+        Assert.AreEqual(404, (await InvokeAsync(app, "/api/v1/item_types/{id}/items", "999")).Response.StatusCode);
     }
 
     [TestMethod]
@@ -87,45 +107,65 @@ public sealed class ItemTypeHandlerTests : DatabaseTest
         Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/item_types", body: "{\"name\":\"No description\"}", method: "POST")).Response.StatusCode);
     }
 
-    private WebApplication CreateApplication()
+    [DataTestMethod]
+    [DataRow("abc")]
+    [DataRow("0")]
+    [DataRow("-1")]
+    [DataRow("2147483648")]
+    public async Task InvalidIdsReturn400WithoutChangingStoredRecordsAsync(string id)
     {
-        WebApplicationBuilder builder = WebApplication.CreateBuilder(new WebApplicationOptions
-        {
-            ContentRootPath = AppContext.BaseDirectory,
-            EnvironmentName = Environments.Production,
-        });
-        builder.Services.AddSingleton<CargoHubDbContext>(Context);
-        builder.Services.AddTransient<ItemTypeAccess>();
-        builder.Services.AddTransient<ItemTypeLogic>();
-        WebApplication app = builder.Build();
-        app.MapDiscoveredRoutes(typeof(ItemTypeHandler).Assembly);
-        return app;
+        await using WebApplication app = CreateApplication();
+        string body = JsonSerializer.Serialize(CreateItemType(1));
+
+        Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/item_types/{id}", id)).Response.StatusCode);
+        Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/item_types/{id}/items", id)).Response.StatusCode);
+        Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/item_types/{id}", id, body, "PUT")).Response.StatusCode);
+        Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/item_types/{id}", id, method: "DELETE")).Response.StatusCode);
+        Assert.AreEqual(1, Context.ItemTypes.Count());
     }
 
-    private static async Task<DefaultHttpContext> InvokeAsync(
-        WebApplication app, string route, string? id = null, string? body = null, string method = "GET")
+    [TestMethod]
+    public async Task DuplicateIdReturns409WithoutChangingStoredRecordAsync()
     {
-        RouteEndpoint endpoint = ((IEndpointRouteBuilder)app).DataSources
-            .SelectMany(source => source.Endpoints)
-            .OfType<RouteEndpoint>()
-            .Single(candidate => candidate.RoutePattern.RawText == route
-                                 && candidate.Metadata.GetMetadata<HttpMethodMetadata>()!.HttpMethods.Contains(method));
-        DefaultHttpContext context = HttpContextTestHelpers.CreateContext(app.Services);
-        context.Request.Path = route;
-        if (id is not null)
-        {
-            context.Request.RouteValues["id"] = id;
-        }
+        await using WebApplication app = CreateApplication();
+        string body = JsonSerializer.Serialize(CreateItemType(1));
 
-        if (body is not null)
-        {
-            context.Request.ContentType = "application/json";
-            context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
-        }
-
-        await endpoint.RequestDelegate!(context);
-        return context;
+        Assert.AreEqual(409, (await InvokeAsync(app, "/api/v1/item_types", body: body, method: "POST")).Response.StatusCode);
+        Assert.AreEqual(1, Context.ItemTypes.Count());
+        Assert.AreEqual("Single", Context.ItemTypes.AsNoTracking().Single().Name);
     }
+
+    [DataTestMethod]
+    [DataRow("null")]
+    [DataRow("{}")]
+    public async Task InvalidDataReturns400WithoutChangingStoredRecordAsync(string body)
+    {
+        await using WebApplication app = CreateApplication();
+
+        Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/item_types", body: body, method: "POST")).Response.StatusCode);
+        Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/item_types/{id}", "1", body, "PUT")).Response.StatusCode);
+        Assert.AreEqual(1, Context.ItemTypes.Count());
+        Assert.AreEqual("Single", Context.ItemTypes.AsNoTracking().Single().Name);
+    }
+
+    private WebApplication CreateApplication() => CreateApplication(services => services
+        .AddTransient<ItemTypeAccess>()
+        .AddTransient<ItemTypeLogic>()
+        .AddTransient<ItemAccess>()
+        .AddTransient<ItemLineAccess>()
+        .AddTransient<ItemGroupAccess>()
+        .AddTransient<ItemLogic>());
+
+    private static Item CreateItem(int id, int itemTypeId, int supplierId = 1) => new()
+    {
+        Id = id,
+        Code = $"ITEM-{id}",
+        Description = $"Test Item {id}",
+        ItemLineId = 1,
+        ItemGroupId = 1,
+        ItemTypeId = itemTypeId,
+        SupplierId = supplierId,
+    };
 
     private static ItemType CreateItemType(int id = 0) => new()
     {
