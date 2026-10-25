@@ -44,6 +44,12 @@ builder.Services.AddScoped<LocationAccess>();
 builder.Services.AddScoped<LocationLogic>();
 builder.Services.AddScoped<TransferAccess>();
 builder.Services.AddScoped<TransferLogic>();
+builder.Services.AddScoped<ItemLineAccess>();
+builder.Services.AddScoped<ItemLineLogic>();
+builder.Services.AddScoped<ItemGroupAccess>();
+builder.Services.AddScoped<ItemGroupLogic>();
+builder.Services.AddScoped<ItemAccess>();
+builder.Services.AddScoped<ItemLogic>();
 
 // Production traffic can reach the app only through the local nginx proxy, which
 // sets the original scheme and client IP. App containers have no published ports.
