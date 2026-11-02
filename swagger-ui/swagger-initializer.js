@@ -3,7 +3,11 @@ window.onload = function() {
 
   // the following lines will be replaced by docker/configurator, when it runs in a docker-container
   window.ui = SwaggerUIBundle({
-    url: "/openapi/v1.json",
+    urls: [
+      { url: "/openapi/v1.json", name: "V1" },
+      { url: "/openapi/v2.json", name: "V2" }
+    ],
+    "urls.primaryName": "V1",
     dom_id: '#swagger-ui',
     deepLinking: true,
     presets: [

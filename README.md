@@ -123,6 +123,7 @@ Zie de [deploymenthandleiding](docs/deployment.md) voor installatie, Cloudflare 
 
 | Begin hier | Wat je vindt |
 | :--- | :--- |
+| [V1/V2-versiegrenzen](docs/api-versioning.md) | Contractscheiding, compatibiliteit en teamafspraken |
 | [Requirements & ontwerpuitgangspunten](docs/notes/requirements.md) | Projectdoelen, compatibiliteit en testaanpak |
 | [Legacy API-referentie](docs/legacy-api/README.md) | Endpoints, responsegedrag en authenticatie van de Python-API |
 | [Voorbeeldrequests](docs/legacy-api/legacy-api.http) | Uitvoerbare HTTP-requests voor de legacy-API |

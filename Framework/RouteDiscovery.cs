@@ -39,7 +39,8 @@ public static class RouteDiscovery
                         GetVersionedTemplate(route),
                         [route.Verb],
                         (Delegate)(Func<HttpContext, Task>)(context =>
-                            InvokeRouteAsync(context, handlerType, method, routeMiddlewares)));
+                            InvokeRouteAsync(context, handlerType, method, routeMiddlewares)))
+                        .WithGroupName($"v{route.Version}");
 
                     endpoint.AddOpenApiOperationTransformer(
                         (operation, context, cancellationToken) => ConfigureOpenApiOperationAsync(
@@ -160,7 +161,7 @@ public static class RouteDiscovery
             .SelectMany(discoveredRoute => discoveredRoute.Method
                 .GetCustomAttributes<RouteAttribute>(inherit: true)
                 .Select(route => new DiscoveredOperation(discoveredRoute, route)))
-            .GroupBy(operation => operation.Route.Describe.OperationId!, StringComparer.Ordinal)
+            .GroupBy(operation => (operation.Attribute.Version, OperationId: operation.Route.Describe.OperationId!))
             .FirstOrDefault(group => group.Count() > 1);
 
         if (duplicate is null)
@@ -169,7 +170,7 @@ public static class RouteDiscovery
         var methods = string.Join(", ", duplicate.Select(operation =>
             $"{operation.Route.Method.DeclaringType?.FullName}.{operation.Route.Method.Name}"));
         throw new InvalidOperationException(
-            $"OpenAPI operation ID '{duplicate.Key}' is declared by multiple routes: {methods}.");
+            $"OpenAPI operation ID '{duplicate.Key.OperationId}' is declared by multiple routes in v{duplicate.Key.Version}: {methods}.");
     }
 
     private static void ValidateRequestSignature(MethodInfo method)

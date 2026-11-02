@@ -74,18 +74,7 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod());
 });
 
-builder.Services.AddOpenApi("v1", options =>
-{
-    options.AddDocumentTransformer((doc, _, _) =>
-    {
-        doc.Info = new()
-        {
-            Title = "CargoHUB WMS",
-            Version = "1.0",
-        };
-        return Task.CompletedTask;
-    });
-});
+builder.Services.AddVersionedOpenApi();
 
 var app = builder.Build();
 
@@ -108,7 +97,7 @@ app.MapGet("/health/ready", () => Results.Ok(new { status = "ready" }))
 
 app.MapDiscoveredRoutes();
 
-app.MapOpenApi("/openapi/{documentName}.json");   // -> /openapi/v1.json
+app.MapOpenApi("/openapi/{documentName}.json");   // -> /openapi/v1.json and /openapi/v2.json
 app.MapScalarApiReference();                      // -> /scalar
 
 await app.RunAsync();
