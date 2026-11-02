@@ -7,6 +7,13 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.FileProviders;
 using Scalar.AspNetCore;
 
+// Maintenance runs offline, before hosting, migrations, or startup side effects.
+if (args.Contains("--repair-records"))
+{
+    Environment.ExitCode = CargoHUB.Maintenance.RepairCommand.Execute(args);
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 var swaggerUiPath = Path.Combine(builder.Environment.ContentRootPath, "swagger-ui");

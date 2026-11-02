@@ -128,6 +128,7 @@ Zie de [deploymenthandleiding](docs/deployment.md) voor installatie, Cloudflare 
 | [Voorbeeldrequests](docs/legacy-api/legacy-api.http) | Uitvoerbare HTTP-requests voor de legacy-API |
 | [Request bodies](docs/legacy-api/request-bodies/) | JSON-voorbeelden per endpoint |
 | [Legacy-modeldocumentatie](docs/legacy-python/api/models/) | Beschrijvingen van de bestaande modellen |
+| [Recordherstel (#74)](docs/record-repair.md) | Offline herkenning, conservatief herstel en audit |
 | [Deployment](docs/deployment.md) | De Raspberry Pi-stack en operationele handelingen |
 | [Sprint 0 — taakverdeling](docs/notes/sprint-0/taken-verdeling.md) | Afspraken uit de projectstart |
 
