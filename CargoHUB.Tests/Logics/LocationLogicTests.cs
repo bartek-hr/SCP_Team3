@@ -9,7 +9,8 @@ namespace CargoHUB.Tests.Logics;
 [TestClass]
 public sealed class LocationLogicTests : DatabaseTest
 {
-    private LocationLogic Logic => new(new LocationAccess(Context), new WarehouseAccess(Context), new TransferAccess(Context));
+    private LocationLogic Logic => new(
+        new LocationAccess(Context), new WarehouseAccess(Context), new TransferAccess(Context), new InventoryDataAccess(Context));
 
     protected override void SeedDatabase()
     {
@@ -62,10 +63,10 @@ public sealed class LocationLogicTests : DatabaseTest
         missingCode.Code = string.Empty;
 
         Assert.ThrowsException<ArgumentNullException>(() => Logic.Add(null!));
-        Assert.ThrowsException<ArgumentException>(() => Logic.Add(missingCode));
-        Assert.ThrowsException<ArgumentException>(() => Logic.Add(TestData.CreateLocation(warehouseId: 999)));
-        Assert.ThrowsException<ArgumentException>(() => Logic.Add(TestData.CreateLocation(warehouseId: 0)));
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => Logic.Add(TestData.CreateLocation(-1)));
+        AssertInvalid(() => Logic.Add(missingCode), "code is required.");
+        AssertInvalid(() => Logic.Add(TestData.CreateLocation(warehouseId: 999)), "warehouse_id 999 does not exist.");
+        AssertInvalid(() => Logic.Add(TestData.CreateLocation(warehouseId: 0)), "warehouse_id 0 does not exist.");
+        AssertInvalid(() => Logic.Add(TestData.CreateLocation(-1)), "id cannot be negative.");
         Assert.ThrowsException<InvalidOperationException>(() => Logic.Add(TestData.CreateLocation(1)));
         Assert.AreEqual(3, Logic.GetAll().Count);
     }
@@ -110,6 +111,23 @@ public sealed class LocationLogicTests : DatabaseTest
         Assert.ThrowsException<InvalidOperationException>(() => Logic.Remove(2));
         Assert.IsNotNull(Logic.GetById(1));
         Assert.IsNotNull(Logic.GetById(2));
+    }
+
+    [TestMethod]
+    public void RemoveRefusesLocationThatStillHasInventory()
+    {
+        Context.Inventories.Add(new Inventory { ItemId = 1, LocationId = 3 });
+        Context.SaveChanges();
+
+        AssertConflict(() => Logic.Remove(3), "Location 3 still has inventory.");
+        Assert.IsNotNull(Logic.GetById(3));
+    }
+
+    [TestMethod]
+    public void UpdateRejectsAnIdThatDoesNotMatchTheUrl()
+    {
+        AssertInvalid(() => Logic.Update(1, TestData.CreateLocation(3)), "id 3 in the body does not match id 1 in the URL.");
+        Assert.IsTrue(Logic.Update(1, TestData.CreateLocation(1, name: "Same Id")));
     }
 
     [TestMethod]

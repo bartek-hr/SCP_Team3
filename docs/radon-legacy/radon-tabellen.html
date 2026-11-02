@@ -1,0 +1,58 @@
+<!doctype html><html><head><meta charset='utf-8'><title>Radon metingen legacy</title><style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#000;background:#fff;max-width:1000px;margin:24px auto;padding:0 16px}
+h1{font-size:16pt}h2{font-size:13pt;margin-top:28px}p.note{font-size:9.5pt;color:#444}
+table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #999;padding:3px 7px;font-size:10pt;text-align:left}
+th{background:#d9e2f3}td.n{text-align:right}tr.bad td{background:#f8d7da}tr.warn td{background:#fff3cd}</style></head><body>
+<h1>Codemetingen legacy CargoHUB (Python) – radon 6.0.1</h1><p class='note'>Gemeten op 4 oktober 2026 op <code>legacy/api</code> (branch dev, commit 0519310). Tip: selecteer een tabel, kopieer (Ctrl+C) en plak in Word.</p>
+<h2>Tabel 1 – Samenvatting</h2><table><tr><th>Meting</th><th>Waarde</th></tr>
+<tr><td>Aantal Python-bestanden (excl. lege __init__)</td><td>20</td></tr>
+<tr><td>Regels totaal (LOC)</td><td>1889</td></tr>
+<tr><td>Regels code (SLOC)</td><td>1650</td></tr>
+<tr><td>Commentaarregels</td><td>12 (0,7% van SLOC)</td></tr>
+<tr><td>Geanalyseerde blokken (functies, methodes, classes)</td><td>185</td></tr>
+<tr><td>Gemiddelde cyclomatic complexity</td><td>2,85 (A)</td></tr>
+<tr><td>Hoogste cyclomatic complexity</td><td>62 (F) – ApiRequestHandler.handle_get_version_1</td></tr>
+<tr><td>Laagste Maintainability Index</td><td>0,00 (C) – main.py</td></tr>
+</table>
+<h2>Tabel 2 – Verdeling cyclomatic complexity per blok</h2><table><tr><th>Rang</th><th>CC</th><th>Betekenis</th><th>Aantal blokken</th></tr>
+<tr><td>A</td><td>1–5</td><td>eenvoudig</td><td class='n'>174</td></tr>
+<tr><td>B</td><td>6–10</td><td>goed te doen</td><td class='n'>6</td></tr>
+<tr><td>C</td><td>11–20</td><td>complex</td><td class='n'>3</td></tr>
+<tr><td>D</td><td>21–30</td><td>meer dan complex</td><td class='n'>1</td></tr>
+<tr><td>E</td><td>31–40</td><td>zeer complex</td><td class='n'>0</td></tr>
+<tr><td>F</td><td>41+</td><td>onhoudbaar / foutgevoelig</td><td class='n'>1</td></tr>
+</table>
+<h2>Tabel 3 – Functies met cyclomatic complexity ≥ 6</h2><table><tr><th>Bestand</th><th>Regel</th><th>Functie / class</th><th>CC</th><th>Rang</th></tr>
+<tr class='bad'><td>main.py</td><td class='n'>12</td><td>ApiRequestHandler.handle_get_version_1</td><td class='n'>62</td><td>F</td></tr>
+<tr class='bad'><td>main.py</td><td class='n'>511</td><td>ApiRequestHandler.handle_put_version_1</td><td class='n'>27</td><td>D</td></tr>
+<tr class='warn'><td>main.py</td><td class='n'>10</td><td>ApiRequestHandler</td><td class='n'>18</td><td>C</td></tr>
+<tr class='warn'><td>main.py</td><td class='n'>390</td><td>ApiRequestHandler.handle_post_version_1</td><td class='n'>14</td><td>C</td></tr>
+<tr class='warn'><td>main.py</td><td class='n'>732</td><td>ApiRequestHandler.handle_delete_version_1</td><td class='n'>14</td><td>C</td></tr>
+<tr class=''><td>models/orders.py</td><td class='n'>55</td><td>Orders.update_items_in_order</td><td class='n'>7</td><td>B</td></tr>
+<tr class=''><td>models/shipments.py</td><td class='n'>55</td><td>Shipments.update_items_in_shipment</td><td class='n'>7</td><td>B</td></tr>
+<tr class=''><td>main.py</td><td class='n'>375</td><td>ApiRequestHandler.do_GET</td><td class='n'>6</td><td>B</td></tr>
+<tr class=''><td>main.py</td><td class='n'>496</td><td>ApiRequestHandler.do_POST</td><td class='n'>6</td><td>B</td></tr>
+<tr class=''><td>main.py</td><td class='n'>717</td><td>ApiRequestHandler.do_PUT</td><td class='n'>6</td><td>B</td></tr>
+<tr class=''><td>main.py</td><td class='n'>810</td><td>ApiRequestHandler.do_DELETE</td><td class='n'>6</td><td>B</td></tr>
+</table>
+<h2>Tabel 4 – Metingen per bestand</h2><table><tr><th>Bestand</th><th>LOC</th><th>SLOC</th><th>Commentaar</th><th>Functies</th><th>Gem. CC</th><th>Max. CC (functie)</th><th>MI</th><th>MI-rang</th></tr>
+<tr class='bad'><td>main.py</td><td class='n'>830</td><td class='n'>812</td><td class='n'>6</td><td class='n'>8</td><td class='n'>17,6</td><td>62 (handle_get_version_1)</td><td class='n'>0,00</td><td>C</td></tr>
+<tr class=''><td>models/items.py</td><td class='n'>77</td><td class='n'>63</td><td class='n'>0</td><td class='n'>12</td><td class='n'>2,2</td><td>3 (get_item)</td><td class='n'>42,98</td><td>A</td></tr>
+<tr class=''><td>models/transfers.py</td><td class='n'>68</td><td class='n'>56</td><td class='n'>0</td><td class='n'>10</td><td class='n'>2,0</td><td>4 (update_transfer)</td><td class='n'>46,66</td><td>A</td></tr>
+<tr class=''><td>models/inventories.py</td><td class='n'>76</td><td class='n'>63</td><td class='n'>1</td><td class='n'>10</td><td class='n'>2,5</td><td>4 (get_inventory)</td><td class='n'>48,70</td><td>A</td></tr>
+<tr class=''><td>models/orders.py</td><td class='n'>107</td><td class='n'>85</td><td class='n'>0</td><td class='n'>13</td><td class='n'>2,6</td><td>7 (update_items_in_order)</td><td class='n'>49,10</td><td>A</td></tr>
+<tr class=''><td>models/locations.py</td><td class='n'>56</td><td class='n'>45</td><td class='n'>0</td><td class='n'>9</td><td class='n'>2,0</td><td>3 (get_location)</td><td class='n'>49,26</td><td>A</td></tr>
+<tr class=''><td>models/shipments.py</td><td class='n'>113</td><td class='n'>89</td><td class='n'>0</td><td class='n'>14</td><td class='n'>2,6</td><td>7 (update_items_in_shipment)</td><td class='n'>49,30</td><td>A</td></tr>
+<tr class=''><td>models/order_items.py</td><td class='n'>47</td><td class='n'>39</td><td class='n'>0</td><td class='n'>7</td><td class='n'>2,1</td><td>3 (get_items_for_order)</td><td class='n'>51,87</td><td>A</td></tr>
+<tr class=''><td>models/clients.py</td><td class='n'>49</td><td class='n'>39</td><td class='n'>0</td><td class='n'>8</td><td class='n'>1,9</td><td>3 (get_client)</td><td class='n'>51,93</td><td>A</td></tr>
+<tr class=''><td>models/item_groups.py</td><td class='n'>49</td><td class='n'>39</td><td class='n'>0</td><td class='n'>8</td><td class='n'>1,9</td><td>3 (get_item_group)</td><td class='n'>51,93</td><td>A</td></tr>
+<tr class=''><td>models/item_lines.py</td><td class='n'>49</td><td class='n'>39</td><td class='n'>0</td><td class='n'>8</td><td class='n'>1,9</td><td>3 (get_item_line)</td><td class='n'>51,93</td><td>A</td></tr>
+<tr class=''><td>models/item_types.py</td><td class='n'>49</td><td class='n'>39</td><td class='n'>0</td><td class='n'>8</td><td class='n'>1,9</td><td>3 (get_item_type)</td><td class='n'>51,93</td><td>A</td></tr>
+<tr class=''><td>models/suppliers.py</td><td class='n'>49</td><td class='n'>39</td><td class='n'>0</td><td class='n'>8</td><td class='n'>1,9</td><td>3 (get_supplier)</td><td class='n'>51,93</td><td>A</td></tr>
+<tr class=''><td>models/warehouses.py</td><td class='n'>49</td><td class='n'>39</td><td class='n'>0</td><td class='n'>8</td><td class='n'>1,9</td><td>3 (get_warehouse)</td><td class='n'>51,93</td><td>A</td></tr>
+<tr class=''><td>models/shipment_items.py</td><td class='n'>44</td><td class='n'>36</td><td class='n'>0</td><td class='n'>7</td><td class='n'>2,0</td><td>3 (get_items_for_shipment)</td><td class='n'>53,82</td><td>A</td></tr>
+<tr class=''><td>providers/data_provider.py</td><td class='n'>70</td><td class='n'>51</td><td class='n'>0</td><td class='n'>15</td><td class='n'>1,0</td><td>1 (fetch_warehouse_pool)</td><td class='n'>58,25</td><td>A</td></tr>
+<tr class=''><td>models/transfer_items.py</td><td class='n'>48</td><td class='n'>36</td><td class='n'>0</td><td class='n'>7</td><td class='n'>2,0</td><td>3 (get_items_for_transfer)</td><td class='n'>66,96</td><td>A</td></tr>
+<tr class=''><td>providers/auth_provider.py</td><td class='n'>28</td><td class='n'>22</td><td class='n'>1</td><td class='n'>3</td><td class='n'>2,0</td><td>3 (get_user)</td><td class='n'>72,25</td><td>A</td></tr>
+<tr class=''><td>models/base.py</td><td class='n'>8</td><td class='n'>6</td><td class='n'>0</td><td class='n'>2</td><td class='n'>1,0</td><td>1 (__init__)</td><td class='n'>77,88</td><td>A</td></tr>
+<tr class=''><td>processors/notification_processor.py</td><td class='n'>23</td><td class='n'>13</td><td class='n'>4</td><td class='n'>3</td><td class='n'>1,3</td><td>2 (send)</td><td class='n'>97,37</td><td>A</td></tr>
+</table><p class='note'>LOC = alle regels; SLOC = regels code; CC = cyclomatic complexity (McCabe, 1976); MI = Maintainability Index 0–100 (A &gt; 19, B 10–19, C &lt; 10). Bron schalen: Lacchia (z.d.), radon-documentatie.</p></body></html>

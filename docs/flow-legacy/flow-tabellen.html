@@ -1,0 +1,75 @@
+<!doctype html><html lang='nl'><head><meta charset='utf-8'><title>Flow legacy</title><style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;max-width:1150px;margin:24px auto;padding:0 16px;background:#fff;color:#000}
+h1{font-size:16pt}h2{font-size:13pt;margin-top:28px}p.note{font-size:9.5pt;color:#444}
+table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #999;padding:3px 6px;font-size:9.5pt;text-align:left;vertical-align:top}
+th{background:#d9e2f3}code{font-family:Consolas,monospace;font-size:9pt}td.c{text-align:center}
+td.nee{background:#f8d7da}td.ja{background:#d4edda}td.leeg{background:#f2f2f2}</style></head><body>
+<h1>Flow legacy CargoHUB API – use cases en clients</h1>
+<p class='note'>Afgeleid uit <code>legacy/api/main.py</code> en <code>legacy/data/user.json</code> (commit 0519310). Alle paden beginnen met <code>/api/v1</code>. Tip: selecteer een tabel, kopieer en plak in Word.</p>
+<h2>Tabel 1 – Use cases en de endpoints in volgorde</h2><table><tr><th>Use case</th><th>Client (actor)</th><th>Stap</th><th>Endpoint</th><th>Doel van de stap</th><th>Mag deze client dit?</th></tr>
+<tr><td rowspan='3'><b>UC-01</b><br>Magazijn inrichten</td><td rowspan='3'><code>facility_management</code></td><td class='c'>1</td><td><code>POST /warehouses</code></td><td>warehouse aanmaken</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>2</td><td><code>POST /locations</code></td><td>per vak/stelling een locatie met warehouse_id</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>3</td><td><code>GET /warehouses/{id}/locations</code></td><td>controleren of alle locaties er staan</td><td class='ja'>ja</td></tr>
+<tr><td rowspan='4'><b>UC-02</b><br>Artikel en leverancier registreren</td><td rowspan='4'><code>receiving_station</code></td><td class='c'>1</td><td><code>GET /suppliers/{id}</code></td><td>bestaat de leverancier?</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>2</td><td><code>POST /suppliers</code></td><td>zo niet: leverancier aanmaken</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>3</td><td><code>GET /item_lines</code></td><td>classificatie opzoeken (ook item_groups, item_types)</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>4</td><td><code>POST /items</code></td><td>artikel aanmaken met supplier_id en classificatie</td><td class='ja'>ja</td></tr>
+<tr><td rowspan='4'><b>UC-03</b><br>Goederen ontvangen</td><td rowspan='4'><code>receiving_station</code></td><td class='c'>1</td><td><code>POST /shipments</code></td><td>inkomende zending vastleggen (shipment_type Incoming)</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>2</td><td><code>PUT /shipments/{id}/items</code></td><td>ontvangen artikelen en aantallen</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>3</td><td><code>GET /items/{id}/inventory</code></td><td>huidige voorraadregels bekijken</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>4</td><td><code>POST /inventories</code></td><td>voorraad op ontvangstlocatie ophogen (upsert)</td><td class='ja'>ja</td></tr>
+<tr><td rowspan='4'><b>UC-04</b><br>Order aannemen</td><td rowspan='4'><code>receiving_station</code></td><td class='c'>1</td><td><code>GET /clients/{id}</code></td><td>klant (filiaal) opzoeken</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>2</td><td><code>GET /items/{id}/inventory/totals</code></td><td>is er genoeg beschikbaar?</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>3</td><td><code>POST /orders</code></td><td>order met orderregels aanmaken</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>4</td><td><code>PUT /orders/{id}/items</code></td><td>regels wijzigen: quantity_allocated wordt bijgewerkt</td><td class='ja'>ja</td></tr>
+<tr><td rowspan='4'><b>UC-05</b><br>Order picken</td><td rowspan='4'><code>order_picker</code></td><td class='c'>1</td><td><code>GET /orders/{id}</code></td><td>order incl. items ophalen</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>2</td><td><code>GET /items/{id}/inventory</code></td><td>op welke locaties ligt het artikel?</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>3</td><td><code>GET /locations/{id}</code></td><td>locatiecode tonen op scanner</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>4</td><td><code>PUT /orders/{id}</code></td><td>status bijwerken na picken</td><td class='ja'>ja</td></tr>
+<tr><td rowspan='5'><b>UC-06</b><br>Order verzenden</td><td rowspan='5'><code>shipping_station</code></td><td class='c'>1</td><td><code>GET /orders/{id}</code></td><td>gepickte order ophalen</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>2</td><td><code>POST /shipments</code></td><td>uitgaande zending aanmaken met vervoerder</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>3</td><td><code>PUT /shipments/{id}/orders</code></td><td>zending aan order koppelen</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>4</td><td><code>PUT /shipments/{id}/items</code></td><td>artikelen in zending: quantity_ordered bijgewerkt</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>5</td><td><code>PUT /orders/{id}</code></td><td>orderstatus naar Shipped</td><td class='ja'>ja</td></tr>
+<tr><td rowspan='4'><b>UC-07</b><br>Voorraad verplaatsen (transfer)</td><td rowspan='4'><code>smartglass_reader</code></td><td class='c'>1</td><td><code>GET /items/{id}/inventory</code></td><td>bron- en doellocatie bepalen</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>2</td><td><code>POST /transfers</code></td><td>transfer plannen (status Scheduled)</td><td class='nee'>nee – 403</td></tr>
+<tr><td class='c'>3</td><td><code>GET /transfers/{id}</code></td><td>taak tonen aan medewerker</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>4</td><td><code>PUT /transfers/{id}/commit</code></td><td>uitvoeren: voorraad van bron naar doel, status Processed</td><td class='nee'>ja; 200, maar niets opgeslagen</td></tr>
+<tr><td rowspan='2'><b>UC-08</b><br>Voorraad corrigeren na telling</td><td rowspan='2'><code>smartglass_reader</code></td><td class='c'>1</td><td><code>GET /items/{id}/inventory</code></td><td>geregistreerde voorraad tonen</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>2</td><td><code>PUT /inventories/{id}</code></td><td>getelde hoeveelheid opslaan</td><td class='nee'>ja; geeft altijd 404</td></tr>
+<tr><td rowspan='3'><b>UC-09</b><br>Klant (filiaal) beheren</td><td rowspan='3'><code>shipping_station</code></td><td class='c'>1</td><td><code>POST /clients</code></td><td>nieuw filiaal aanmaken</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>2</td><td><code>PUT /clients/{id}</code></td><td>adres of contact wijzigen</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>3</td><td><code>GET /clients/{id}/orders</code></td><td>orderhistorie van filiaal</td><td class='ja'>ja</td></tr>
+<tr><td rowspan='4'><b>UC-10</b><br>Rapportage</td><td rowspan='4'><code>analytics_dashboard</code></td><td class='c'>1</td><td><code>GET /warehouses</code></td><td>overzicht magazijnen</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>2</td><td><code>GET /inventories</code></td><td>alle voorraadregels</td><td class='ja'>ja</td></tr>
+<tr><td class='c'>3</td><td><code>GET /orders</code></td><td>alle orders</td><td class='nee'>ja; duurt 205 s</td></tr>
+<tr><td class='c'>4</td><td><code>GET /shipments</code></td><td>alle zendingen</td><td class='nee'>ja; duurt 234 s</td></tr>
+</table><p class='note'>Rood = de client kan deze stap niet uitvoeren (geen recht) of het endpoint werkt niet (zie 4.3).</p>
+<h2>Tabel 2 – Type clients</h2><table><tr><th>Type client</th><th>App (API-key)</th><th>Gebruiker</th><th>Gebruik</th></tr>
+<tr><td>Dashboard (web)</td><td><code>analytics_dashboard</code></td><td>Management / planning</td><td>alleen lezen</td></tr>
+<tr><td>Handscanner</td><td><code>order_picker</code></td><td>Orderpicker</td><td>lezen + schrijven op inventories, orders, transfers</td></tr>
+<tr><td>Smart glasses</td><td><code>smartglass_reader</code></td><td>Magazijnmedewerker</td><td>lezen + schrijven op inventories, transfers</td></tr>
+<tr><td>Werkstation ontvangst</td><td><code>receiving_station</code></td><td>Medewerker goederenontvangst</td><td>lezen + schrijven op inventories, item_groups, item_lines, item_types, items, orders, shipments, suppliers, transfers</td></tr>
+<tr><td>Werkstation expeditie</td><td><code>shipping_station</code></td><td>Medewerker expeditie</td><td>lezen + schrijven op clients, inventories, orders, shipments, transfers</td></tr>
+<tr><td>Beheerportaal (web)</td><td><code>facility_management</code></td><td>Facility manager</td><td>lezen + schrijven op clients, item_groups, item_lines, item_types, locations, suppliers, warehouses</td></tr>
+</table>
+<h2>Tabel 3 – Welke client mag welke endpoints gebruiken</h2><table><tr><th>Resource</th><th>Dashboard (web)<br><code>analytics_dashboard</code></th><th>Handscanner<br><code>order_picker</code></th><th>Smart glasses<br><code>smartglass_reader</code></th><th>Werkstation ontvangst<br><code>receiving_station</code></th><th>Werkstation expeditie<br><code>shipping_station</code></th><th>Beheerportaal (web)<br><code>facility_management</code></th></tr>
+<tr><td><code>/warehouses</code></td><td class='c'>G</td><td class='c'>G</td><td class='c'>G</td><td class='c'>G</td><td class='c'>G</td><td class='c'>GPUD</td></tr>
+<tr><td><code>/locations</code></td><td class='c'>G</td><td class='c'>G</td><td class='c'>G</td><td class='c'>G</td><td class='c'>G</td><td class='c'>GPUD</td></tr>
+<tr><td><code>/transfers</code></td><td class='c'>G</td><td class='c'>GU</td><td class='c'>GU</td><td class='c'>GPU</td><td class='c'>GPU</td><td class='c'>G</td></tr>
+<tr><td><code>/items</code></td><td class='c'>G</td><td class='c'>G</td><td class='c'>G</td><td class='c'>GPU</td><td class='c'>G</td><td class='c'>G</td></tr>
+<tr><td><code>/item_lines</code></td><td class='c'>G</td><td class='c'>G</td><td class='c'>G</td><td class='c'>GPU</td><td class='c'>G</td><td class='c'>GPUD</td></tr>
+<tr><td><code>/item_groups</code></td><td class='c'>G</td><td class='c'>G</td><td class='c'>G</td><td class='c'>GPU</td><td class='c'>G</td><td class='c'>GPUD</td></tr>
+<tr><td><code>/item_types</code></td><td class='c'>G</td><td class='c'>G</td><td class='c'>G</td><td class='c'>GPU</td><td class='c'>G</td><td class='c'>GPUD</td></tr>
+<tr><td><code>/inventories</code></td><td class='c'>G</td><td class='c'>GU</td><td class='c'>GU</td><td class='c'>GPU</td><td class='c'>GU</td><td class='c'>G</td></tr>
+<tr><td><code>/suppliers</code></td><td class='c'>G</td><td class='c'>G</td><td class='c'>G</td><td class='c'>GPU</td><td class='c'>G</td><td class='c'>GPUD</td></tr>
+<tr><td><code>/orders</code></td><td class='c'>G</td><td class='c'>GU</td><td class='c'>G</td><td class='c'>GPU</td><td class='c'>GU</td><td class='c'>G</td></tr>
+<tr><td><code>/clients</code></td><td class='c'>G</td><td class='c'>G</td><td class='c'>G</td><td class='c'>G</td><td class='c'>GPU</td><td class='c'>GPUD</td></tr>
+<tr><td><code>/shipments</code></td><td class='c'>G</td><td class='c'>G</td><td class='c'>G</td><td class='c'>GPU</td><td class='c'>GPU</td><td class='c'>G</td></tr>
+</table><p class='note'>G = GET (lezen), P = POST (aanmaken), U = PUT (wijzigen), D = DELETE (verwijderen). GET geeft toegang tot alle GET-endpoints van die resource, inclusief sub-paden zoals <code>/items/{id}/inventory</code>.</p>
+<h2>Tabel 4 – Opvallend in de flows</h2><table><tr><th>Bevinding</th><th>Gevolg</th></tr>
+<tr><td><code>smartglass_reader</code> en <code>order_picker</code> hebben geen POST op transfers</td><td>Ze kunnen een transfer alleen uitvoeren (commit), niet zelf plannen; dat moet via een werkstation (UC-07)</td></tr>
+<tr><td><code>PUT /inventories/{id}</code> geeft altijd 404</td><td>Voorraadcorrectie na telling (UC-08) is voor geen enkele client mogelijk</td></tr>
+<tr><td>Geen client heeft DELETE op items, orders, shipments, transfers, inventories</td><td>Foutieve orders of zendingen kunnen niet worden verwijderd</td></tr>
+<tr><td><code>receiving_station</code> mag orders aanmaken, <code>shipping_station</code> niet</td><td>Orderinvoer ligt bij de ontvangst, wat procesmatig onlogisch lijkt</td></tr>
+<tr><td>De server verwerkt requests één voor één (<code>socketserver.TCPServer</code>, niet multithreaded)</td><td>Eén &lt;code&gt;GET /orders&lt;/code&gt; van het dashboard (205 s) blokkeert alle handscanners en werkstations</td></tr>
+</table></body></html>

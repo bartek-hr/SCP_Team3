@@ -9,7 +9,7 @@ namespace CargoHUB.Tests.Logics;
 [TestClass]
 public sealed class WarehouseLogicTests : DatabaseTest
 {
-    private WarehouseLogic Logic => new(new WarehouseAccess(Context), new LocationAccess(Context));
+    private WarehouseLogic Logic => new(new WarehouseAccess(Context), new LocationAccess(Context), new OrderDataAccess(Context));
 
     protected override void SeedDatabase()
     {
@@ -61,9 +61,9 @@ public sealed class WarehouseLogicTests : DatabaseTest
         invalidEmail.ContactEmail = "not-an-email";
 
         Assert.ThrowsException<ArgumentNullException>(() => Logic.Add(null!));
-        Assert.ThrowsException<ArgumentException>(() => Logic.Add(missingCity));
-        Assert.ThrowsException<ArgumentException>(() => Logic.Add(invalidEmail));
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => Logic.Add(TestData.CreateWarehouse(-1)));
+        AssertInvalid(() => Logic.Add(missingCity), "city is required.");
+        AssertInvalid(() => Logic.Add(invalidEmail), "contact_email must be a valid email address.");
+        AssertInvalid(() => Logic.Add(TestData.CreateWarehouse(-1)), "id cannot be negative.");
         Assert.ThrowsException<InvalidOperationException>(() => Logic.Add(TestData.CreateWarehouse(1)));
         Assert.AreEqual(2, Logic.GetAll().Count);
     }
@@ -108,6 +108,23 @@ public sealed class WarehouseLogicTests : DatabaseTest
     {
         Assert.ThrowsException<InvalidOperationException>(() => Logic.Remove(2));
         Assert.IsNotNull(Logic.GetById(2));
+    }
+
+    [TestMethod]
+    public void RemoveRefusesWarehouseThatOrdersStillUse()
+    {
+        Context.Orders.Add(new Order { Id = 1, WarehouseId = 1 });
+        Context.SaveChanges();
+
+        AssertConflict(() => Logic.Remove(1), "Warehouse 1 is still used by orders.");
+        Assert.IsNotNull(Logic.GetById(1));
+    }
+
+    [TestMethod]
+    public void UpdateRejectsAnIdThatDoesNotMatchTheUrl()
+    {
+        AssertInvalid(() => Logic.Update(1, TestData.CreateWarehouse(2)), "id 2 in the body does not match id 1 in the URL.");
+        Assert.AreEqual("Test Warehouse", Logic.GetById(1)?.Name);
     }
 
     [TestMethod]

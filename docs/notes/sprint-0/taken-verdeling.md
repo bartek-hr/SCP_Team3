@@ -10,3 +10,10 @@
 - Bart: model refactor naar c#OrderItems (ShipmentItems, TransferItems)
 - Devin: model refactor naar c# (Items, ItemLines, ItemGroups)
 - Raygell: model refactor naar c# (Clients, Suppliers, ItemTypes)
+
+## taken sprint 2
+- Floris: 
+- Joran:
+- Bart:
+- Devin:
+- Raygell:

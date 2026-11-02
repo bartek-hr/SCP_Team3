@@ -1,0 +1,42 @@
+sequenceDiagram
+  autonumber
+  actor M as Medewerker
+  participant C as Client-app<br/>(bv. handscanner)
+  participant S as HTTP-server<br/>main.py :3000
+  participant A as auth_provider
+  participant U as user.json
+  participant H as handle_*_version_1
+  participant D as data_provider + model
+  participant J as data/*.json
+  M->>C: actie (bv. scan order)
+  C->>S: TCP-verbinding naar poort 3000 (HTTP, geen TLS)
+  C->>S: GET /api/v1/orders/1<br/>Header API_KEY: <sleutel>
+  S->>A: get_user(api_key)
+  A->>U: open + json.load (elke request)
+  U-->>A: lijst met 6 apps
+  alt key ontbreekt of onbekend
+    A-->>S: None
+    S-->>C: 401 Unauthorized (lege body)
+  else key geldig
+    A-->>S: user
+    S->>S: pad splitsen, controleer /api/v1
+    alt pad zonder /api/v1
+      S--xC: geen response, verbinding gesloten
+    else
+      S->>H: paths, user
+      H->>A: has_access(user, paths, "get")
+      alt geen recht op resource/methode
+        H-->>C: 403 Forbidden (lege body)
+      else recht
+        H->>D: fetch_order_pool().get_order(1)
+        D->>J: open + json.load (nieuw object per aanroep)
+        J-->>D: data
+        D-->>H: order of None
+        H-->>C: 200 OK + JSON (ook bij None: body null)
+      end
+    end
+    opt exceptie (bv. id = "abc")
+      S-->>C: 500 Internal Server Error
+    end
+  end
+  C-->>M: resultaat tonen

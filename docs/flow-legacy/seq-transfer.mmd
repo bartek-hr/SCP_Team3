@@ -1,0 +1,29 @@
+sequenceDiagram
+  autonumber
+  actor R as Medewerker ontvangst
+  participant RS as receiving_station
+  actor P as Orderpicker
+  participant OP as order_picker<br/>(handscanner)
+  participant API as CargoHUB API
+  participant J as data/*.json
+  R->>RS: voorraad moet naar picklocatie
+  RS->>API: GET /api/v1/items/{id}/inventory
+  API-->>RS: 200 voorraad per locatie
+  RS->>API: POST /api/v1/transfers {from, to, items}
+  API->>J: transfer + transfer_items (status Scheduled)
+  API-->>RS: 201 Created (geen body, geen id)
+  Note over API: notificatie "Scheduled batch transfer" (alleen print)
+  P->>OP: open taken
+  OP->>API: GET /api/v1/transfers/{id}
+  API-->>OP: 200 transfer incl. items
+  P->>OP: goederen verplaatst, bevestig
+  OP->>API: PUT /api/v1/transfers/{id}/commit
+  loop per item
+    API->>API: bron: quantity_on_hand - amount
+    API->>API: doel: quantity_on_hand + amount (of nieuwe regel)
+  end
+  API->>J: save() op NIEUW ingelezen object
+  Note over API,J: bug: wijzigingen gaan verloren, status blijft Scheduled
+  API-->>OP: 200 OK
+  OP->>API: GET /api/v1/items/{id}/inventory/totals
+  API-->>OP: 200 totalen (ongewijzigd)

@@ -3,7 +3,7 @@ using CargoHUB.Models;
 
 namespace CargoHUB.Logics;
 
-public sealed class InventoryLogic(InventoryDataAccess dataAccess)
+public sealed class InventoryLogic(InventoryDataAccess dataAccess, ItemAccess itemAccess, LocationAccess locationAccess)
 {
     public IReadOnlyList<Inventory> GetAll()
     {
@@ -64,11 +64,13 @@ public sealed class InventoryLogic(InventoryDataAccess dataAccess)
     public void Update(int itemId, int locationId, Inventory inventory)
     {
         ValidateKey(itemId, locationId);
-        Validate(inventory);
+        ArgumentNullException.ThrowIfNull(inventory);
         if (inventory.ItemId != itemId || inventory.LocationId != locationId)
         {
-            throw new ArgumentException("The inventory item and location must match the key.", nameof(inventory));
+            throw new ArgumentException("item_id and location_id in the body must match the URL.");
         }
+
+        Validate(inventory);
 
         Inventory? existing = dataAccess.GetByKey(itemId, locationId);
         if (existing is null)
@@ -93,13 +95,14 @@ public sealed class InventoryLogic(InventoryDataAccess dataAccess)
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(locationId);
     }
 
-    private static void Validate(Inventory inventory)
+    private void Validate(Inventory inventory)
     {
         ArgumentNullException.ThrowIfNull(inventory);
-        ValidateKey(inventory.ItemId, inventory.LocationId);
-        ArgumentOutOfRangeException.ThrowIfNegative(inventory.QuantityOnHand);
-        ArgumentOutOfRangeException.ThrowIfNegative(inventory.QuantityExpected);
-        ArgumentOutOfRangeException.ThrowIfNegative(inventory.QuantityOrdered);
-        ArgumentOutOfRangeException.ThrowIfNegative(inventory.QuantityAllocated);
+        Validation.Reference(inventory.ItemId, "item_id", id => itemAccess.GetById(id) is not null);
+        Validation.Reference(inventory.LocationId, "location_id", id => locationAccess.GetById(id) is not null);
+        Validation.NotNegative(inventory.QuantityOnHand, "quantity_on_hand");
+        Validation.NotNegative(inventory.QuantityExpected, "quantity_expected");
+        Validation.NotNegative(inventory.QuantityOrdered, "quantity_ordered");
+        Validation.NotNegative(inventory.QuantityAllocated, "quantity_allocated");
     }
 }

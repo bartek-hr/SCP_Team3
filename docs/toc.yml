@@ -4,5 +4,7 @@
   href: deployment.md
 - name: Requirements
   href: notes/requirements.md
+- name: Validatie voorraad en logistiek
+  href: validatie-voorraad-logistiek.md
 - name: Legacy Python API
   href: legacy-python/api/models/clients.md

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="nl"><head><meta charset="utf-8"><title>Advies CargoHUB</title>
+<style>
+body{font-family:Calibri,Arial,sans-serif;font-size:11pt;max-width:1150px;margin:24px auto;padding:0 16px;background:#fff;color:#000}
+h1{font-size:16pt}h2{font-size:13pt;margin-top:28px}p.note{font-size:9.5pt;color:#444}
+table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #999;padding:3px 6px;font-size:9.5pt;text-align:left;vertical-align:top}
+th{background:#d9e2f3}code{font-family:Consolas,monospace;font-size:9pt}
+td.must{background:#f8d7da;font-weight:bold}td.should{background:#fff3cd;font-weight:bold}td.could{background:#d4edda;font-weight:bold}td.wont{background:#e7e6e6;font-weight:bold}
+td.best{background:#d4edda}
+</style></head><body>
+<h1>Advies CargoHUB API</h1>
+<p class="note">Gebaseerd op de analyse in hoofdstuk 4 (metingen van 4 en 5 oktober 2026, commit 0519310). De kolom “Bron” verwijst naar de paragraaf of het risico (R-nummer uit 4.6). Tip: selecteer een tabel, kopieer en plak in Word.</p>
+
+<h2>Tabel 1 – Oordeel over het huidige systeem</h2>
+<table>
+<tr><th>Aspect</th><th>Oordeel</th><th>Onderbouwing</th></tr>
+<tr><td>Functionaliteit</td><td>Onvoldoende</td><td>Lezen werkt, maar geen enkele schrijfactie wordt opgeslagen (0 van 11 resources); 2 van de 9 Must-requirements gehaald (4.3, 4.4)</td></tr>
+<tr><td>Beveiliging</td><td>Onvoldoende</td><td>Geen HTTPS, API-keys in platte tekst in Git, één open verbinding zonder key legt de API plat (4.6, R02/R04/R05)</td></tr>
+<tr><td>Prestaties en schaalbaarheid</td><td>Onvoldoende</td><td><code>GET /orders</code> 130–205 s, <code>GET /shipments</code> 234 s; één request tegelijk (4.3, 4.6)</td></tr>
+<tr><td>Data-integriteit</td><td>Matig</td><td>Data nu grotendeels consistent, maar het model dwingt niets af; 854 dubbele orderreferenties (4.2)</td></tr>
+<tr><td>Onderhoudbaarheid</td><td>Onvoldoende</td><td>Cyclomatic complexity 62, Maintainability Index 0 in <code>main.py</code>, veel duplicatie, geen tests (4.1)</td></tr>
+<tr><td><b>Conclusie</b></td><td colspan="2"><b>De legacy-API is niet geschikt voor productie. Repareren is duurder dan herbouwen; het advies is de herbouw in C# (tabel 2) voort te zetten met de verbeterpunten uit tabel 3 en 4 als backlog.</b></td></tr>
+</table>
+
+<h2>Tabel 2 – Afweging van oplossingsrichtingen</h2>
+<table>
+<tr><th>Criterium</th><th>A. Legacy Python repareren</th><th>B. Herbouwen in ASP.NET Core + EF Core</th><th>C. Standaard-WMS aanschaffen (bv. Picqer, SAP EWM)</th></tr>
+<tr><td>Bestaande clients blijven werken</td><td class="best">Ja</td><td class="best">Ja, als de 76 endpoints behouden blijven</td><td>Nee, clients moeten worden aangepast</td></tr>
+<tr><td>Lost kernproblemen op (opslag, concurrency, performance)</td><td>Deels; vraagt nieuwe server-, opslag- en routinglaag</td><td class="best">Ja: Kestrel is multithreaded, database met transacties en constraints</td><td class="best">Ja</td></tr>
+<tr><td>Onderhoudbaarheid en testbaarheid</td><td>Laag (CC 62, geen structuur)</td><td class="best">Hoog (lagen Handler → Logic → Access, xUnit)</td><td>n.v.t. (leverancier)</td></tr>
+<tr><td>Kosten</td><td>Laag–middel</td><td>Middel (ontwikkeltijd)</td><td>Hoog (licenties, implementatie)</td></tr>
+<tr><td>Aansluiting op opdracht en leerdoelen (refactoring, tests, CI/CD, Docker)</td><td>Gedeeltelijk</td><td class="best">Volledig</td><td>Nee</td></tr>
+<tr><td><b>Keuze</b></td><td></td><td class="best"><b>Gekozen</b></td><td></td></tr>
+</table>
+
+<h2>Tabel 3 – Verbeterpunten: functionele eisen</h2>
+<table>
+<tr><th>ID</th><th>Probleem (analyse)</th><th>Bron</th><th>Verbeterpunt als requirement</th><th>Acceptatiecriterium (test)</th><th>MoSCoW</th></tr>
+<tr><td>VF-01</td><td>Schrijfacties geven 200/201 maar worden niet opgeslagen</td><td>4.1, 4.3, R01</td><td>Het systeem slaat elke geslaagde POST, PUT en DELETE blijvend op</td><td>Na een 2xx op POST/PUT/DELETE toont een GET op dezelfde resource de nieuwe toestand, voor alle 12 resources</td><td class="must">Must</td></tr>
+<tr><td>VF-02</td><td>Onbekend id geeft 200 met <code>null</code>; PUT/DELETE op onbekend id geeft 200</td><td>4.3</td><td>GET, PUT en DELETE op een niet-bestaand id geven 404</td><td><code>GET/PUT/DELETE /api/v1/{resource}/99999</code> → 404 voor alle resources</td><td class="must">Must</td></tr>
+<tr><td>VF-03</td><td>Geen invoervalidatie; ongeldige JSON of tekst als id geeft 500</td><td>4.2, 4.3, R06</td><td>Elke POST en PUT valideert verplichte velden, datatypes en lengtes en geeft bij een fout 400 met de foutieve velden</td><td><code>POST /api/v1/warehouses</code> zonder <code>code</code> → 400 met veld <code>code</code> in de response; <code>/warehouses/abc</code> → 400</td><td class="must">Must</td></tr>
+<tr><td>VF-04</td><td>Verwijzingen worden niet gecontroleerd; verwijderen laat wezen achter</td><td>4.2</td><td>Het systeem weigert een verwijzing naar een niet-bestaand record (400) en het verwijderen van een record waar nog naar verwezen wordt (409)</td><td><code>POST /locations</code> met <code>warehouse_id</code> 99999 → 400; <code>DELETE /warehouses/1</code> met locaties → 409</td><td class="must">Must</td></tr>
+<tr><td>VF-05</td><td>Transfer kan meerdere keren worden gecommit; voorraad kan negatief worden</td><td>4.1, 4.2, 4.5</td><td>Een transfer kan alleen worden uitgevoerd vanuit status Scheduled; voorraad, transferstatus en tijdstempel worden in één transactie bijgewerkt en de bronvoorraad wordt nooit negatief</td><td>Tweede <code>PUT /transfers/{id}/commit</code> → 409; commit met te weinig bronvoorraad → 409 en niets gewijzigd</td><td class="must">Must</td></tr>
+<tr><td>VF-06</td><td>Lijst-endpoints geven alle records (tot 6.132) in één response</td><td>4.3, R03</td><td>Lijst-endpoints ondersteunen <code>page</code> en <code>pageSize</code> (standaard 50, maximaal 100) en geven het totaal aantal records terug</td><td><code>GET /orders?page=2&amp;pageSize=50</code> → 50 orders + <code>totalCount</code> = 4854</td><td class="must">Must</td></tr>
+<tr><td>VF-07</td><td>Client kiest zelf het id; POST geeft geen body</td><td>4.2, 4.3</td><td>Het systeem genereert het id; POST geeft 201 met het aangemaakte object en een <code>Location</code>-header</td><td><code>POST /warehouses</code> zonder id → 201, body bevat nieuw id, <code>Location: /api/v1/warehouses/{id}</code></td><td class="should">Should</td></tr>
+<tr><td>VF-08</td><td>Codes en referenties zijn niet uniek (854 dubbele orderreferenties, 4 locatiecodes)</td><td>4.2</td><td>Codes en referenties zijn uniek (locatiecode per warehouse); een duplicaat geeft 409</td><td>Tweede <code>POST /orders</code> met bestaande <code>reference</code> → 409</td><td class="should">Should</td></tr>
+<tr><td>VF-09</td><td>Statussen zijn vrije tekst; orderstatus spreekt zendingen tegen</td><td>4.1, 4.2</td><td>Order-, zending- en transferstatus zijn enums met vastgelegde toegestane overgangen</td><td><code>PUT /orders/{id}</code> met status "Verzonden!" → 400; Shipped → Pending → 409</td><td class="should">Should</td></tr>
+<tr><td>VF-10</td><td>Voorraad corrigeren is voor geen enkele client mogelijk (<code>PUT /inventories/{id}</code> altijd 404)</td><td>4.3, 4.5 (UC-08)</td><td>Een client met PUT-recht op inventories kan de voorraad van één artikel op één locatie aanpassen</td><td><code>PUT /inventories?item_id=1&amp;location_id=1</code> → 200 en GET toont de nieuwe hoeveelheid</td><td class="should">Should</td></tr>
+<tr><td>VF-11</td><td>Smart glasses en handscanner kunnen geen transfer plannen; niemand mag orders/zendingen verwijderen</td><td>4.5</td><td>De rechtenmatrix wordt met de product owner herzien en per client vastgelegd</td><td>Rechtenmatrix goedgekeurd door PO; per client een test op 200/403 per endpoint</td><td class="should">Should</td></tr>
+<tr><td>VF-12</td><td>Inkomende zending moet aan een klantorder hangen</td><td>4.2</td><td>Een inkomende zending verwijst naar een leverancier, een uitgaande naar een order</td><td><code>POST /shipments</code> Incoming zonder <code>supplier_id</code> → 400</td><td class="could">Could</td></tr>
+<tr><td>VF-13</td><td>Notificaties worden alleen geprint</td><td>4.4 (FR-12)</td><td>Bij een geplande of verwerkte transfer wordt een melding verstuurd naar de betrokken client</td><td>Na <code>POST /transfers</code> ontvangt een geabonneerde client binnen 30 s een melding</td><td class="could">Could</td></tr>
+<tr><td>VF-14</td><td>Iedere client ziet alle magazijnen en klanten</td><td>R14</td><td>Autorisatie per warehouse of klant</td><td>–</td><td class="wont">Won’t (deze fase)</td></tr>
+</table>
+
+<h2>Tabel 4 – Verbeterpunten: niet-functionele eisen</h2>
+<table>
+<tr><th>ID</th><th>Probleem (analyse)</th><th>Bron</th><th>Verbeterpunt als requirement</th><th>Acceptatiecriterium (test)</th><th>MoSCoW</th></tr>
+<tr><td>VN-01</td><td>Eén trage of onvolledige request blokkeert alle clients (getest: 129,7 s / geen antwoord)</td><td>4.6, R02</td><td>De server verwerkt requests parallel en verbreekt een verbinding die 30 s geen volledige request stuurt</td><td><code>test_concurrency.py</code>: <code>GET /warehouses</code> antwoordt binnen 1 s terwijl een trage en een onvolledige request openstaan</td><td class="must">Must</td></tr>
+<tr><td>VN-02</td><td><code>GET /orders</code> 130–205 s, <code>GET /shipments</code> 234 s</td><td>4.3, R03, R10</td><td>95% van de GET-requests antwoordt binnen 500 ms en geen enkele binnen meer dan 2 s, met de huidige dataset</td><td><code>test_endpoints.py</code> tegen de nieuwe API: p95 &lt; 500 ms, max &lt; 2 s</td><td class="must">Must</td></tr>
+<tr><td>VN-03</td><td>Verkeer zonder TLS; API-key leesbaar</td><td>R05</td><td>De API is alleen bereikbaar via HTTPS</td><td>Request via HTTP → redirect of geweigerd; TLS-certificaat geldig</td><td class="must">Must</td></tr>
+<tr><td>VN-04</td><td>Keys in platte tekst in Git, voorspelbaar, zonder rotatie</td><td>R04</td><td>API-keys zijn willekeurig (≥ 32 tekens), worden gehasht opgeslagen en staan niet in de repository</td><td>Repository-scan vindt geen keys; database bevat alleen hashes; oude key werkt niet na rotatie</td><td class="must">Must</td></tr>
+<tr><td>VN-05</td><td>Geen authenticatie/autorisatie in de nieuwe versie gevonden</td><td>4.4 (FR-11)</td><td>Elke request vereist een geldige key (401) met recht op resource en methode (403), zoals de legacy-API</td><td>Request zonder key → 401; key zonder recht → 403, voor alle endpoints</td><td class="must">Must</td></tr>
+<tr><td>VN-06</td><td>Geen tests, geen CI</td><td>4.1, R12</td><td>Elk endpoint heeft minstens één integratietest en elke Logic-class unittests; alle tests draaien bij elke pull request</td><td>CI-pipeline groen; line coverage Logic-laag ≥ 80%</td><td class="must">Must</td></tr>
+<tr><td>VN-07</td><td>Bestaande clients mogen niet breken</td><td>4.4 (NFR-11)</td><td>De nieuwe API behoudt de 76 legacy-paden, methodes en veldnamen</td><td><code>test_endpoints.py</code> tegen de nieuwe API: alle leesverzoeken geven dezelfde velden als de legacy-API</td><td class="must">Must</td></tr>
+<tr><td>VN-08</td><td>Geen API-documentatie</td><td>4.3</td><td>Alle endpoints staan met request- en responsevoorbeelden in de OpenAPI-specificatie</td><td>Swagger UI toont 76 endpoints, elk met voorbeeld</td><td class="must">Must</td></tr>
+<tr><td>VN-09</td><td>Foutresponses zijn leeg, zonder Content-Type</td><td>4.3</td><td>Foutresponses zijn JSON volgens RFC 9457 (Problem Details)</td><td>Elke 4xx/5xx heeft <code>Content-Type: application/problem+json</code> met <code>status</code>, <code>title</code>, <code>detail</code></td><td class="should">Should</td></tr>
+<tr><td>VN-10</td><td>Gelijktijdige PUT’s overschrijven elkaar (lost update)</td><td>4.6, R07</td><td>Wijzigingen gebruiken optimistic concurrency; een PUT op een verouderde versie wordt geweigerd</td><td>Twee PUT’s met dezelfde versie: eerste 200, tweede 409</td><td class="should">Should</td></tr>
+<tr><td>VN-11</td><td>Fouten en misbruik onzichtbaar</td><td>R09</td><td>Elke request wordt gelogd (tijd, client, methode, pad, status, duur) en elke 5xx met stacktrace</td><td>Na een 500 staat de fout met stacktrace in de log; logregel per request aanwezig</td><td class="should">Should</td></tr>
+<tr><td>VN-12</td><td>CC 62, MI 0, veel duplicatie</td><td>4.1, R11</td><td>Geen methode heeft een cyclomatic complexity boven 10 en geen bestand een Maintainability Index onder 20</td><td>Code Metrics-rapport in CI zonder overschrijdingen</td><td class="should">Should</td></tr>
+<tr><td>VN-13</td><td>Brute force op keys mogelijk</td><td>R13</td><td>Maximaal 100 requests per minuut per key; na 10 mislukte authenticaties per minuut per IP volgt 429</td><td>101e request binnen een minuut → 429</td><td class="could">Could</td></tr>
+<tr><td>VN-14</td><td>Gegevensverlies bij crash</td><td>R08</td><td>Dagelijkse back-up van de database met een geteste herstelprocedure</td><td>Herstel van back-up op testomgeving binnen 15 minuten</td><td class="could">Could</td></tr>
+</table>
+<p class="note">MoSCoW: Must = nodig voor een bruikbare eerste versie; Should = belangrijk, maar het systeem werkt zonder; Could = wenselijk als er tijd is; Won’t = bewust niet in deze fase. Na goedkeuring door de product owner gaan de verbeterpunten als items op de backlog.</p>
+</body></html>

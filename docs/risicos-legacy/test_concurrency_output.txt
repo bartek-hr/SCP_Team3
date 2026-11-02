@@ -1,0 +1,12 @@
+== Test 1: referentie
+GET /warehouses alleen: 200 in 13 ms
+
+== Test 2: snelle request terwijl een trage request loopt
+GET /api/v1/clients/1/orders: 200 in 1.4 s
+  GET /warehouses 0,5 s later gestart: 200 in 0.9 s
+GET /api/v1/orders: 200 in 130.2 s
+  GET /warehouses 0,5 s later gestart: 200 in 129.7 s
+
+== Test 3: één client stuurt een onvolledige request (geen API-key nodig)
+GET /warehouses terwijl de onvolledige request openstaat: geen antwoord (TimeoutError) na 15.0 s
+GET /warehouses nadat die client de verbinding sluit: 200 in 41 ms

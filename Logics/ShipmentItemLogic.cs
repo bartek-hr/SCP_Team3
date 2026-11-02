@@ -3,7 +3,7 @@ using CargoHUB.Models;
 
 namespace CargoHUB.Logics;
 
-public sealed class ShipmentItemLogic(ShipmentItemDataAccess dataAccess)
+public sealed class ShipmentItemLogic(ShipmentItemDataAccess dataAccess, ShipmentDataAccess shipmentAccess, ItemAccess itemAccess)
 {
 
     public ShipmentItem? GetById(int id)
@@ -29,22 +29,21 @@ public sealed class ShipmentItemLogic(ShipmentItemDataAccess dataAccess)
 
     public void Add(ShipmentItem shipmentitem)
     {
-        ValidateItem(shipmentitem);
+        Validate(shipmentitem);
         if (shipmentitem.Id > 0 && GetById(shipmentitem.Id) is not null)
         {
-            throw new InvalidOperationException($"A shipment with ID {shipmentitem.Id} already exists.");
+            throw new InvalidOperationException($"A shipment item with ID {shipmentitem.Id} already exists.");
         }
+
+        EnsureItemNotInShipment(shipmentitem, 0);
         dataAccess.Add(shipmentitem);
     }
 
     public void Update(int id, ShipmentItem shipmentitem)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
-        ValidateItem(shipmentitem);
-        if (shipmentitem.Id != 0 && shipmentitem.Id != id)
-        {
-            throw new ArgumentException("The shipment ID must match the requested ID.", nameof(shipmentitem));
-        }
+        Validate(shipmentitem);
+        Validation.MatchesRoute(shipmentitem.Id, id);
 
         ShipmentItem? existing = GetById(id);
         if (existing is null)
@@ -52,6 +51,7 @@ public sealed class ShipmentItemLogic(ShipmentItemDataAccess dataAccess)
             return;
         }
 
+        EnsureItemNotInShipment(shipmentitem, id);
         dataAccess.Update(id, shipmentitem);
     }
 
@@ -61,25 +61,21 @@ public sealed class ShipmentItemLogic(ShipmentItemDataAccess dataAccess)
         dataAccess.Remove(id);
     }
 
-    public static void ValidateItem(ShipmentItem item)
+    private void Validate(ShipmentItem shipmentitem)
     {
-        ArgumentNullException.ThrowIfNull(item);
-        ArgumentNullException.ThrowIfNull(item);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.ItemId);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.Amount);
+        ArgumentNullException.ThrowIfNull(shipmentitem);
+        Validation.NotNegative(shipmentitem.Id, "id");
+        Validation.Reference(shipmentitem.ShipmentId, "shipment_id", id => shipmentAccess.GetById(id) is not null);
+        Validation.Reference(shipmentitem.ItemId, "item_id", id => itemAccess.GetById(id) is not null);
+        Validation.Positive(shipmentitem.Amount, "amount");
     }
 
-    public static void ValidateItems(IReadOnlyList<ShipmentItem> items)
+    // A shipment lists each item once, like the items of PUT /shipments/{id}/items.
+    private void EnsureItemNotInShipment(ShipmentItem shipmentitem, int ownId)
     {
-        ArgumentNullException.ThrowIfNull(items);
-        var itemIds = new HashSet<int>();
-        foreach (ShipmentItem item in items)
+        if (dataAccess.GetItems(shipmentitem.ShipmentId).Any(row => row.ItemId == shipmentitem.ItemId && row.Id != ownId))
         {
-            ArgumentNullException.ThrowIfNull(item);
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.ItemId);
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.Amount);
-            if (!itemIds.Add(item.ItemId))
-                throw new ArgumentException("Each item may appear only once.", nameof(items));
+            throw new InvalidOperationException($"Shipment {shipmentitem.ShipmentId} already contains item_id {shipmentitem.ItemId}.");
         }
     }
 }

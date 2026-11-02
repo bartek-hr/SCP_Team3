@@ -26,31 +26,19 @@ public sealed class LocationHandler(LocationLogic logic)
     [Post("/locations")]
     [Describe(
         "Creates a location.",
-        Description = "The warehouse_id must refer to an existing warehouse.",
+        Description = "code and name are required and warehouse_id must refer to an existing warehouse. Returns 409 when the id is already used.",
         Tags = ["Locations"],
         OperationId = "createLocation",
         SuccessStatus = StatusCodes.Status201Created)]
     public Response Add(Request<Location> request)
     {
-        try
-        {
-            logic.Add(request.Data);
-            return Response.Created();
-        }
-        catch (ArgumentException)
-        {
-            return Response.BadRequest();
-        }
-        catch (InvalidOperationException)
-        {
-            return Response.Conflict();
-        }
+        return WriteResponse.Save(() => logic.Add(request.Data), StatusCodes.Status201Created);
     }
 
     [Put("/locations/{id}")]
     [Describe(
         "Updates a location.",
-        Description = "The warehouse_id must refer to an existing warehouse.",
+        Description = "Uses the same rules as creating a location. An id in the body must match the URL.",
         Tags = ["Locations"],
         OperationId = "updateLocation")]
     public Response Update(Request<Location> request)
@@ -60,20 +48,13 @@ public sealed class LocationHandler(LocationLogic logic)
             return Response.BadRequest();
         }
 
-        try
-        {
-            return logic.Update(id, request.Data) ? Response.Ok() : Response.NotFound();
-        }
-        catch (ArgumentException)
-        {
-            return Response.BadRequest();
-        }
+        return WriteResponse.Save(() => logic.Update(id, request.Data), StatusCodes.Status200OK);
     }
 
     [Delete("/locations/{id}")]
     [Describe(
         "Deletes a location.",
-        Description = "Returns 409 while transfers still use the location.",
+        Description = "Returns 409 while transfers or inventories still use the location.",
         Tags = ["Locations"],
         OperationId = "deleteLocation")]
     public Response Remove(Request request)
@@ -83,13 +64,6 @@ public sealed class LocationHandler(LocationLogic logic)
             return Response.BadRequest();
         }
 
-        try
-        {
-            return logic.Remove(id) ? Response.Ok() : Response.NotFound();
-        }
-        catch (InvalidOperationException)
-        {
-            return Response.Conflict();
-        }
+        return WriteResponse.Save(() => logic.Remove(id), StatusCodes.Status200OK);
     }
 }

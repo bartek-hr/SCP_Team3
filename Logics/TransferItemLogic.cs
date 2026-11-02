@@ -3,7 +3,7 @@ using CargoHUB.Models;
 
 namespace CargoHUB.Logics;
 
-public sealed class TransferItemLogic(TransferItemAccess dataAccess)
+public sealed class TransferItemLogic(TransferItemAccess dataAccess, TransferAccess transferAccess, ItemAccess itemAccess)
 {
 
     public TransferItem? GetById(int id)
@@ -29,22 +29,22 @@ public sealed class TransferItemLogic(TransferItemAccess dataAccess)
 
     public void Add(TransferItem Transferitem)
     {
-        ValidateItem(Transferitem);
+        Validate(Transferitem);
         if (Transferitem.Id > 0 && GetById(Transferitem.Id) is not null)
         {
-            throw new InvalidOperationException($"A Transfer with ID {Transferitem.Id} already exists.");
+            throw new InvalidOperationException($"A transfer item with ID {Transferitem.Id} already exists.");
         }
+
+        EnsureTransferIsScheduled(Transferitem.TransferId);
+        EnsureItemNotInTransfer(Transferitem, 0);
         dataAccess.Add(Transferitem);
     }
 
     public void Update(int id, TransferItem Transferitem)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
-        ValidateItem(Transferitem);
-        if (Transferitem.Id != 0 && Transferitem.Id != id)
-        {
-            throw new ArgumentException("The Transfer ID must match the requested ID.", nameof(Transferitem));
-        }
+        Validate(Transferitem);
+        Validation.MatchesRoute(Transferitem.Id, id);
 
         TransferItem? existing = GetById(id);
         if (existing is null)
@@ -52,34 +52,48 @@ public sealed class TransferItemLogic(TransferItemAccess dataAccess)
             return;
         }
 
+        // Both the current and the new transfer must still be open.
+        EnsureTransferIsScheduled(existing.TransferId);
+        EnsureTransferIsScheduled(Transferitem.TransferId);
+        EnsureItemNotInTransfer(Transferitem, id);
         dataAccess.Update(id, Transferitem);
     }
 
     public void Remove(int id)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
+        if (GetById(id) is { } existing)
+        {
+            EnsureTransferIsScheduled(existing.TransferId);
+        }
+
         dataAccess.Remove(id);
     }
 
-    public static void ValidateItem(TransferItem item)
+    private void Validate(TransferItem transferitem)
     {
-        ArgumentNullException.ThrowIfNull(item);
-        ArgumentNullException.ThrowIfNull(item);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.ItemId);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.Amount);
+        ArgumentNullException.ThrowIfNull(transferitem);
+        // transfer_id is not read from JSON (see TransferItem), so a request body always arrives with 0 here.
+        Validation.Reference(transferitem.TransferId, "transfer_id", id => transferAccess.GetById(id) is not null);
+        Validation.Reference(transferitem.ItemId, "item_id", id => itemAccess.GetById(id) is not null);
+        Validation.Positive(transferitem.Amount, "amount");
     }
 
-    public static void ValidateItems(IReadOnlyList<TransferItem> items)
+    // A processed transfer has moved its stock, so its items are final.
+    private void EnsureTransferIsScheduled(int transferId)
     {
-        ArgumentNullException.ThrowIfNull(items);
-        var itemIds = new HashSet<int>();
-        foreach (TransferItem item in items)
+        if (transferAccess.GetById(transferId)?.TransferStatus == TransferStatus.Processed)
         {
-            ArgumentNullException.ThrowIfNull(item);
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.ItemId);
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.Amount);
-            if (!itemIds.Add(item.ItemId))
-                throw new ArgumentException("Each item may appear only once.", nameof(items));
+            throw new InvalidOperationException($"Transfer {transferId} is already processed and cannot be changed.");
+        }
+    }
+
+    // A transfer lists each item once, like the items of PUT /transfers/{id}.
+    private void EnsureItemNotInTransfer(TransferItem transferitem, int ownId)
+    {
+        if (dataAccess.GetItems(transferitem.TransferId).Any(row => row.ItemId == transferitem.ItemId && row.Id != ownId))
+        {
+            throw new InvalidOperationException($"Transfer {transferitem.TransferId} already contains item_id {transferitem.ItemId}.");
         }
     }
 }

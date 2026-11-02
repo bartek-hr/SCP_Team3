@@ -4,7 +4,7 @@ using CargoHUB.Models;
 
 namespace CargoHUB.Logics;
 
-public sealed class WarehouseLogic(WarehouseAccess warehouseAccess, LocationAccess locationAccess)
+public sealed class WarehouseLogic(WarehouseAccess warehouseAccess, LocationAccess locationAccess, OrderDataAccess orderAccess)
 {
     public IReadOnlyList<Warehouse> GetAll() => warehouseAccess.GetAll();
 
@@ -13,10 +13,7 @@ public sealed class WarehouseLogic(WarehouseAccess warehouseAccess, LocationAcce
     public void Add(Warehouse warehouse)
     {
         Validate(warehouse);
-        if (warehouse.Id < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(warehouse.Id));
-        }
+        Validation.NotNegative(warehouse.Id, "id");
 
         if (warehouse.Id > 0 && GetById(warehouse.Id) is not null)
         {
@@ -41,6 +38,7 @@ public sealed class WarehouseLogic(WarehouseAccess warehouseAccess, LocationAcce
         }
 
         Validate(warehouse);
+        Validation.MatchesRoute(warehouse.Id, id);
         warehouse.UpdatedAt = DateTime.UtcNow;
         return warehouseAccess.Update(id, warehouse);
     }
@@ -62,26 +60,31 @@ public sealed class WarehouseLogic(WarehouseAccess warehouseAccess, LocationAcce
             throw new InvalidOperationException($"Warehouse {id} still has locations.");
         }
 
+        if (orderAccess.AnyForWarehouse(id))
+        {
+            throw new InvalidOperationException($"Warehouse {id} is still used by orders.");
+        }
+
         return warehouseAccess.Remove(id);
     }
 
     private static void Validate(Warehouse warehouse)
     {
         ArgumentNullException.ThrowIfNull(warehouse);
-
-        if (new[]
-            {
-                warehouse.Code, warehouse.Name, warehouse.Address, warehouse.City,
-                warehouse.ZipCode, warehouse.Province, warehouse.Country,
-                warehouse.ContactName, warehouse.ContactPhone, warehouse.ContactEmail
-            }.Any(string.IsNullOrWhiteSpace))
-        {
-            throw new ArgumentException("All warehouse fields are required.", nameof(warehouse));
-        }
+        Validation.Required(warehouse.Code, "code");
+        Validation.Required(warehouse.Name, "name");
+        Validation.Required(warehouse.Address, "address");
+        Validation.Required(warehouse.City, "city");
+        Validation.Required(warehouse.ZipCode, "zip_code");
+        Validation.Required(warehouse.Province, "province");
+        Validation.Required(warehouse.Country, "country");
+        Validation.Required(warehouse.ContactName, "contact_name");
+        Validation.Required(warehouse.ContactPhone, "contact_phone");
+        Validation.Required(warehouse.ContactEmail, "contact_email");
 
         if (!new EmailAddressAttribute().IsValid(warehouse.ContactEmail))
         {
-            throw new ArgumentException("ContactEmail must be a valid email address.", nameof(warehouse));
+            throw new ArgumentException("contact_email must be a valid email address.");
         }
     }
 }

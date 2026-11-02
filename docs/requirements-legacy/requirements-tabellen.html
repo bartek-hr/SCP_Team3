@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="nl"><head><meta charset="utf-8"><title>Requirements legacy</title>
+<style>
+body{font-family:Calibri,Arial,sans-serif;font-size:11pt;max-width:1150px;margin:24px auto;padding:0 16px;background:#fff;color:#000}
+h1{font-size:16pt}h2{font-size:13pt;margin-top:28px}p.note{font-size:9.5pt;color:#444}
+table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #999;padding:3px 6px;font-size:9.5pt;text-align:left;vertical-align:top}
+th{background:#d9e2f3}code{font-family:Consolas,monospace;font-size:9pt}
+td.ja{background:#d4edda}td.nee{background:#f8d7da}td.deels{background:#fff3cd}
+</style></head><body>
+<h1>Requirements huidige CargoHUB API (legacy)</h1>
+<p class="note">Afgeleid uit <code>legacy/api</code>, <code>legacy/data/user.json</code> en de dataset (commit 0519310). De kolom “Legacy voldoet?” is gebaseerd op de endpointtests van 4 oktober 2026 (<code>docs/endpoints-legacy/test_output.txt</code>). Tip: selecteer een tabel, kopieer en plak in Word.</p>
+
+<h2>Tabel 1 – Actoren (systemen die de API aanroepen)</h2>
+<table>
+<tr><th>Actor (app in user.json)</th><th>Waarschijnlijke gebruiker</th><th>Rechten</th><th>Taak in het magazijnproces</th></tr>
+<tr><td><code>facility_management</code></td><td>Facility manager / beheer</td><td>GET, POST, PUT, DELETE op warehouses, locations, item_lines, item_groups, item_types, suppliers, clients; verder alleen GET</td><td>Beheert stamdata: magazijnen, locaties, artikelclassificatie, leveranciers en klanten</td></tr>
+<tr><td><code>receiving_station</code></td><td>Medewerker goederenontvangst</td><td>GET op alles; POST + PUT op items, item-classificatie, suppliers, orders, shipments, transfers, inventories</td><td>Registreert binnenkomende goederen, nieuwe artikelen en voorraad</td></tr>
+<tr><td><code>shipping_station</code></td><td>Medewerker expeditie</td><td>GET op alles; POST + PUT op clients, shipments, transfers; PUT op orders en inventories</td><td>Maakt zendingen aan voor orders en beheert afleveradressen (klanten)</td></tr>
+<tr><td><code>order_picker</code></td><td>Orderpicker (handheld)</td><td>GET op alles; PUT op orders, transfers, inventories</td><td>Verzamelt orderregels en verplaatst voorraad tussen locaties</td></tr>
+<tr><td><code>smartglass_reader</code></td><td>Magazijnmedewerker met smart glasses</td><td>GET op alles; PUT op transfers en inventories</td><td>Scant locaties/artikelen, corrigeert voorraad en voert transfers uit</td></tr>
+<tr><td><code>analytics_dashboard</code></td><td>Management / planning</td><td>Alleen GET op alles</td><td>Rapportages en inzicht in voorraad, orders en zendingen</td></tr>
+</table>
+<p class="note">Geen enkele actor heeft DELETE-recht op items, orders, shipments, transfers en inventories, terwijl die endpoints wel bestaan.</p>
+
+<h2>Tabel 2 – Stakeholders</h2>
+<table>
+<tr><th>Stakeholder</th><th>Belang</th><th>Invloed</th><th>Relatie met de API</th></tr>
+<tr><td>Opdrachtgever / retailer (in de dataset: distributiecentra van een supermarktketen)</td><td>Betrouwbare voorraad, tijdige levering aan filialen, lagere kosten</td><td>Hoog</td><td>Eigenaar van het systeem en de data</td></tr>
+<tr><td>Magazijnmedewerkers (ontvangst, expeditie, orderpickers)</td><td>Snel en foutloos kunnen werken met handhelds/smart glasses</td><td>Middel</td><td>Indirect, via de actor-apps</td></tr>
+<tr><td>Facility manager</td><td>Juiste inrichting van magazijnen en locaties</td><td>Middel</td><td>Via <code>facility_management</code></td></tr>
+<tr><td>Management / planning</td><td>Actuele cijfers voor beslissingen</td><td>Hoog</td><td>Via <code>analytics_dashboard</code></td></tr>
+<tr><td>Filialen (clients)</td><td>Bestelde goederen op tijd en compleet ontvangen</td><td>Middel</td><td>Komen voor als <code>client</code> in orders</td></tr>
+<tr><td>Leveranciers (suppliers)</td><td>Correcte inkoopgegevens, tijdige afname</td><td>Laag</td><td>Komen voor als <code>supplier</code> bij items</td></tr>
+<tr><td>Vervoerders (carriers)</td><td>Juiste zendinggegevens</td><td>Laag</td><td>Komen voor als <code>carrier_name</code> bij shipments</td></tr>
+<tr><td>Ontwikkelaars van de client-apps</td><td>Stabiele, gedocumenteerde API zonder brekende wijzigingen</td><td>Middel</td><td>Gebruiken de endpoints direct</td></tr>
+<tr><td>Ontwikkel- en beheerteam (SCP Team 3)</td><td>Onderhoudbare, testbare code en een werkende pipeline</td><td>Hoog</td><td>Bouwt en beheert de API</td></tr>
+<tr><td>Product owner / docent</td><td>Product voldoet aan opdracht en leerdoelen</td><td>Hoog</td><td>Accepteert requirements en oplevering</td></tr>
+</table>
+
+<h2>Tabel 3 – Functionele requirements</h2>
+<table>
+<tr><th>ID</th><th>Actor</th><th>Requirement (het systeem moet …)</th><th>Endpoint(s)</th><th>Business value</th><th>MoSCoW</th><th>Legacy voldoet?</th></tr>
+<tr><td>FR-01</td><td>facility_management</td><td>… een warehouse kunnen aanmaken, wijzigen en verwijderen; na een geslaagde aanroep is de wijziging via GET zichtbaar</td><td><code>POST/PUT/DELETE /warehouses</code></td><td>Nieuwe distributiecentra snel in gebruik nemen</td><td>Must</td><td class="nee">Nee – wordt niet opgeslagen</td></tr>
+<tr><td>FR-02</td><td>facility_management</td><td>… locaties binnen een warehouse beheren, met een code die uniek is binnen dat warehouse</td><td><code>/locations</code>, <code>GET /warehouses/{id}/locations</code></td><td>Elke pallet/doos heeft een vindbare plek</td><td>Must</td><td class="nee">Nee – niet opgeslagen; 4 dubbele codes</td></tr>
+<tr><td>FR-03</td><td>receiving_station</td><td>… een artikel registreren met code, barcode, leverancier en classificatie (line, group, type)</td><td><code>/items</code>, <code>/item_lines</code>, <code>/item_groups</code>, <code>/item_types</code>, <code>/suppliers</code></td><td>Artikelen zijn eenduidig te scannen en te groeperen</td><td>Must</td><td class="nee">Nee – niet opgeslagen</td></tr>
+<tr><td>FR-04</td><td>alle actoren</td><td>… per artikel de voorraad per locatie tonen, en het totaal verwacht, besteld, gereserveerd en beschikbaar (on_hand − allocated)</td><td><code>GET /items/{id}/inventory</code>, <code>…/inventory/totals</code></td><td>Weten wat leverbaar is; voorkomt nee-verkoop</td><td>Must</td><td class="ja">Ja (23–31 ms)</td></tr>
+<tr><td>FR-05</td><td>receiving_station</td><td>… voorraad op een locatie registreren of bijwerken (één regel per artikel + locatie)</td><td><code>POST /inventories</code></td><td>Actuele voorraad na ontvangst</td><td>Must</td><td class="deels">Deels – 201, opslag niet aantoonbaar</td></tr>
+<tr><td>FR-06</td><td>receiving_station, order_picker</td><td>… een order met orderregels vastleggen en bij wijziging van regels de gereserveerde voorraad (quantity_allocated) aanpassen</td><td><code>POST /orders</code>, <code>PUT /orders/{id}</code>, <code>PUT /orders/{id}/items</code></td><td>Voorraad wordt gereserveerd voor bestellingen van filialen</td><td>Must</td><td class="nee">Nee – niet opgeslagen</td></tr>
+<tr><td>FR-07</td><td>shipping_station</td><td>… een zending aanmaken voor een order, met vervoerder, type (inkomend/uitgaand) en status</td><td><code>POST /shipments</code>, <code>PUT /shipments/{id}</code>, <code>…/orders</code>, <code>…/items</code></td><td>Uitlevering plannen en volgen tot aan het filiaal</td><td>Must</td><td class="nee">Nee – niet opgeslagen</td></tr>
+<tr><td>FR-08</td><td>order_picker, smartglass_reader</td><td>… een transfer tussen twee locaties plannen en uitvoeren: bij commit gaat de voorraad op de bronlocatie omlaag, op de doellocatie omhoog, en wordt de status Processed</td><td><code>POST /transfers</code>, <code>PUT /transfers/{id}/commit</code></td><td>Voorraad staat op de juiste plek voor het picken</td><td>Must</td><td class="nee">Nee – status blijft Scheduled</td></tr>
+<tr><td>FR-09</td><td>shipping_station, facility_management</td><td>… klanten (filialen) beheren en alle orders van een klant tonen (als klant, ship-to of bill-to)</td><td><code>/clients</code>, <code>GET /clients/{id}/orders</code></td><td>Klantenservice en levering per filiaal</td><td>Should</td><td class="deels">Deels – lezen werkt (2 s), schrijven niet</td></tr>
+<tr><td>FR-10</td><td>analytics_dashboard</td><td>… alle gegevens alleen-lezen beschikbaar stellen</td><td>alle <code>GET</code>-endpoints</td><td>Rapportage en sturing</td><td>Should</td><td class="deels">Deels – werkt, maar /orders en /shipments duren 205–234 s</td></tr>
+<tr><td>FR-11</td><td>alle actoren</td><td>… een aanroep alleen toestaan met een geldige API-key en alleen voor de resources en methodes waar die key recht op heeft</td><td>header <code>API_KEY</code>, alle endpoints</td><td>Voorkomt ongeautoriseerde wijzigingen</td><td>Must</td><td class="ja">Ja – 401 / 403 correct</td></tr>
+<tr><td>FR-12</td><td>alle actoren</td><td>… een melding versturen wanneer een transfer is gepland of verwerkt</td><td><code>POST /transfers</code>, <code>PUT /transfers/{id}/commit</code></td><td>Medewerkers weten welke verplaatsingen klaarstaan</td><td>Could</td><td class="deels">Deels – alleen een print in de console</td></tr>
+</table>
+
+<h2>Tabel 4 – Niet-functionele requirements</h2>
+<table>
+<tr><th>ID</th><th>Categorie</th><th>Requirement (meetbaar)</th><th>Meetmethode</th><th>Legacy-meting</th><th>MoSCoW</th><th>Legacy voldoet?</th></tr>
+<tr><td>NFR-01</td><td>Performance</td><td>95% van de GET-requests antwoordt binnen 500 ms met de huidige dataset; geen enkele request duurt langer dan 5 s</td><td>Endpointtest met tijdmeting</td><td>32 van 36 GETs &lt; 500 ms; <code>/orders</code> 205 s, <code>/shipments</code> 234 s</td><td>Must</td><td class="nee">Nee</td></tr>
+<tr><td>NFR-02</td><td>Performance</td><td>Lijst-endpoints ondersteunen paginering met maximaal 100 records per pagina</td><td>Endpointtest met <code>?page=&amp;pageSize=</code></td><td>Geen paginering; query-string geeft 403</td><td>Should</td><td class="nee">Nee</td></tr>
+<tr><td>NFR-03</td><td>Betrouwbaarheid</td><td>100% van de geslaagde (2xx) schrijfacties is daarna via GET zichtbaar</td><td>POST/PUT/DELETE gevolgd door GET</td><td>0 van 11 resources</td><td>Must</td><td class="nee">Nee</td></tr>
+<tr><td>NFR-04</td><td>Data-integriteit</td><td>0 dubbele ids/referenties en 0 verwijzingen naar niet-bestaande records; voorraad nooit negatief</td><td>Integriteitsscript op de data</td><td>854 dubbele orderreferenties, 4 dubbele locatiecodes; 0 wezen; 0 negatief</td><td>Must</td><td class="deels">Deels</td></tr>
+<tr><td>NFR-05</td><td>Correctheid API</td><td>Statuscodes volgens RFC 9110: 404 bij onbekend id/resource, 400 bij ongeldige invoer, 405 bij niet-ondersteunde methode; elke request krijgt een antwoord</td><td>14 foutgevallen in endpointtest</td><td>3 van 14 correct</td><td>Must</td><td class="nee">Nee</td></tr>
+<tr><td>NFR-06</td><td>Correctheid API</td><td>Foutresponses zijn JSON volgens RFC 9457 (Problem Details) met <code>Content-Type</code></td><td>Endpointtest</td><td>Lege body, geen Content-Type</td><td>Should</td><td class="nee">Nee</td></tr>
+<tr><td>NFR-07</td><td>Beveiliging</td><td>API-keys worden niet in platte tekst opgeslagen; verkeer loopt via HTTPS</td><td>Code-review / configuratie</td><td>Keys in platte tekst in <code>user.json</code>; alleen HTTP</td><td>Must</td><td class="nee">Nee</td></tr>
+<tr><td>NFR-08</td><td>Onderhoudbaarheid</td><td>Geen functie met cyclomatic complexity &gt; 10; elk bestand Maintainability Index ≥ 20</td><td>radon (Python) / Code Metrics (C#)</td><td>Max. CC 62; MI <code>main.py</code> 0,00</td><td>Should</td><td class="nee">Nee</td></tr>
+<tr><td>NFR-09</td><td>Testbaarheid</td><td>Elke endpoint heeft minstens één geautomatiseerde test die in de CI-pipeline draait</td><td>Testrapport / pipeline</td><td>0 tests</td><td>Must</td><td class="nee">Nee</td></tr>
+<tr><td>NFR-10</td><td>Documentatie</td><td>Alle endpoints staan in een OpenAPI-specificatie (Swagger)</td><td>Swagger UI</td><td>Geen specificatie</td><td>Must</td><td class="nee">Nee</td></tr>
+<tr><td>NFR-11</td><td>Compatibiliteit</td><td>De nieuwe API behoudt alle 76 paden, methodes en veldnamen van de legacy-API</td><td>Dezelfde endpointtest tegen de nieuwe API</td><td>n.v.t. (referentie)</td><td>Must</td><td>–</td></tr>
+</table>
+<p class="note">MoSCoW = Must / Should / Could / Won’t have. Groen = voldoet, geel = deels, rood = voldoet niet.</p>
+</body></html>

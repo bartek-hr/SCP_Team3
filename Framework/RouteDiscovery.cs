@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
 
@@ -99,9 +100,9 @@ public static class RouteDiscovery
         {
             routeResult = await HandlerInvoker.InvokeAsync(context, handlerType, routeMethod);
         }
-        catch (RequestBindingException)
+        catch (RequestBindingException exception)
         {
-            await HandlerInvoker.ExecuteResultAsync(context, Response.BadRequest());
+            await HandlerInvoker.ExecuteResultAsync(context, Response.BadRequest(exception.Message));
             return;
         }
 
@@ -229,7 +230,9 @@ public static class RouteDiscovery
                     ["application/json"] = new OpenApiMediaType { Schema = schema },
                 },
             };
-            AddStatusResponse(operation, StatusCodes.Status400BadRequest, "Invalid JSON request body.");
+            var problemSchema = await context.GetOrCreateSchemaAsync(typeof(ProblemDetails), null, cancellationToken);
+            AddProblemResponse(operation, StatusCodes.Status400BadRequest,
+                "Invalid request body. The detail names the field that is wrong.", problemSchema);
         }
 
         var responseType = GetResponseBodyType(method);
@@ -314,6 +317,20 @@ public static class RouteDiscovery
             Content = new Dictionary<string, OpenApiMediaType>
             {
                 ["application/json"] = new OpenApiMediaType { Schema = schema },
+            },
+        };
+    }
+
+    private static void AddProblemResponse(OpenApiOperation operation, int status, string description, OpenApiSchema schema)
+    {
+        var responses = operation.Responses
+                        ?? throw new InvalidOperationException("OpenAPI operation responses were not initialized.");
+        responses[status.ToString(System.Globalization.CultureInfo.InvariantCulture)] = new OpenApiResponse
+        {
+            Description = description,
+            Content = new Dictionary<string, OpenApiMediaType>
+            {
+                ["application/problem+json"] = new OpenApiMediaType { Schema = schema },
             },
         };
     }

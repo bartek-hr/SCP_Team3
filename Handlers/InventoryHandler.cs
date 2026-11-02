@@ -53,7 +53,12 @@ public sealed class InventoryHandler(InventoryLogic logic)
     }
 
     [Post("/inventories")]
-    [Describe("Voegt voorraad toe of vervangt de bestaande voorraadregel.", Tags = ["Inventories"], OperationId = "upsertInventory", SuccessStatus = StatusCodes.Status201Created)]
+    [Describe(
+        "Voegt voorraad toe of vervangt de bestaande voorraadregel.",
+        Description = "item_id en location_id moeten bestaan en de aantallen mogen niet negatief zijn.",
+        Tags = ["Inventories"],
+        OperationId = "upsertInventory",
+        SuccessStatus = StatusCodes.Status201Created)]
     public Response AddOrUpdate(Request<Inventory> request)
     {
         return WriteResponse.Save(() => logic.AddOrUpdate(request.Data), StatusCodes.Status201Created);

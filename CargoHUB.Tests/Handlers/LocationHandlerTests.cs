@@ -1,6 +1,7 @@
 using System.Text.Json;
 using CargoHUB.Access;
 using CargoHUB.Logics;
+using CargoHUB.Models;
 using CargoHUB.Tests.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -90,16 +91,30 @@ public sealed class LocationHandlerTests : HandlerTest
         await using WebApplication app = CreateApplication();
         string unknownWarehouse = JsonSerializer.Serialize(TestData.CreateLocation(warehouseId: 999));
 
-        Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/locations", body: unknownWarehouse, method: "POST")).Response.StatusCode);
+        await AssertProblemAsync(
+            await InvokeAsync(app, "/api/v1/locations", body: unknownWarehouse, method: "POST"), 400, "warehouse_id 999 does not exist.");
         Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/locations/{id}", "1", unknownWarehouse, "PUT")).Response.StatusCode);
         Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/locations", body: "{", method: "POST")).Response.StatusCode);
         Assert.AreEqual(3, Context.Locations.Count());
         Assert.AreEqual(1, Context.Locations.AsNoTracking().Single(location => location.Id == 1).WarehouseId);
     }
 
+    [TestMethod]
+    public async Task DeletingALocationWithInventoryReturns409Async()
+    {
+        await using WebApplication app = CreateApplication();
+        Context.Inventories.Add(new Inventory { ItemId = 1, LocationId = 3, QuantityOnHand = 4 });
+        Context.SaveChanges();
+
+        await AssertProblemAsync(
+            await InvokeAsync(app, "/api/v1/locations/{id}", "3", method: "DELETE"), 409, "Location 3 still has inventory.");
+        Assert.AreEqual(3, Context.Locations.Count());
+    }
+
     private WebApplication CreateApplication() => CreateApplication(services => services
         .AddTransient<LocationAccess>()
         .AddTransient<WarehouseAccess>()
         .AddTransient<TransferAccess>()
+        .AddTransient<InventoryDataAccess>()
         .AddTransient<LocationLogic>());
 }

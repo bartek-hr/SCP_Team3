@@ -34,4 +34,34 @@ public abstract class DatabaseTest
     protected virtual void SeedDatabase()
     {
     }
+
+    // Catalog items need an item line and group because of their foreign keys.
+    protected void SeedCatalogItems(params int[] ids)
+    {
+        if (Context.ItemLines.Find(1) is null)
+        {
+            Context.ItemLines.Add(TestData.CreateItemLine(1));
+        }
+
+        if (Context.ItemGroups.Find(1) is null)
+        {
+            Context.ItemGroups.Add(TestData.CreateItemGroup(1));
+        }
+
+        Context.Items.AddRange(ids.Select(id => TestData.CreateCatalogItem(id)));
+        Context.SaveChanges();
+    }
+
+    // The API returns these messages to the client, so the tests pin them down.
+    protected static void AssertInvalid(Action action, string message)
+    {
+        ArgumentException exception = Assert.ThrowsException<ArgumentException>(action);
+        Assert.AreEqual(message, exception.Message);
+    }
+
+    protected static void AssertConflict(Action action, string message)
+    {
+        InvalidOperationException exception = Assert.ThrowsException<InvalidOperationException>(action);
+        Assert.AreEqual(message, exception.Message);
+    }
 }

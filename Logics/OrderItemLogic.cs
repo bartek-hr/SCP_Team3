@@ -3,7 +3,7 @@ using CargoHUB.Models;
 
 namespace CargoHUB.Logics;
 
-public sealed class OrderItemLogic(OrderItemDataAccess dataAccess)
+public sealed class OrderItemLogic(OrderItemDataAccess dataAccess, OrderDataAccess orderAccess, ItemAccess itemAccess)
 {
     public IReadOnlyList<OrderItem> GetAll()
     {
@@ -40,7 +40,7 @@ public sealed class OrderItemLogic(OrderItemDataAccess dataAccess)
             throw new InvalidOperationException($"An orderitem with ID {orderitem.Id} already exists.");
         }
 
-
+        EnsureItemNotInOrder(orderitem, 0);
         dataAccess.Add(orderitem);
     }
 
@@ -48,10 +48,7 @@ public sealed class OrderItemLogic(OrderItemDataAccess dataAccess)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
         Validate(orderitem);
-        if (orderitem.Id != 0 && orderitem.Id != id)
-        {
-            throw new ArgumentException("The order ID must match the requested ID.", nameof(orderitem));
-        }
+        Validation.MatchesRoute(orderitem.Id, id);
 
         OrderItem? existing = GetById(id);
         if (existing is null)
@@ -59,6 +56,7 @@ public sealed class OrderItemLogic(OrderItemDataAccess dataAccess)
             return;
         }
 
+        EnsureItemNotInOrder(orderitem, id);
         dataAccess.Update(id, orderitem);
     }
 
@@ -69,15 +67,22 @@ public sealed class OrderItemLogic(OrderItemDataAccess dataAccess)
         dataAccess.Remove(id);
     }
 
-    private static void Validate(OrderItem orderitem)
+    private void Validate(OrderItem orderitem)
     {
         ArgumentNullException.ThrowIfNull(orderitem);
-        ArgumentOutOfRangeException.ThrowIfNegative(orderitem.Id);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(orderitem.OrderId);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(orderitem.ItemId);
-        if (orderitem.UnitPrice is < 0)
-            throw new ArgumentOutOfRangeException(nameof(orderitem.UnitPrice));
+        Validation.NotNegative(orderitem.Id, "id");
+        Validation.Reference(orderitem.OrderId, "order_id", id => orderAccess.GetById(id) is not null);
+        Validation.Reference(orderitem.ItemId, "item_id", id => itemAccess.GetById(id) is not null);
+        Validation.Positive(orderitem.Amount, "amount");
+        Validation.NotNegative(orderitem.UnitPrice, "unit_price");
     }
 
-
+    // An order lists each item once, like the items of PUT /orders/{id}/items.
+    private void EnsureItemNotInOrder(OrderItem orderitem, int ownId)
+    {
+        if (dataAccess.GetByOrderId(orderitem.OrderId).Any(row => row.ItemId == orderitem.ItemId && row.Id != ownId))
+        {
+            throw new InvalidOperationException($"Order {orderitem.OrderId} already contains item_id {orderitem.ItemId}.");
+        }
+    }
 }

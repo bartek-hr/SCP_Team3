@@ -28,7 +28,7 @@ public sealed class TransferItemHandler(TransferItemLogic logic)
     [Describe("Geeft de artikelen terug.", Tags = ["TransferItems"], OperationId = "getTransferItemsByTransferId")]
     public Response<IReadOnlyList<TransferItem>> GetItems(Request request)
     {
-        if (!request.TryParam<int>("shipment_id", out int id) || id <= 0)
+        if (!request.TryParam<int>("id", out int id) || id <= 0)
         {
             return Response<IReadOnlyList<TransferItem>>.BadRequest();
         }
@@ -37,7 +37,12 @@ public sealed class TransferItemHandler(TransferItemLogic logic)
     }
 
     [Post("/TransferItems")]
-    [Describe("Maakt een record aan.", Tags = ["TransferItems"], OperationId = "createTransferItem", SuccessStatus = StatusCodes.Status201Created)]
+    [Describe(
+        "Maakt een record aan.",
+        Description = "transfer_id en item_id moeten bestaan en amount moet positief zijn. Geeft 409 voor een verwerkte transfer of als het artikel er al in staat. Let op: transfer_id wordt nog niet uit de JSON gelezen.",
+        Tags = ["TransferItems"],
+        OperationId = "createTransferItem",
+        SuccessStatus = StatusCodes.Status201Created)]
     public Response Add(Request<TransferItem> request)
     {
         return WriteResponse.Save(() => logic.Add(request.Data), StatusCodes.Status201Created);
@@ -71,8 +76,7 @@ public sealed class TransferItemHandler(TransferItemLogic logic)
             return Response.NotFound();
         }
 
-        logic.Remove(id);
-        return Response.Ok();
+        return WriteResponse.Save(() => logic.Remove(id), StatusCodes.Status200OK);
     }
 
 

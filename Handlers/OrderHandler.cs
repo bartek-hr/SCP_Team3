@@ -41,7 +41,12 @@ public sealed class OrderHandler(OrderLogic logic)
     }
 
     [Post("/orders")]
-    [Describe("Maakt een record aan.", Tags = ["Orders"], OperationId = "createOrder", SuccessStatus = StatusCodes.Status201Created)]
+    [Describe(
+        "Maakt een record aan.",
+        Description = "Klanten, magazijn en artikelen moeten bestaan en request_date mag niet voor order_date liggen. Elk artikel komt één keer voor met een positief amount.",
+        Tags = ["Orders"],
+        OperationId = "createOrder",
+        SuccessStatus = StatusCodes.Status201Created)]
     public Response Add(Request<Order> request)
     {
         return WriteResponse.Save(() => logic.Add(request.Data), StatusCodes.Status201Created);
@@ -80,7 +85,7 @@ public sealed class OrderHandler(OrderLogic logic)
     }
 
     [Delete("/orders/{id}")]
-    [Describe("Verwijdert een record.", Tags = ["Orders"], OperationId = "deleteOrder")]
+    [Describe("Verwijdert een record.", Description = "Geeft 409 zolang zendingen naar de order verwijzen.", Tags = ["Orders"], OperationId = "deleteOrder")]
     public Response Remove(Request request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
@@ -92,7 +97,6 @@ public sealed class OrderHandler(OrderLogic logic)
             return Response.NotFound();
         }
 
-        logic.Remove(id);
-        return Response.Ok();
+        return WriteResponse.Save(() => logic.Remove(id), StatusCodes.Status200OK);
     }
 }

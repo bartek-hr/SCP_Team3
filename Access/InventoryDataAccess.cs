@@ -30,6 +30,11 @@ public sealed class InventoryDataAccess(CargoHubDbContext context)
             .ToList();
     }
 
+    public bool AnyAtLocation(int locationId)
+    {
+        return Inventories.Any(inventory => inventory.LocationId == locationId);
+    }
+
     public void AddOrUpdate(Inventory inventory)
     {
         Inventory? existing = Inventories.Find(inventory.ItemId, inventory.LocationId);

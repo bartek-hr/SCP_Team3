@@ -43,6 +43,7 @@ public sealed class TransferHandlerTests : HandlerTest
 
     protected override void SeedDatabase()
     {
+        SeedCatalogItems(1, 2);
         Context.Warehouses.Add(TestData.CreateWarehouse(1));
         Context.Locations.AddRange(TestData.CreateLocation(1), TestData.CreateLocation(2), TestData.CreateLocation(3));
 
@@ -166,8 +167,72 @@ public sealed class TransferHandlerTests : HandlerTest
         Assert.AreEqual(1, Context.Transfers.Count());
     }
 
+    [TestMethod]
+    public async Task ErrorsExplainWhatIsWrongAsync()
+    {
+        await using WebApplication app = CreateApplication();
+        string unknownItem = """
+            { "reference": "TRF-X", "from_location_id": 1, "to_location_id": 2, "items": [{ "item_id": 404, "amount": 1 }] }
+            """;
+        string duplicateItem = """
+            { "reference": "TRF-X", "from_location_id": 1, "to_location_id": 2, "items": [{ "item_id": 1, "amount": 1 }, { "item_id": 1, "amount": 2 }] }
+            """;
+
+        await AssertProblemAsync(
+            await InvokeAsync(app, "/api/v1/transfers", body: unknownItem, method: "POST"), 400, "items[0].item_id 404 does not exist.");
+        await AssertProblemAsync(
+            await InvokeAsync(app, "/api/v1/transfers", body: duplicateItem, method: "POST"), 400, "item_id 1 appears more than once in items.");
+        await AssertProblemAsync(
+            await InvokeAsync(app, "/api/v1/transfers", body: "{", method: "POST"), 400, "The JSON request body is invalid.");
+        await AssertProblemAsync(
+            await InvokeAsync(app, "/api/v1/transfers", body: """{ "reference": "TRF-X", "transfer_status": "Pending" }""", method: "POST"),
+            400,
+            "The JSON request body is invalid at $.transfer_status.");
+        await AssertProblemAsync(
+            await InvokeAsync(app, "/api/v1/transfers", body: LegacyPostBody.Replace("9001", "1"), method: "POST"),
+            409,
+            "A transfer with ID 1 already exists.");
+        Assert.AreEqual(1, Context.Transfers.Count());
+    }
+
+    [TestMethod]
+    public async Task ChangingAProcessedTransferReturns409Async()
+    {
+        await using WebApplication app = CreateApplication();
+        string body = """
+            { "reference": "TRF-TEST", "from_location_id": 1, "to_location_id": 3 }
+            """;
+
+        await AssertProblemAsync(
+            await InvokeAsync(app, "/api/v1/transfers/{id}", "1", body, "PUT"), 409, "Transfer 1 is already processed and cannot be changed.");
+        await AssertProblemAsync(
+            await InvokeAsync(app, "/api/v1/TransferItems/{id}", "1", method: "DELETE"), 409, "Transfer 1 is already processed and cannot be changed.");
+        Assert.AreEqual(2, Context.TransferItems.Count());
+    }
+
+    [TestMethod]
+    public async Task TransferItemRoutesUseTheTransferIdAndValidateTheBodyAsync()
+    {
+        await using WebApplication app = CreateApplication();
+
+        DefaultHttpContext items = await InvokeAsync(app, "/api/v1/TransferItems/{id}/items", "1");
+        Assert.AreEqual(200, items.Response.StatusCode);
+        Assert.AreEqual(
+            """[{"item_id":10,"amount":5},{"item_id":20,"amount":3}]""",
+            await HttpContextTestHelpers.ReadResponseBodyAsync(items));
+
+        // transfer_id is not part of the JSON contract of a transfer item yet, so it cannot be set.
+        await AssertProblemAsync(
+            await InvokeAsync(app, "/api/v1/TransferItems", body: """{ "transfer_id": 1, "item_id": 1, "amount": 1 }""", method: "POST"),
+            400,
+            "transfer_id 0 does not exist.");
+    }
+
     private WebApplication CreateApplication() => CreateApplication(services => services
         .AddTransient<TransferAccess>()
         .AddTransient<LocationAccess>()
-        .AddTransient<TransferLogic>());
+        .AddTransient<ItemAccess>()
+        .AddTransient<TransferItemAccess>()
+        .AddTransient<TransferLogic>()
+        .AddTransient<TransferItemLogic>());
 }

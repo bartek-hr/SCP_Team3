@@ -39,31 +39,19 @@ public sealed class TransferHandler(TransferLogic logic)
     [Post("/transfers")]
     [Describe(
         "Creates a transfer.",
-        Description = "A new transfer always starts with transfer_status Scheduled.",
+        Description = "A new transfer always starts with transfer_status Scheduled. Both locations must exist and differ; every item needs an existing item_id and a positive amount, and may appear only once.",
         Tags = ["Transfers"],
         OperationId = "createTransfer",
         SuccessStatus = StatusCodes.Status201Created)]
     public Response Add(Request<Transfer> request)
     {
-        try
-        {
-            logic.Add(request.Data);
-            return Response.Created();
-        }
-        catch (ArgumentException)
-        {
-            return Response.BadRequest();
-        }
-        catch (InvalidOperationException)
-        {
-            return Response.Conflict();
-        }
+        return WriteResponse.Save(() => logic.Add(request.Data), StatusCodes.Status201Created);
     }
 
     [Put("/transfers/{id}")]
     [Describe(
         "Updates a transfer.",
-        Description = "Omit items to keep the stored items. The transfer_status is kept; it only changes by committing.",
+        Description = "Omit items to keep the stored items. The transfer_status is kept; it only changes by committing. Returns 409 for a transfer that is already processed.",
         Tags = ["Transfers"],
         OperationId = "updateTransfer")]
     public Response Update(Request<Transfer> request)
@@ -73,14 +61,7 @@ public sealed class TransferHandler(TransferLogic logic)
             return Response.BadRequest();
         }
 
-        try
-        {
-            return logic.Update(id, request.Data) ? Response.Ok() : Response.NotFound();
-        }
-        catch (ArgumentException)
-        {
-            return Response.BadRequest();
-        }
+        return WriteResponse.Save(() => logic.Update(id, request.Data), StatusCodes.Status200OK);
     }
 
     [Put("/transfers/{id}/commit")]

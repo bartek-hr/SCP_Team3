@@ -75,5 +75,25 @@ public sealed class ResponseTests
         Assert.AreEqual(string.Empty, await HttpContextTestHelpers.ReadResponseBodyAsync(context));
     }
 
+    [DataTestMethod]
+    [DataRow(StatusCodes.Status400BadRequest, "Bad Request")]
+    [DataRow(StatusCodes.Status409Conflict, "Conflict")]
+    public async Task ExecutesProblemResponsesAsProblemDetailsAsync(int status, string title)
+    {
+        var context = HttpContextTestHelpers.CreateContext();
+        var response = status == StatusCodes.Status400BadRequest
+            ? Response.BadRequest("amount must be greater than 0.")
+            : Response.Conflict("amount must be greater than 0.");
+
+        await response.ExecuteAsync(context);
+
+        Assert.AreEqual(status, context.Response.StatusCode);
+        Assert.AreEqual("application/problem+json", context.Response.ContentType);
+        using var document = JsonDocument.Parse(await HttpContextTestHelpers.ReadResponseBodyAsync(context));
+        Assert.AreEqual(title, document.RootElement.GetProperty("title").GetString());
+        Assert.AreEqual(status, document.RootElement.GetProperty("status").GetInt32());
+        Assert.AreEqual("amount must be greater than 0.", document.RootElement.GetProperty("detail").GetString());
+    }
+
     private sealed record Payload(string Name, int Count);
 }

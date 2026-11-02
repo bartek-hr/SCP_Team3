@@ -41,26 +41,23 @@ public sealed class WarehouseHandler(WarehouseLogic warehouseLogic, LocationLogi
     }
 
     [Post("/warehouses")]
-    [Describe("Creates a warehouse.", Tags = ["Warehouses"], OperationId = "createWarehouse", SuccessStatus = StatusCodes.Status201Created)]
+    [Describe(
+        "Creates a warehouse.",
+        Description = "All fields are required and contact_email must be a valid email address. Returns 409 when the id is already used.",
+        Tags = ["Warehouses"],
+        OperationId = "createWarehouse",
+        SuccessStatus = StatusCodes.Status201Created)]
     public Response Add(Request<Warehouse> request)
     {
-        try
-        {
-            warehouseLogic.Add(request.Data);
-            return Response.Created();
-        }
-        catch (ArgumentException)
-        {
-            return Response.BadRequest();
-        }
-        catch (InvalidOperationException)
-        {
-            return Response.Conflict();
-        }
+        return WriteResponse.Save(() => warehouseLogic.Add(request.Data), StatusCodes.Status201Created);
     }
 
     [Put("/warehouses/{id}")]
-    [Describe("Updates a warehouse.", Tags = ["Warehouses"], OperationId = "updateWarehouse")]
+    [Describe(
+        "Updates a warehouse.",
+        Description = "Uses the same rules as creating a warehouse. An id in the body must match the URL.",
+        Tags = ["Warehouses"],
+        OperationId = "updateWarehouse")]
     public Response Update(Request<Warehouse> request)
     {
         if (!request.TryParam<int>("id", out int id) || id <= 0)
@@ -68,20 +65,13 @@ public sealed class WarehouseHandler(WarehouseLogic warehouseLogic, LocationLogi
             return Response.BadRequest();
         }
 
-        try
-        {
-            return warehouseLogic.Update(id, request.Data) ? Response.Ok() : Response.NotFound();
-        }
-        catch (ArgumentException)
-        {
-            return Response.BadRequest();
-        }
+        return WriteResponse.Save(() => warehouseLogic.Update(id, request.Data), StatusCodes.Status200OK);
     }
 
     [Delete("/warehouses/{id}")]
     [Describe(
         "Deletes a warehouse.",
-        Description = "Returns 409 while the warehouse still has locations.",
+        Description = "Returns 409 while the warehouse still has locations or is used by orders.",
         Tags = ["Warehouses"],
         OperationId = "deleteWarehouse")]
     public Response Remove(Request request)
@@ -91,13 +81,6 @@ public sealed class WarehouseHandler(WarehouseLogic warehouseLogic, LocationLogi
             return Response.BadRequest();
         }
 
-        try
-        {
-            return warehouseLogic.Remove(id) ? Response.Ok() : Response.NotFound();
-        }
-        catch (InvalidOperationException)
-        {
-            return Response.Conflict();
-        }
+        return WriteResponse.Save(() => warehouseLogic.Remove(id), StatusCodes.Status200OK);
     }
 }

@@ -113,10 +113,25 @@ public sealed class WarehouseHandlerTests : HandlerTest
 
         Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/warehouses", body: "{", method: "POST")).Response.StatusCode);
         Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/warehouses", body: "[]", method: "POST")).Response.StatusCode);
-        Assert.AreEqual(
+        await AssertProblemAsync(
+            await InvokeAsync(app, "/api/v1/warehouses", body: JsonSerializer.Serialize(invalidEmail), method: "POST"),
             400,
-            (await InvokeAsync(app, "/api/v1/warehouses", body: JsonSerializer.Serialize(invalidEmail), method: "POST")).Response.StatusCode);
+            "contact_email must be a valid email address.");
         Assert.AreEqual(400, (await InvokeAsync(app, "/api/v1/warehouses/{id}", "1", "{", "PUT")).Response.StatusCode);
+        Assert.AreEqual(2, Context.Warehouses.Count());
+    }
+
+    [TestMethod]
+    public async Task DeletingAWarehouseThatOrdersUseReturns409Async()
+    {
+        await using WebApplication app = CreateApplication();
+        Context.Orders.Add(new Order { Id = 1, WarehouseId = 2 });
+        Context.SaveChanges();
+
+        await AssertProblemAsync(
+            await InvokeAsync(app, "/api/v1/warehouses/{id}", "2", method: "DELETE"), 409, "Warehouse 2 is still used by orders.");
+        await AssertProblemAsync(
+            await InvokeAsync(app, "/api/v1/warehouses/{id}", "1", method: "DELETE"), 409, "Warehouse 1 still has locations.");
         Assert.AreEqual(2, Context.Warehouses.Count());
     }
 
@@ -124,6 +139,8 @@ public sealed class WarehouseHandlerTests : HandlerTest
         .AddTransient<WarehouseAccess>()
         .AddTransient<LocationAccess>()
         .AddTransient<TransferAccess>()
+        .AddTransient<OrderDataAccess>()
+        .AddTransient<InventoryDataAccess>()
         .AddTransient<WarehouseLogic>()
         .AddTransient<LocationLogic>());
 }

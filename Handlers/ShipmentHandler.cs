@@ -41,7 +41,12 @@ public sealed class ShipmentHandler(ShipmentLogic logic)
     }
 
     [Post("/shipments")]
-    [Describe("Maakt een record aan.", Tags = ["Shipments"], OperationId = "createShipment", SuccessStatus = StatusCodes.Status201Created)]
+    [Describe(
+        "Maakt een record aan.",
+        Description = "Een order_id moet naar een bestaande order verwijzen. Elk artikel moet bestaan en komt één keer voor met een positief amount.",
+        Tags = ["Shipments"],
+        OperationId = "createShipment",
+        SuccessStatus = StatusCodes.Status201Created)]
     public Response Add(Request<Shipment> request)
     {
         return WriteResponse.Save(() => logic.Add(request.Data), StatusCodes.Status201Created);

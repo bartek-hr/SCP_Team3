@@ -37,7 +37,12 @@ public sealed class ShipmentItemHandler(ShipmentItemLogic logic)
     }
 
     [Post("/ShipmentItems")]
-    [Describe("Maakt een record aan.", Tags = ["ShipmentItems"], OperationId = "createShipmentItem", SuccessStatus = StatusCodes.Status201Created)]
+    [Describe(
+        "Maakt een record aan.",
+        Description = "shipment_id en item_id moeten bestaan en amount moet positief zijn. Geeft 409 als het artikel al in de zending staat.",
+        Tags = ["ShipmentItems"],
+        OperationId = "createShipmentItem",
+        SuccessStatus = StatusCodes.Status201Created)]
     public Response Add(Request<ShipmentItem> request)
     {
         return WriteResponse.Save(() => logic.Add(request.Data), StatusCodes.Status201Created);

@@ -3,7 +3,7 @@ using CargoHUB.Models;
 
 namespace CargoHUB.Logics;
 
-public sealed class TransferLogic(TransferAccess transferAccess, LocationAccess locationAccess)
+public sealed class TransferLogic(TransferAccess transferAccess, LocationAccess locationAccess, ItemAccess itemAccess)
 {
     public IReadOnlyList<Transfer> GetAll() => transferAccess.GetAll();
 
@@ -14,11 +14,7 @@ public sealed class TransferLogic(TransferAccess transferAccess, LocationAccess 
     public void Add(Transfer transfer)
     {
         Validate(transfer);
-        if (transfer.Id < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(transfer.Id));
-        }
-
+        Validation.NotNegative(transfer.Id, "id");
         if (transfer.Id > 0 && GetById(transfer.Id) is not null)
         {
             throw new InvalidOperationException($"A transfer with ID {transfer.Id} already exists.");
@@ -46,6 +42,13 @@ public sealed class TransferLogic(TransferAccess transferAccess, LocationAccess 
         }
 
         Validate(transfer);
+        Validation.MatchesRoute(transfer.Id, id);
+        if (existing.TransferStatus == TransferStatus.Processed)
+        {
+            // The stock has already moved, so changing the transfer would no longer match the inventory.
+            throw new InvalidOperationException($"Transfer {id} is already processed and cannot be changed.");
+        }
+
         // The status only changes by committing the transfer, so a client cannot mark it processed.
         transfer.TransferStatus = existing.TransferStatus;
         transfer.UpdatedAt = DateTime.UtcNow;
@@ -65,28 +68,18 @@ public sealed class TransferLogic(TransferAccess transferAccess, LocationAccess 
     private void Validate(Transfer transfer)
     {
         ArgumentNullException.ThrowIfNull(transfer);
-
-        if (string.IsNullOrWhiteSpace(transfer.Reference))
-        {
-            throw new ArgumentException("Reference is required.", nameof(transfer));
-        }
-
+        Validation.Required(transfer.Reference, "reference");
+        Validation.Reference(transfer.FromLocationId, "from_location_id", id => locationAccess.GetById(id) is not null);
+        Validation.Reference(transfer.ToLocationId, "to_location_id", id => locationAccess.GetById(id) is not null);
         if (transfer.FromLocationId == transfer.ToLocationId)
         {
-            throw new ArgumentException("A transfer must move items between two different locations.", nameof(transfer));
+            throw new ArgumentException("from_location_id and to_location_id must be different locations.");
         }
 
-        foreach (int locationId in new[] { transfer.FromLocationId, transfer.ToLocationId })
+        // Null means the items were not sent; an update then keeps the stored items.
+        if (transfer.Items is not null)
         {
-            if (locationId <= 0 || locationAccess.GetById(locationId) is null)
-            {
-                throw new ArgumentException($"Location {locationId} does not exist.", nameof(transfer));
-            }
-        }
-
-        if (transfer.Items is not null && transfer.Items.Any(item => item is null || item.ItemId <= 0 || item.Amount <= 0))
-        {
-            throw new ArgumentException("Every transfer item needs a positive item_id and amount.", nameof(transfer));
+            Validation.Items(transfer.Items, item => item.ItemId, item => item.Amount, id => itemAccess.GetById(id) is not null);
         }
     }
 }

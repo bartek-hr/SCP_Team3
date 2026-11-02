@@ -1,0 +1,34 @@
+== 1. Uniciteit
+warehouse.code: 0 dubbele waarden
+location.code: 4 dubbele waarden
+item.code: 0 dubbele waarden
+item.barcode: 0 dubbele waarden
+supplier.code: 0 dubbele waarden
+order.reference: 854 dubbele waarden
+shipment.reference: 0 dubbele waarden
+transfer.reference: 0 dubbele waarden
+inventory (item_id, location_id): 0 dubbel
+
+== 2. Verwijzingen (wezen)
+location.warehouse_id -> warehouse: 0 wezen
+inventory.item_id -> item: 0 wezen
+inventory.location_id -> location: 0 wezen
+item.supplier_id -> supplier: 0 wezen
+order.client_id -> client: 0 wezen
+order.warehouse_id -> warehouse: 0 wezen
+order_item.order_id -> order: 0 wezen
+shipment.order_id -> order: 0 wezen
+shipment_item.shipment_id -> shipment: 0 wezen
+transfer.from_location_id -> location: 0 wezen
+transfer.to_location_id -> location: 0 wezen
+transfer_item.transfer_id -> transfer: 0 wezen
+
+== 3. Bedrijfsregels
+shipments per order: {2: 2263, 1: 1606}
+Incoming shipments gekoppeld aan klantorder: 3043
+Orders 'Shipped' zonder Outgoing shipment: 679
+Orders 'Pending' met Outgoing shipment 'Delivered': 296
+Items met packaging_type 'None' maar case_size > 1: 125
+Items waar min_purchase_qty geen veelvoud van case_size is: 329
+Negatieve voorraad: 0
+quantity_allocated > quantity_on_hand: 0

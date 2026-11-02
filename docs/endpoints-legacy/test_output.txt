@@ -1,0 +1,126 @@
+OK  GET    /api/v1/warehouses                            verwacht 200 kreeg 200 (25 ms, lijst van 10) 
+OK  GET    /api/v1/warehouses/1                          verwacht 200 kreeg 200 (15 ms, object) 
+OK  GET    /api/v1/warehouses/1/locations                verwacht 200 kreeg 200 (2 ms, lijst van 40) 
+OK  GET    /api/v1/locations                             verwacht 200 kreeg 200 (14 ms, lijst van 400) 
+OK  GET    /api/v1/locations/1                           verwacht 200 kreeg 200 (15 ms, object) 
+OK  GET    /api/v1/transfers                             verwacht 200 kreeg 200 (1759 ms, lijst van 800) 
+OK  GET    /api/v1/transfers/1                           verwacht 200 kreeg 200 (22 ms, object) 
+OK  GET    /api/v1/transfers/1/items                     verwacht 200 kreeg 200 (30 ms, lijst van 2) 
+OK  GET    /api/v1/items                                 verwacht 200 kreeg 200 (6 ms, lijst van 600) 
+OK  GET    /api/v1/items/1                               verwacht 200 kreeg 200 (22 ms, object) 
+OK  GET    /api/v1/items/1/inventory                     verwacht 200 kreeg 200 (23 ms, lijst van 10) 
+OK  GET    /api/v1/items/1/inventory/totals              verwacht 200 kreeg 200 (31 ms, object) 
+OK  GET    /api/v1/item_lines                            verwacht 200 kreeg 200 (20 ms, lijst van 14) 
+OK  GET    /api/v1/item_lines/1                          verwacht 200 kreeg 200 (16 ms, object) 
+OK  GET    /api/v1/item_lines/1/items                    verwacht 200 kreeg 200 (19 ms, lijst van 47) 
+OK  GET    /api/v1/item_groups                           verwacht 200 kreeg 200 (12 ms, lijst van 3) 
+OK  GET    /api/v1/item_groups/1                         verwacht 200 kreeg 200 (15 ms, object) 
+OK  GET    /api/v1/item_groups/1/items                   verwacht 200 kreeg 200 (4 ms, lijst van 287) 
+OK  GET    /api/v1/item_types                            verwacht 200 kreeg 200 (1 ms, lijst van 3) 
+OK  GET    /api/v1/item_types/1                          verwacht 200 kreeg 200 (1 ms, object) 
+OK  GET    /api/v1/item_types/1/items                    verwacht 200 kreeg 200 (4 ms, lijst van 284) 
+OK  GET    /api/v1/inventories                           verwacht 200 kreeg 200 (37 ms, lijst van 4800) 
+OK  GET    /api/v1/inventories/1                         verwacht 404 kreeg 404 (1 ms, leeg) 
+OK  GET    /api/v1/suppliers                             verwacht 200 kreeg 200 (1 ms, lijst van 21) 
+OK  GET    /api/v1/suppliers/1                           verwacht 200 kreeg 200 (21 ms, object) 
+OK  GET    /api/v1/suppliers/1/items                     verwacht 200 kreeg 200 (18 ms, lijst van 17) 
+OK  GET    /api/v1/orders                                verwacht 200 kreeg 200 (205139 ms, lijst van 4854) 
+OK  GET    /api/v1/orders/1                              verwacht 200 kreeg 200 (67 ms, object) 
+OK  GET    /api/v1/orders/1/items                        verwacht 200 kreeg 200 (62 ms, lijst van 1) 
+OK  GET    /api/v1/clients                               verwacht 200 kreeg 200 (15 ms, lijst van 300) 
+OK  GET    /api/v1/clients/1                             verwacht 200 kreeg 200 (14 ms, object) 
+OK  GET    /api/v1/clients/1/orders                      verwacht 200 kreeg 200 (1960 ms, lijst van 57) 
+OK  GET    /api/v1/shipments                             verwacht 200 kreeg 200 (233929 ms, lijst van 6132) 
+OK  GET    /api/v1/shipments/1                           verwacht 200 kreeg 200 (68 ms, object) 
+OK  GET    /api/v1/shipments/1/orders                    verwacht 200 kreeg 200 (44 ms, lijst van 1) 
+OK  GET    /api/v1/shipments/1/items                     verwacht 200 kreeg 200 (66 ms, lijst van 1) 
+FOUT GET    /api/v1/warehouses/99999                      verwacht 404 kreeg 200 (26 ms, null) 
+FOUT GET    /api/v1/warehouses/abc                        verwacht 400 kreeg 500 (15 ms, leeg) 
+FOUT GET    /api/v1/warehouses/                           verwacht 200 kreeg 500 (15 ms, leeg) 
+FOUT GET    /api/v1/warehouses?limit=5                    verwacht 200 kreeg 403 (1 ms, leeg) 
+FOUT GET    /api/v1/bestaatniet                           verwacht 404 kreeg 403 (15 ms, leeg) 
+FOUT GET    /api/v2/warehouses                            verwacht 404 kreeg geen antwoord (RemoteDisconnected) (15 ms, leeg) 
+FOUT GET    /                                             verwacht 404 kreeg geen antwoord (RemoteDisconnected) (15 ms, leeg) 
+OK  GET    /api/v1/warehouses                            verwacht 401 kreeg 401 (16 ms, leeg) 
+OK  GET    /api/v1/warehouses                            verwacht 401 kreeg 401 (16 ms, leeg) 
+OK  POST   /api/v1/warehouses                            verwacht 403 kreeg 403 (16 ms, leeg) 
+FOUT POST   /api/v1/warehouses                            verwacht 400 kreeg 500 (15 ms, leeg) 
+FOUT PUT    /api/v1/warehouses/99999                      verwacht 404 kreeg 200 (17 ms, leeg) 
+FOUT DELETE /api/v1/warehouses/99999                      verwacht 404 kreeg 200 (14 ms, leeg) 
+FOUT PATCH  /api/v1/warehouses/1                          verwacht 405 kreeg 501 (16 ms, <geen JSON>) 
+OK  POST   /api/v1/warehouses                            verwacht 201 kreeg 201 (18 ms, leeg) 
+FOUT GET    /api/v1/warehouses/90001                      verwacht 200 kreeg 200 (14 ms, null) NIET opgeslagen (GET geeft null)
+OK  PUT    /api/v1/warehouses/1                          verwacht 200 kreeg 200 (14 ms, leeg) 
+      controle na PUT: wijziging NIET opgeslagen
+OK  DELETE /api/v1/warehouses/2                          verwacht 200 kreeg 200 (15 ms, leeg) 
+FOUT GET    /api/v1/warehouses/2                          verwacht 404 kreeg 200 (16 ms, object) NIET verwijderd
+OK  POST   /api/v1/locations                             verwacht 201 kreeg 201 (8 ms, leeg) 
+FOUT GET    /api/v1/locations/90001                       verwacht 200 kreeg 200 (36 ms, null) NIET opgeslagen (GET geeft null)
+OK  PUT    /api/v1/locations/1                           verwacht 200 kreeg 200 (23 ms, leeg) 
+      controle na PUT: wijziging NIET opgeslagen
+OK  DELETE /api/v1/locations/2                           verwacht 200 kreeg 200 (8 ms, leeg) 
+FOUT GET    /api/v1/locations/2                           verwacht 404 kreeg 200 (38 ms, object) NIET verwijderd
+OK  POST   /api/v1/items                                 verwacht 201 kreeg 201 (47 ms, leeg) 
+FOUT GET    /api/v1/items/90001                           verwacht 200 kreeg 200 (32 ms, null) NIET opgeslagen (GET geeft null)
+OK  PUT    /api/v1/items/1                               verwacht 200 kreeg 200 (44 ms, leeg) 
+      controle na PUT: wijziging NIET opgeslagen
+FOUT DELETE /api/v1/items/2                               verwacht 200 kreeg 403 (15 ms, leeg) 
+FOUT GET    /api/v1/items/2                               verwacht 404 kreeg 200 (18 ms, object) NIET verwijderd
+OK  POST   /api/v1/item_lines                            verwacht 201 kreeg 201 (14 ms, leeg) 
+FOUT GET    /api/v1/item_lines/90001                      verwacht 200 kreeg 200 (25 ms, null) NIET opgeslagen (GET geeft null)
+OK  PUT    /api/v1/item_lines/1                          verwacht 200 kreeg 200 (21 ms, leeg) 
+      controle na PUT: wijziging NIET opgeslagen
+OK  DELETE /api/v1/item_lines/2                          verwacht 200 kreeg 200 (15 ms, leeg) 
+FOUT GET    /api/v1/item_lines/2                          verwacht 404 kreeg 200 (16 ms, object) NIET verwijderd
+OK  POST   /api/v1/item_groups                           verwacht 201 kreeg 201 (15 ms, leeg) 
+FOUT GET    /api/v1/item_groups/90001                     verwacht 200 kreeg 200 (25 ms, null) NIET opgeslagen (GET geeft null)
+OK  PUT    /api/v1/item_groups/1                         verwacht 200 kreeg 200 (22 ms, leeg) 
+      controle na PUT: wijziging NIET opgeslagen
+OK  DELETE /api/v1/item_groups/2                         verwacht 200 kreeg 200 (2 ms, leeg) 
+FOUT GET    /api/v1/item_groups/2                         verwacht 404 kreeg 200 (14 ms, object) NIET verwijderd
+OK  POST   /api/v1/item_types                            verwacht 201 kreeg 201 (15 ms, leeg) 
+FOUT GET    /api/v1/item_types/90001                      verwacht 200 kreeg 200 (25 ms, null) NIET opgeslagen (GET geeft null)
+OK  PUT    /api/v1/item_types/1                          verwacht 200 kreeg 200 (22 ms, leeg) 
+      controle na PUT: wijziging NIET opgeslagen
+OK  DELETE /api/v1/item_types/2                          verwacht 200 kreeg 200 (2 ms, leeg) 
+FOUT GET    /api/v1/item_types/2                          verwacht 404 kreeg 200 (14 ms, object) NIET verwijderd
+OK  POST   /api/v1/suppliers                             verwacht 201 kreeg 201 (16 ms, leeg) 
+FOUT GET    /api/v1/suppliers/90001                       verwacht 200 kreeg 200 (13 ms, null) NIET opgeslagen (GET geeft null)
+OK  PUT    /api/v1/suppliers/1                           verwacht 200 kreeg 200 (3 ms, leeg) 
+      controle na PUT: wijziging NIET opgeslagen
+OK  DELETE /api/v1/suppliers/2                           verwacht 200 kreeg 200 (12 ms, leeg) 
+FOUT GET    /api/v1/suppliers/2                           verwacht 404 kreeg 200 (3 ms, object) NIET verwijderd
+OK  POST   /api/v1/clients                               verwacht 201 kreeg 201 (21 ms, leeg) 
+FOUT GET    /api/v1/clients/90001                         verwacht 200 kreeg 200 (34 ms, null) NIET opgeslagen (GET geeft null)
+OK  PUT    /api/v1/clients/1                             verwacht 200 kreeg 200 (27 ms, leeg) 
+      controle na PUT: wijziging NIET opgeslagen
+OK  DELETE /api/v1/clients/2                             verwacht 200 kreeg 200 (29 ms, leeg) 
+FOUT GET    /api/v1/clients/2                             verwacht 404 kreeg 200 (36 ms, object) NIET verwijderd
+OK  POST   /api/v1/orders                                verwacht 201 kreeg 201 (201 ms, leeg) 
+FOUT GET    /api/v1/orders/90001                          verwacht 200 kreeg 200 (26 ms, null) NIET opgeslagen (GET geeft null)
+OK  PUT    /api/v1/orders/1                              verwacht 200 kreeg 200 (164 ms, leeg) 
+      controle na PUT: niet te controleren
+FOUT DELETE /api/v1/orders/2                              verwacht 200 kreeg 403 (1 ms, leeg) 
+FOUT GET    /api/v1/orders/2                              verwacht 404 kreeg 200 (70 ms, object) NIET verwijderd
+OK  POST   /api/v1/shipments                             verwacht 201 kreeg 201 (201 ms, leeg) 
+FOUT GET    /api/v1/shipments/90001                       verwacht 200 kreeg 200 (27 ms, null) NIET opgeslagen (GET geeft null)
+OK  PUT    /api/v1/shipments/1                           verwacht 200 kreeg 200 (172 ms, leeg) 
+      controle na PUT: niet te controleren
+FOUT DELETE /api/v1/shipments/2                           verwacht 200 kreeg 403 (20 ms, leeg) 
+FOUT GET    /api/v1/shipments/2                           verwacht 404 kreeg 200 (62 ms, object) NIET verwijderd
+OK  POST   /api/v1/transfers                             verwacht 201 kreeg 201 (32 ms, leeg) 
+FOUT GET    /api/v1/transfers/90001                       verwacht 200 kreeg 200 (29 ms, null) NIET opgeslagen (GET geeft null)
+OK  PUT    /api/v1/transfers/1                           verwacht 200 kreeg 200 (31 ms, leeg) 
+      controle na PUT: niet te controleren
+FOUT DELETE /api/v1/transfers/2                           verwacht 200 kreeg 403 (14 ms, leeg) 
+FOUT GET    /api/v1/transfers/2                           verwacht 404 kreeg 200 (5 ms, object) NIET verwijderd
+OK  POST   /api/v1/inventories                           verwacht 201 kreeg 201 (122 ms, leeg) 
+OK  PUT    /api/v1/orders/1/items                        verwacht 200 kreeg 200 (255 ms, leeg) 
+OK  PUT    /api/v1/shipments/1/items                     verwacht 200 kreeg 200 (240 ms, leeg) 
+OK  PUT    /api/v1/shipments/1/orders                    verwacht 200 kreeg 200 (180 ms, leeg) 
+OK  PUT    /api/v1/transfers/1/commit                    verwacht 200 kreeg 200 (134 ms, leeg) 
+FOUT GET    /api/v1/transfers/1                           verwacht 200 kreeg 200 (29 ms, object) status = Scheduled
+OK  PUT    /api/v1/inventories/1                         verwacht 404 kreeg 404 (15 ms, leeg) 
+FOUT DELETE /api/v1/inventories/1                         verwacht 404 kreeg 403 (1 ms, leeg) 
+
+66/113 gevallen gedragen zich zoals verwacht

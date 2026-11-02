@@ -3,7 +3,7 @@ using CargoHUB.Models;
 
 namespace CargoHUB.Logics;
 
-public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
+public sealed class ShipmentLogic(ShipmentDataAccess dataAccess, OrderDataAccess orderAccess, ItemAccess itemAccess)
 {
     public IReadOnlyList<Shipment> GetAll()
     {
@@ -58,10 +58,7 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
         Validate(shipment);
-        if (shipment.Id != 0 && shipment.Id != id)
-        {
-            throw new ArgumentException("The shipment ID must match the requested ID.", nameof(shipment));
-        }
+        Validation.MatchesRoute(shipment.Id, id);
 
         Shipment? existing = GetById(id);
         if (existing is null)
@@ -87,7 +84,7 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
         ArgumentNullException.ThrowIfNull(orderIds);
         foreach (int orderId in orderIds)
         {
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(orderId);
+            Validation.Reference(orderId, "order_id", OrderExists);
         }
 
         // The legacy API accepts a list but stores only the first order ID.
@@ -106,40 +103,26 @@ public sealed class ShipmentLogic(ShipmentDataAccess dataAccess)
         dataAccess.Remove(id);
     }
 
-    private static void Validate(Shipment shipment)
+    private void Validate(Shipment shipment)
     {
         ArgumentNullException.ThrowIfNull(shipment);
-        ArgumentOutOfRangeException.ThrowIfNegative(shipment.Id);
-        if (string.IsNullOrWhiteSpace(shipment.Reference))
-            throw new ArgumentException("Reference is required.", nameof(shipment.Reference));
+        Validation.NotNegative(shipment.Id, "id");
+        Validation.Required(shipment.Reference, "reference");
         if (shipment.OrderId is int orderId)
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(orderId);
-        if (shipment.ShipmentDate == default)
-            throw new ArgumentException("ShipmentDate is required.", nameof(shipment.ShipmentDate));
-        if (string.IsNullOrWhiteSpace(shipment.ShipmentType))
-            throw new ArgumentException("ShipmentType is required.", nameof(shipment.ShipmentType));
-        if (string.IsNullOrWhiteSpace(shipment.ShipmentStatus))
-            throw new ArgumentException("ShipmentStatus is required.", nameof(shipment.ShipmentStatus));
-        if (string.IsNullOrWhiteSpace(shipment.CarrierName))
-            throw new ArgumentException("CarrierName is required.", nameof(shipment.CarrierName));
-        if (string.IsNullOrWhiteSpace(shipment.ShippingMethod))
-            throw new ArgumentException("ShippingMethod is required.", nameof(shipment.ShippingMethod));
-        if (string.IsNullOrWhiteSpace(shipment.PaymentType))
-            throw new ArgumentException("PaymentType is required.", nameof(shipment.PaymentType));
+            Validation.Reference(orderId, "order_id", OrderExists);
+        Validation.Required(shipment.ShipmentDate, "shipment_date");
+        Validation.Required(shipment.ShipmentType, "shipment_type");
+        Validation.Required(shipment.ShipmentStatus, "shipment_status");
+        Validation.Required(shipment.CarrierName, "carrier_name");
+        Validation.Required(shipment.ShippingMethod, "shipping_method");
+        Validation.Required(shipment.PaymentType, "payment_type");
         ValidateItems(shipment.Items);
     }
 
-    private static void ValidateItems(IReadOnlyList<ShipmentItem> items)
+    private void ValidateItems(IReadOnlyList<ShipmentItem> items)
     {
-        ArgumentNullException.ThrowIfNull(items);
-        var itemIds = new HashSet<int>();
-        foreach (ShipmentItem item in items)
-        {
-            ArgumentNullException.ThrowIfNull(item);
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.ItemId);
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.Amount);
-            if (!itemIds.Add(item.ItemId))
-                throw new ArgumentException("Each item may appear only once.", nameof(items));
-        }
+        Validation.Items(items, item => item.ItemId, item => item.Amount, id => itemAccess.GetById(id) is not null);
     }
+
+    private bool OrderExists(int id) => orderAccess.GetById(id) is not null;
 }

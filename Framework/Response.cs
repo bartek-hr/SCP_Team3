@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+
 namespace CargoHUB.Framework;
 
 public abstract class Response : IResult
@@ -40,6 +43,11 @@ public abstract class Response : IResult
     public static Response ServerError()        => new EmptyResponse(StatusCodes.Status500InternalServerError);
     public static Response NotImplemented()        => new EmptyResponse(StatusCodes.Status501NotImplemented);
 
+    // Errors with an explanation use the RFC 9457 problem details format.
+    public static Response Problem(int code, string detail) => new ProblemResponse(code, detail);
+    public static Response BadRequest(string detail)       => Problem(StatusCodes.Status400BadRequest, detail);
+    public static Response Conflict(string detail)         => Problem(StatusCodes.Status409Conflict, detail);
+
     public static Response Ok()        => new EmptyResponse(StatusCodes.Status200OK);
     public static Response<T> Ok<T>(T body)       => Response<T>.Ok(body);
     public static Response<T> Created<T>(T body)  => Response<T>.Created(body);
@@ -49,6 +57,28 @@ public abstract class Response : IResult
     {
         public EmptyResponse(int status) => StatusCode = status;
         protected override Task WriteBodyAsync(HttpContext ctx) => Task.CompletedTask;
+    }
+
+    private sealed class ProblemResponse : Response
+    {
+        private readonly string _detail;
+
+        public ProblemResponse(int status, string detail)
+        {
+            StatusCode = status;
+            _detail = detail;
+        }
+
+        protected override Task WriteBodyAsync(HttpContext ctx)
+        {
+            var problem = new ProblemDetails
+            {
+                Title = ReasonPhrases.GetReasonPhrase(StatusCode),
+                Status = StatusCode,
+                Detail = _detail,
+            };
+            return ctx.Response.WriteAsJsonAsync(problem, options: null, "application/problem+json", ctx.RequestAborted);
+        }
     }
 }
 

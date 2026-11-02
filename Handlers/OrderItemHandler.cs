@@ -40,7 +40,12 @@ public sealed class OrderItemHandler(OrderItemLogic logic)
         return Response.Ok(logic.GetItems(id));
     }
     [Post("/orderitems")]
-    [Describe("Maakt een record aan.", Tags = ["OrderItems"], OperationId = "createOrderItem", SuccessStatus = StatusCodes.Status201Created)]
+    [Describe(
+        "Maakt een record aan.",
+        Description = "order_id en item_id moeten bestaan en amount moet positief zijn. Geeft 409 als het artikel al in de order staat.",
+        Tags = ["OrderItems"],
+        OperationId = "createOrderItem",
+        SuccessStatus = StatusCodes.Status201Created)]
     public Response Add(Request<OrderItem> request)
     {
         return WriteResponse.Save(() => logic.Add(request.Data), StatusCodes.Status201Created);

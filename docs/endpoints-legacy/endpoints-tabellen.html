@@ -1,0 +1,123 @@
+<!doctype html><html><head><meta charset='utf-8'><title>Endpoints legacy</title><style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;max-width:1150px;margin:24px auto;padding:0 16px;background:#fff;color:#000}
+h1{font-size:16pt}h2{font-size:13pt;margin-top:28px}p.note{font-size:9.5pt;color:#444}
+table{border-collapse:collapse;margin:8px 0}th,td{border:1px solid #999;padding:3px 6px;font-size:9.5pt;text-align:left;vertical-align:top}
+th{background:#d9e2f3}td.n{text-align:right}tr.bad td{background:#f8d7da}tr.warn td{background:#fff3cd}code{font-family:Consolas,monospace;font-size:9pt}</style></head><body>
+<h1>Endpoints legacy CargoHUB API – overzicht en testresultaten</h1>
+<p class='note'>Getest op 4 oktober 2026 tegen een kopie van <code>legacy/</code> (commit 0519310), Python 3.14, lokaal op 127.0.0.1:3000. Script: <code>test_endpoints.py</code>, ruwe uitvoer: <code>test_output.txt</code>. Alle paden beginnen met <code>/api/v1</code>; elke request vereist de header <code>API_KEY</code>. Tip: selecteer een tabel, kopieer en plak in Word.</p>
+<h2>Tabel 1 – Alle endpoints (76)</h2><table><tr><th>#</th><th>Methode</th><th>Pad</th><th>Wat doet het</th><th>Recht (apps)</th><th>Status</th><th>Tijd (ms)</th><th>Resultaat</th></tr>
+<tr class=''><td class='n'>1</td><td>GET</td><td><code>/warehouses</code></td><td>Lijst van alle warehouses</td><td>alle 6</td><td>200</td><td class='n'>25</td><td>lijst van 10</td></tr>
+<tr class=''><td class='n'>2</td><td>GET</td><td><code>/warehouses/{id}</code></td><td>Eén warehouse op id</td><td>alle 6</td><td>200</td><td class='n'>15</td><td>object</td></tr>
+<tr class=''><td class='n'>3</td><td>GET</td><td><code>/warehouses/{id}/locations</code></td><td>Alle locaties in dit warehouse</td><td>alle 6</td><td>200</td><td class='n'>2</td><td>lijst van 40</td></tr>
+<tr class='bad'><td class='n'>4</td><td>POST</td><td><code>/warehouses</code></td><td>Nieuwe warehouse toevoegen</td><td>facility_management</td><td>201</td><td class='n'>18</td><td>NIET opgeslagen (GET geeft null)</td></tr>
+<tr class='bad'><td class='n'>5</td><td>PUT</td><td><code>/warehouses/{id}</code></td><td>Warehouse vervangen</td><td>facility_management</td><td>200</td><td class='n'>14</td><td>wijziging NIET opgeslagen</td></tr>
+<tr class='bad'><td class='n'>6</td><td>DELETE</td><td><code>/warehouses/{id}</code></td><td>Warehouse verwijderen</td><td>facility_management</td><td>200</td><td class='n'>15</td><td>NIET verwijderd</td></tr>
+<tr class=''><td class='n'>7</td><td>GET</td><td><code>/locations</code></td><td>Lijst van alle locaties</td><td>alle 6</td><td>200</td><td class='n'>14</td><td>lijst van 400</td></tr>
+<tr class=''><td class='n'>8</td><td>GET</td><td><code>/locations/{id}</code></td><td>Eén locatie op id</td><td>alle 6</td><td>200</td><td class='n'>15</td><td>object</td></tr>
+<tr class='bad'><td class='n'>9</td><td>POST</td><td><code>/locations</code></td><td>Nieuwe locatie toevoegen</td><td>facility_management</td><td>201</td><td class='n'>8</td><td>NIET opgeslagen (GET geeft null)</td></tr>
+<tr class='bad'><td class='n'>10</td><td>PUT</td><td><code>/locations/{id}</code></td><td>Locatie vervangen</td><td>facility_management</td><td>200</td><td class='n'>23</td><td>wijziging NIET opgeslagen</td></tr>
+<tr class='bad'><td class='n'>11</td><td>DELETE</td><td><code>/locations/{id}</code></td><td>Locatie verwijderen</td><td>facility_management</td><td>200</td><td class='n'>8</td><td>NIET verwijderd</td></tr>
+<tr class='warn'><td class='n'>12</td><td>GET</td><td><code>/transfers</code></td><td>Lijst van alle transfers incl. items</td><td>alle 6</td><td>200</td><td class='n'>1.759</td><td>lijst van 800</td></tr>
+<tr class=''><td class='n'>13</td><td>GET</td><td><code>/transfers/{id}</code></td><td>Eén transfer op id</td><td>alle 6</td><td>200</td><td class='n'>22</td><td>object</td></tr>
+<tr class=''><td class='n'>14</td><td>GET</td><td><code>/transfers/{id}/items</code></td><td>Items (item_id + aantal) in deze transfer</td><td>alle 6</td><td>200</td><td class='n'>30</td><td>lijst van 2</td></tr>
+<tr class='bad'><td class='n'>15</td><td>POST</td><td><code>/transfers</code></td><td>Nieuwe transfer toevoegen, status wordt Scheduled + notificatie</td><td>receiving_station, shipping_station</td><td>201</td><td class='n'>32</td><td>NIET opgeslagen (GET geeft null)</td></tr>
+<tr class=''><td class='n'>16</td><td>PUT</td><td><code>/transfers/{id}</code></td><td>Transfer vervangen</td><td>smartglass_reader, order_picker, receiving_station, shipping_station</td><td>200</td><td class='n'>31</td><td>niet te controleren</td></tr>
+<tr class=''><td class='n'>17</td><td>PUT</td><td><code>/transfers/{id}/commit</code></td><td>Transfer uitvoeren: voorraad van → naar locatie, status Processed</td><td>smartglass_reader, order_picker, receiving_station, shipping_station</td><td>200</td><td class='n'>134</td><td>leeg</td></tr>
+<tr class='bad'><td class='n'>18</td><td>DELETE</td><td><code>/transfers/{id}</code></td><td>Transfer verwijderen</td><td>geen enkele</td><td>403</td><td class='n'>14</td><td>geen enkele app mag dit</td></tr>
+<tr class=''><td class='n'>19</td><td>GET</td><td><code>/items</code></td><td>Lijst van alle items</td><td>alle 6</td><td>200</td><td class='n'>6</td><td>lijst van 600</td></tr>
+<tr class=''><td class='n'>20</td><td>GET</td><td><code>/items/{id}</code></td><td>Eén item op id</td><td>alle 6</td><td>200</td><td class='n'>22</td><td>object</td></tr>
+<tr class=''><td class='n'>21</td><td>GET</td><td><code>/items/{id}/inventory</code></td><td>Voorraadregels van dit item per locatie</td><td>alle 6</td><td>200</td><td class='n'>23</td><td>lijst van 10</td></tr>
+<tr class=''><td class='n'>22</td><td>GET</td><td><code>/items/{id}/inventory/totals</code></td><td>Totalen: verwacht, besteld, gereserveerd, beschikbaar</td><td>alle 6</td><td>200</td><td class='n'>31</td><td>object</td></tr>
+<tr class='bad'><td class='n'>23</td><td>POST</td><td><code>/items</code></td><td>Nieuwe item toevoegen</td><td>receiving_station</td><td>201</td><td class='n'>47</td><td>NIET opgeslagen (GET geeft null)</td></tr>
+<tr class='bad'><td class='n'>24</td><td>PUT</td><td><code>/items/{id}</code></td><td>Item vervangen</td><td>receiving_station</td><td>200</td><td class='n'>44</td><td>wijziging NIET opgeslagen</td></tr>
+<tr class='bad'><td class='n'>25</td><td>DELETE</td><td><code>/items/{id}</code></td><td>Item verwijderen</td><td>geen enkele</td><td>403</td><td class='n'>15</td><td>geen enkele app mag dit</td></tr>
+<tr class=''><td class='n'>26</td><td>GET</td><td><code>/item_lines</code></td><td>Lijst van alle item lines</td><td>alle 6</td><td>200</td><td class='n'>20</td><td>lijst van 14</td></tr>
+<tr class=''><td class='n'>27</td><td>GET</td><td><code>/item_lines/{id}</code></td><td>Eén item line op id</td><td>alle 6</td><td>200</td><td class='n'>16</td><td>object</td></tr>
+<tr class=''><td class='n'>28</td><td>GET</td><td><code>/item_lines/{id}/items</code></td><td>Ids van items in deze item line</td><td>alle 6</td><td>200</td><td class='n'>19</td><td>lijst van 47</td></tr>
+<tr class='bad'><td class='n'>29</td><td>POST</td><td><code>/item_lines</code></td><td>Nieuwe item line toevoegen</td><td>receiving_station, facility_management</td><td>201</td><td class='n'>14</td><td>NIET opgeslagen (GET geeft null)</td></tr>
+<tr class='bad'><td class='n'>30</td><td>PUT</td><td><code>/item_lines/{id}</code></td><td>Item line vervangen</td><td>receiving_station, facility_management</td><td>200</td><td class='n'>21</td><td>wijziging NIET opgeslagen</td></tr>
+<tr class='bad'><td class='n'>31</td><td>DELETE</td><td><code>/item_lines/{id}</code></td><td>Item line verwijderen</td><td>facility_management</td><td>200</td><td class='n'>15</td><td>NIET verwijderd</td></tr>
+<tr class=''><td class='n'>32</td><td>GET</td><td><code>/item_groups</code></td><td>Lijst van alle item groups</td><td>alle 6</td><td>200</td><td class='n'>12</td><td>lijst van 3</td></tr>
+<tr class=''><td class='n'>33</td><td>GET</td><td><code>/item_groups/{id}</code></td><td>Eén item group op id</td><td>alle 6</td><td>200</td><td class='n'>15</td><td>object</td></tr>
+<tr class=''><td class='n'>34</td><td>GET</td><td><code>/item_groups/{id}/items</code></td><td>Ids van items in deze item group</td><td>alle 6</td><td>200</td><td class='n'>4</td><td>lijst van 287</td></tr>
+<tr class='bad'><td class='n'>35</td><td>POST</td><td><code>/item_groups</code></td><td>Nieuwe item group toevoegen</td><td>receiving_station, facility_management</td><td>201</td><td class='n'>15</td><td>NIET opgeslagen (GET geeft null)</td></tr>
+<tr class='bad'><td class='n'>36</td><td>PUT</td><td><code>/item_groups/{id}</code></td><td>Item group vervangen</td><td>receiving_station, facility_management</td><td>200</td><td class='n'>22</td><td>wijziging NIET opgeslagen</td></tr>
+<tr class='bad'><td class='n'>37</td><td>DELETE</td><td><code>/item_groups/{id}</code></td><td>Item group verwijderen</td><td>facility_management</td><td>200</td><td class='n'>2</td><td>NIET verwijderd</td></tr>
+<tr class=''><td class='n'>38</td><td>GET</td><td><code>/item_types</code></td><td>Lijst van alle item types</td><td>alle 6</td><td>200</td><td class='n'>1</td><td>lijst van 3</td></tr>
+<tr class=''><td class='n'>39</td><td>GET</td><td><code>/item_types/{id}</code></td><td>Eén item type op id</td><td>alle 6</td><td>200</td><td class='n'>1</td><td>object</td></tr>
+<tr class=''><td class='n'>40</td><td>GET</td><td><code>/item_types/{id}/items</code></td><td>Ids van items in dit item type</td><td>alle 6</td><td>200</td><td class='n'>4</td><td>lijst van 284</td></tr>
+<tr class='bad'><td class='n'>41</td><td>POST</td><td><code>/item_types</code></td><td>Nieuwe item type toevoegen</td><td>receiving_station, facility_management</td><td>201</td><td class='n'>15</td><td>NIET opgeslagen (GET geeft null)</td></tr>
+<tr class='bad'><td class='n'>42</td><td>PUT</td><td><code>/item_types/{id}</code></td><td>Item type vervangen</td><td>receiving_station, facility_management</td><td>200</td><td class='n'>22</td><td>wijziging NIET opgeslagen</td></tr>
+<tr class='bad'><td class='n'>43</td><td>DELETE</td><td><code>/item_types/{id}</code></td><td>Item type verwijderen</td><td>facility_management</td><td>200</td><td class='n'>2</td><td>NIET verwijderd</td></tr>
+<tr class=''><td class='n'>44</td><td>GET</td><td><code>/inventories</code></td><td>Lijst van alle voorraadregels</td><td>alle 6</td><td>200</td><td class='n'>37</td><td>lijst van 4800</td></tr>
+<tr class=''><td class='n'>45</td><td>GET</td><td><code>/inventories/{id}</code></td><td>Altijd 404 (voorraad heeft samengestelde sleutel)</td><td>alle 6</td><td>404</td><td class='n'>1</td><td>leeg</td></tr>
+<tr class=''><td class='n'>46</td><td>POST</td><td><code>/inventories</code></td><td>Nieuwe voorraadregel toevoegen (upsert op item_id + location_id)</td><td>receiving_station</td><td>201</td><td class='n'>122</td><td>leeg</td></tr>
+<tr class=''><td class='n'>47</td><td>PUT</td><td><code>/inventories/{id}</code></td><td>Altijd 404</td><td>smartglass_reader, order_picker, receiving_station, shipping_station</td><td>404</td><td class='n'>15</td><td>leeg</td></tr>
+<tr class='bad'><td class='n'>48</td><td>DELETE</td><td><code>/inventories/{id}</code></td><td>Altijd 404</td><td>geen enkele</td><td>403</td><td class='n'>1</td><td>geen enkele app mag dit</td></tr>
+<tr class=''><td class='n'>49</td><td>GET</td><td><code>/suppliers</code></td><td>Lijst van alle leveranciers</td><td>alle 6</td><td>200</td><td class='n'>1</td><td>lijst van 21</td></tr>
+<tr class=''><td class='n'>50</td><td>GET</td><td><code>/suppliers/{id}</code></td><td>Eén leverancier op id</td><td>alle 6</td><td>200</td><td class='n'>21</td><td>object</td></tr>
+<tr class=''><td class='n'>51</td><td>GET</td><td><code>/suppliers/{id}/items</code></td><td>Items van deze leverancier</td><td>alle 6</td><td>200</td><td class='n'>18</td><td>lijst van 17</td></tr>
+<tr class='bad'><td class='n'>52</td><td>POST</td><td><code>/suppliers</code></td><td>Nieuwe leverancier toevoegen</td><td>receiving_station, facility_management</td><td>201</td><td class='n'>16</td><td>NIET opgeslagen (GET geeft null)</td></tr>
+<tr class='bad'><td class='n'>53</td><td>PUT</td><td><code>/suppliers/{id}</code></td><td>Leverancier vervangen</td><td>receiving_station, facility_management</td><td>200</td><td class='n'>3</td><td>wijziging NIET opgeslagen</td></tr>
+<tr class='bad'><td class='n'>54</td><td>DELETE</td><td><code>/suppliers/{id}</code></td><td>Leverancier verwijderen</td><td>facility_management</td><td>200</td><td class='n'>12</td><td>NIET verwijderd</td></tr>
+<tr class='warn'><td class='n'>55</td><td>GET</td><td><code>/orders</code></td><td>Lijst van alle orders incl. items</td><td>alle 6</td><td>200</td><td class='n'>205.139</td><td>lijst van 4854</td></tr>
+<tr class=''><td class='n'>56</td><td>GET</td><td><code>/orders/{id}</code></td><td>Eén order op id</td><td>alle 6</td><td>200</td><td class='n'>67</td><td>object</td></tr>
+<tr class=''><td class='n'>57</td><td>GET</td><td><code>/orders/{id}/items</code></td><td>Items (item_id + aantal) in deze order</td><td>alle 6</td><td>200</td><td class='n'>62</td><td>lijst van 1</td></tr>
+<tr class='bad'><td class='n'>58</td><td>POST</td><td><code>/orders</code></td><td>Nieuwe order toevoegen</td><td>receiving_station</td><td>201</td><td class='n'>201</td><td>NIET opgeslagen (GET geeft null)</td></tr>
+<tr class=''><td class='n'>59</td><td>PUT</td><td><code>/orders/{id}</code></td><td>Order vervangen</td><td>order_picker, receiving_station, shipping_station</td><td>200</td><td class='n'>164</td><td>niet te controleren</td></tr>
+<tr class=''><td class='n'>60</td><td>PUT</td><td><code>/orders/{id}/items</code></td><td>Items van order vervangen en quantity_allocated bijwerken</td><td>order_picker, receiving_station, shipping_station</td><td>200</td><td class='n'>255</td><td>leeg</td></tr>
+<tr class='bad'><td class='n'>61</td><td>DELETE</td><td><code>/orders/{id}</code></td><td>Order verwijderen</td><td>geen enkele</td><td>403</td><td class='n'>1</td><td>geen enkele app mag dit</td></tr>
+<tr class=''><td class='n'>62</td><td>GET</td><td><code>/clients</code></td><td>Lijst van alle klants</td><td>alle 6</td><td>200</td><td class='n'>15</td><td>lijst van 300</td></tr>
+<tr class=''><td class='n'>63</td><td>GET</td><td><code>/clients/{id}</code></td><td>Eén klant op id</td><td>alle 6</td><td>200</td><td class='n'>14</td><td>object</td></tr>
+<tr class='warn'><td class='n'>64</td><td>GET</td><td><code>/clients/{id}/orders</code></td><td>Orders waarin deze klant klant, ship-to of bill-to is</td><td>alle 6</td><td>200</td><td class='n'>1.960</td><td>lijst van 57</td></tr>
+<tr class='bad'><td class='n'>65</td><td>POST</td><td><code>/clients</code></td><td>Nieuwe klant toevoegen</td><td>shipping_station, facility_management</td><td>201</td><td class='n'>21</td><td>NIET opgeslagen (GET geeft null)</td></tr>
+<tr class='bad'><td class='n'>66</td><td>PUT</td><td><code>/clients/{id}</code></td><td>Klant vervangen</td><td>shipping_station, facility_management</td><td>200</td><td class='n'>27</td><td>wijziging NIET opgeslagen</td></tr>
+<tr class='bad'><td class='n'>67</td><td>DELETE</td><td><code>/clients/{id}</code></td><td>Klant verwijderen</td><td>facility_management</td><td>200</td><td class='n'>29</td><td>NIET verwijderd</td></tr>
+<tr class='warn'><td class='n'>68</td><td>GET</td><td><code>/shipments</code></td><td>Lijst van alle zendings incl. items</td><td>alle 6</td><td>200</td><td class='n'>233.929</td><td>lijst van 6132</td></tr>
+<tr class=''><td class='n'>69</td><td>GET</td><td><code>/shipments/{id}</code></td><td>Eén zending op id</td><td>alle 6</td><td>200</td><td class='n'>68</td><td>object</td></tr>
+<tr class=''><td class='n'>70</td><td>GET</td><td><code>/shipments/{id}/orders</code></td><td>Order-id van deze zending (als lijst)</td><td>alle 6</td><td>200</td><td class='n'>44</td><td>lijst van 1</td></tr>
+<tr class=''><td class='n'>71</td><td>GET</td><td><code>/shipments/{id}/items</code></td><td>Items (item_id + aantal) in deze zending</td><td>alle 6</td><td>200</td><td class='n'>66</td><td>lijst van 1</td></tr>
+<tr class='bad'><td class='n'>72</td><td>POST</td><td><code>/shipments</code></td><td>Nieuwe zending toevoegen</td><td>receiving_station, shipping_station</td><td>201</td><td class='n'>201</td><td>NIET opgeslagen (GET geeft null)</td></tr>
+<tr class=''><td class='n'>73</td><td>PUT</td><td><code>/shipments/{id}</code></td><td>Zending vervangen</td><td>receiving_station, shipping_station</td><td>200</td><td class='n'>172</td><td>niet te controleren</td></tr>
+<tr class=''><td class='n'>74</td><td>PUT</td><td><code>/shipments/{id}/orders</code></td><td>Order van zending wijzigen (eerste id uit lijst)</td><td>receiving_station, shipping_station</td><td>200</td><td class='n'>180</td><td>leeg</td></tr>
+<tr class=''><td class='n'>75</td><td>PUT</td><td><code>/shipments/{id}/items</code></td><td>Items van zending vervangen en quantity_ordered bijwerken</td><td>receiving_station, shipping_station</td><td>200</td><td class='n'>240</td><td>leeg</td></tr>
+<tr class='bad'><td class='n'>76</td><td>DELETE</td><td><code>/shipments/{id}</code></td><td>Zending verwijderen</td><td>geen enkele</td><td>403</td><td class='n'>20</td><td>geen enkele app mag dit</td></tr>
+</table><p class='note'>Rood = werkt niet zoals bedoeld; geel = trager dan 1 seconde. Bij POST/PUT/DELETE is ‘Resultaat’ de controle met een GET achteraf (zie tabel 3).</p>
+<h2>Tabel 2 – Foutafhandeling</h2><table><tr><th>Situatie</th><th>Request</th><th>Verwacht (REST-conventie)</th><th>Kreeg</th></tr>
+<tr class='bad'><td>Niet-bestaand id</td><td><code>GET /api/v1/warehouses/99999</code></td><td>404</td><td>200 (body: null)</td></tr>
+<tr class='bad'><td>Ongeldig id (tekst)</td><td><code>GET /api/v1/warehouses/abc</code></td><td>400</td><td>500</td></tr>
+<tr class='bad'><td>Afsluitende slash</td><td><code>GET /api/v1/warehouses/</code></td><td>200</td><td>500</td></tr>
+<tr class='bad'><td>Query-parameter</td><td><code>GET /api/v1/warehouses?limit=5</code></td><td>200</td><td>403</td></tr>
+<tr class='bad'><td>Onbekende resource</td><td><code>GET /api/v1/bestaatniet</code></td><td>404</td><td>403</td></tr>
+<tr class='bad'><td>Onbekende API-versie</td><td><code>GET /api/v2/warehouses</code></td><td>404</td><td>geen antwoord (RemoteDisconnected)</td></tr>
+<tr class='bad'><td>Root-URL</td><td><code>GET /</code></td><td>404</td><td>geen antwoord (RemoteDisconnected)</td></tr>
+<tr class=''><td>Zonder API-key</td><td><code>GET /api/v1/warehouses</code></td><td>401</td><td>401</td></tr>
+<tr class=''><td>Ongeldige API-key</td><td><code>GET /api/v1/warehouses</code></td><td>401</td><td>401</td></tr>
+<tr class=''><td>Key zonder schrijfrecht</td><td><code>POST /api/v1/warehouses</code></td><td>403</td><td>403</td></tr>
+<tr class='bad'><td>Ongeldige JSON in body</td><td><code>POST /api/v1/warehouses</code></td><td>400</td><td>500</td></tr>
+<tr class='bad'><td>PUT op niet-bestaand id</td><td><code>PUT /api/v1/warehouses/99999</code></td><td>404</td><td>200</td></tr>
+<tr class='bad'><td>DELETE op niet-bestaand id</td><td><code>DELETE /api/v1/warehouses/99999</code></td><td>404</td><td>200</td></tr>
+<tr class='bad'><td>Niet-ondersteunde methode</td><td><code>PATCH /api/v1/warehouses/1</code></td><td>405</td><td>501</td></tr>
+</table>
+<h2>Tabel 3 – Worden wijzigingen echt opgeslagen?</h2><table><tr><th>Resource</th><th>POST → GET nieuw id</th><th>PUT → GET</th><th>DELETE → GET</th></tr>
+<tr class='bad'><td>warehouses</td><td>201, maar NIET opgeslagen (GET geeft null)</td><td>200, wijziging NIET opgeslagen</td><td>200, maar NIET verwijderd</td></tr>
+<tr class='bad'><td>locations</td><td>201, maar NIET opgeslagen (GET geeft null)</td><td>200, wijziging NIET opgeslagen</td><td>200, maar NIET verwijderd</td></tr>
+<tr class='bad'><td>items</td><td>201, maar NIET opgeslagen (GET geeft null)</td><td>200, wijziging NIET opgeslagen</td><td>403 – geen enkele app heeft DELETE-recht</td></tr>
+<tr class='bad'><td>item_lines</td><td>201, maar NIET opgeslagen (GET geeft null)</td><td>200, wijziging NIET opgeslagen</td><td>200, maar NIET verwijderd</td></tr>
+<tr class='bad'><td>item_groups</td><td>201, maar NIET opgeslagen (GET geeft null)</td><td>200, wijziging NIET opgeslagen</td><td>200, maar NIET verwijderd</td></tr>
+<tr class='bad'><td>item_types</td><td>201, maar NIET opgeslagen (GET geeft null)</td><td>200, wijziging NIET opgeslagen</td><td>200, maar NIET verwijderd</td></tr>
+<tr class='bad'><td>suppliers</td><td>201, maar NIET opgeslagen (GET geeft null)</td><td>200, wijziging NIET opgeslagen</td><td>200, maar NIET verwijderd</td></tr>
+<tr class='bad'><td>clients</td><td>201, maar NIET opgeslagen (GET geeft null)</td><td>200, wijziging NIET opgeslagen</td><td>200, maar NIET verwijderd</td></tr>
+<tr class='bad'><td>orders</td><td>201, maar NIET opgeslagen (GET geeft null)</td><td>200, niet te controleren</td><td>403 – geen enkele app heeft DELETE-recht</td></tr>
+<tr class='bad'><td>shipments</td><td>201, maar NIET opgeslagen (GET geeft null)</td><td>200, niet te controleren</td><td>403 – geen enkele app heeft DELETE-recht</td></tr>
+<tr class='bad'><td>transfers</td><td>201, maar NIET opgeslagen (GET geeft null)</td><td>200, niet te controleren</td><td>403 – geen enkele app heeft DELETE-recht</td></tr>
+<tr class='bad'><td>transfers/1/commit</td><td colspan='3'>200, maar daarna status = Scheduled (verwacht Processed)</td></tr></table>
+<h2>Tabel 4 – Gebruikte HTTP-statuscodes</h2><table><tr><th>Code</th><th>Wanneer de legacy-API hem geeft</th><th>Correct gebruik?</th></tr>
+<tr><td>200 OK</td><td>Elke geslaagde GET, PUT en DELETE – ook als het id niet bestaat</td><td>Deels: onbekend id hoort 404 te geven</td></tr>
+<tr><td>201 Created</td><td>Elke POST</td><td>Deels: zonder body of Location-header, en ook als er niets is opgeslagen</td></tr>
+<tr><td>401 Unauthorized</td><td>API_KEY ontbreekt of is onbekend</td><td>Ja</td></tr>
+<tr><td>403 Forbidden</td><td>App heeft geen recht op resource/methode – óók bij onbekende resource of query-string</td><td>Deels: onbekende resource hoort 404</td></tr>
+<tr><td>404 Not Found</td><td>Onbekend sub-pad, inventories/{id}</td><td>Te weinig gebruikt</td></tr>
+<tr><td>500 Internal Server Error</td><td>Elke exceptie: tekst als id, afsluitende slash, ongeldige JSON</td><td>Nee: invoerfouten horen 400</td></tr>
+<tr><td>501 Not Implemented</td><td>PATCH en andere methodes (standaard van http.server, HTML-body)</td><td>Hoort 405 Method Not Allowed</td></tr>
+<tr><td>(geen antwoord)</td><td>Pad zonder /api/v1 – verbinding wordt gesloten zonder response</td><td>Nee: hoort 404</td></tr>
+</table><p class='note'>Totaal: 66 van 113 testgevallen gedroegen zich zoals verwacht.</p></body></html>

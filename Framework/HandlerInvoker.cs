@@ -97,7 +97,9 @@ internal static class HandlerInvoker
         }
         catch (JsonException exception)
         {
-            throw new RequestBindingException($"The JSON request body is invalid for {dataType.Name}.", exception);
+            // The path tells the client which field could not be read, for example $.amount.
+            var location = exception.Path is { Length: > 1 } path ? $" at {path}" : string.Empty;
+            throw new RequestBindingException($"The JSON request body is invalid{location}.", exception);
         }
         catch (BadHttpRequestException exception)
         {

@@ -1,0 +1,288 @@
+api\main.py
+    LOC: 830
+    LLOC: 810
+    SLOC: 812
+    Comments: 6
+    Single comments: 6
+    Multi: 0
+    Blank: 12
+    - Comment Stats
+        (C % L): 1%
+        (C % S): 1%
+        (C + M % L): 1%
+api\models\base.py
+    LOC: 8
+    LLOC: 6
+    SLOC: 6
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 2
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+api\models\clients.py
+    LOC: 49
+    LLOC: 39
+    SLOC: 39
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 10
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+api\models\inventories.py
+    LOC: 76
+    LLOC: 55
+    SLOC: 63
+    Comments: 1
+    Single comments: 1
+    Multi: 0
+    Blank: 12
+    - Comment Stats
+        (C % L): 1%
+        (C % S): 2%
+        (C + M % L): 1%
+api\models\items.py
+    LOC: 77
+    LLOC: 63
+    SLOC: 63
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 14
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+api\models\item_groups.py
+    LOC: 49
+    LLOC: 39
+    SLOC: 39
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 10
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+api\models\item_lines.py
+    LOC: 49
+    LLOC: 39
+    SLOC: 39
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 10
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+api\models\item_types.py
+    LOC: 49
+    LLOC: 39
+    SLOC: 39
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 10
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+api\models\locations.py
+    LOC: 56
+    LLOC: 45
+    SLOC: 45
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 11
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+api\models\orders.py
+    LOC: 107
+    LLOC: 88
+    SLOC: 85
+    Comments: 0
+    Single comments: 0
+    Multi: 4
+    Blank: 18
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 4%
+api\models\order_items.py
+    LOC: 47
+    LLOC: 35
+    SLOC: 39
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 8
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+api\models\shipments.py
+    LOC: 113
+    LLOC: 96
+    SLOC: 89
+    Comments: 0
+    Single comments: 1
+    Multi: 5
+    Blank: 18
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 4%
+api\models\shipment_items.py
+    LOC: 44
+    LLOC: 32
+    SLOC: 36
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 8
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+api\models\suppliers.py
+    LOC: 49
+    LLOC: 39
+    SLOC: 39
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 10
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+api\models\transfers.py
+    LOC: 68
+    LLOC: 57
+    SLOC: 56
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 12
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+api\models\transfer_items.py
+    LOC: 48
+    LLOC: 34
+    SLOC: 36
+    Comments: 0
+    Single comments: 1
+    Multi: 2
+    Blank: 9
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 4%
+api\models\warehouses.py
+    LOC: 49
+    LLOC: 39
+    SLOC: 39
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 10
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+api\models\__ init __.py
+    LOC: 0
+    LLOC: 0
+    SLOC: 0
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 0
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+api\processors\notification_processor.py
+    LOC: 23
+    LLOC: 13
+    SLOC: 13
+    Comments: 4
+    Single comments: 4
+    Multi: 0
+    Blank: 6
+    - Comment Stats
+        (C % L): 17%
+        (C % S): 31%
+        (C + M % L): 17%
+api\processors\__ init __.py
+    LOC: 0
+    LLOC: 0
+    SLOC: 0
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 0
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+api\providers\auth_provider.py
+    LOC: 28
+    LLOC: 20
+    SLOC: 22
+    Comments: 1
+    Single comments: 1
+    Multi: 0
+    Blank: 5
+    - Comment Stats
+        (C % L): 4%
+        (C % S): 5%
+        (C + M % L): 4%
+api\providers\data_provider.py
+    LOC: 70
+    LLOC: 49
+    SLOC: 51
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 19
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+api\providers\__ init __.py
+    LOC: 0
+    LLOC: 0
+    SLOC: 0
+    Comments: 0
+    Single comments: 0
+    Multi: 0
+    Blank: 0
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 0%
+** Total **
+    LOC: 1889
+    LLOC: 1637
+    SLOC: 1650
+    Comments: 12
+    Single comments: 14
+    Multi: 11
+    Blank: 214
+    - Comment Stats
+        (C % L): 1%
+        (C % S): 1%
+        (C + M % L): 1%

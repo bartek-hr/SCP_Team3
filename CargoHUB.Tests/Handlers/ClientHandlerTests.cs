@@ -180,6 +180,9 @@ public sealed class ClientHandlerTests : HandlerTest
         .AddTransient<ClientAccess>()
         .AddTransient<ClientLogic>()
         .AddTransient<OrderDataAccess>()
+        .AddTransient<WarehouseAccess>()
+        .AddTransient<ItemAccess>()
+        .AddTransient<ShipmentDataAccess>()
         .AddTransient<OrderLogic>());
 
     private static Client CreateClient(int id = 0) => new()

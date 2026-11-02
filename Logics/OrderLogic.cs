@@ -3,7 +3,12 @@ using CargoHUB.Models;
 
 namespace CargoHUB.Logics;
 
-public sealed class OrderLogic(OrderDataAccess dataAccess)
+public sealed class OrderLogic(
+    OrderDataAccess dataAccess,
+    ClientAccess clientAccess,
+    WarehouseAccess warehouseAccess,
+    ItemAccess itemAccess,
+    ShipmentDataAccess shipmentAccess)
 {
     public IReadOnlyList<Order> GetAll()
     {
@@ -57,10 +62,7 @@ public sealed class OrderLogic(OrderDataAccess dataAccess)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
         Validate(order);
-        if (order.Id != 0 && order.Id != id)
-        {
-            throw new ArgumentException("The order ID must match the requested ID.", nameof(order));
-        }
+        Validation.MatchesRoute(order.Id, id);
 
         Order? existing = GetById(id);
         if (existing is null)
@@ -83,43 +85,38 @@ public sealed class OrderLogic(OrderDataAccess dataAccess)
     public void Remove(int id)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
+        if (shipmentAccess.AnyForOrder(id))
+        {
+            throw new InvalidOperationException($"Order {id} still has shipments.");
+        }
+
         dataAccess.Remove(id);
     }
 
-    private static void Validate(Order order)
+    private void Validate(Order order)
     {
         ArgumentNullException.ThrowIfNull(order);
-        ArgumentOutOfRangeException.ThrowIfNegative(order.Id);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(order.ClientId);
-        if (order.OrderDate == default)
-            throw new ArgumentException("OrderDate is required.", nameof(order.OrderDate));
-        if (order.RequestDate == default)
-            throw new ArgumentException("RequestDate is required.", nameof(order.RequestDate));
-        if (string.IsNullOrWhiteSpace(order.Reference))
-            throw new ArgumentException("Reference is required.", nameof(order.Reference));
-        if (string.IsNullOrWhiteSpace(order.CustomerPoNumber))
-            throw new ArgumentException("CustomerPoNumber is required.", nameof(order.CustomerPoNumber));
-        if (string.IsNullOrWhiteSpace(order.OrderStatus))
-            throw new ArgumentException("OrderStatus is required.", nameof(order.OrderStatus));
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(order.WarehouseId);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(order.ShipToClientId);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(order.BillToClientId);
+        Validation.NotNegative(order.Id, "id");
+        Validation.Reference(order.ClientId, "client_id", ClientExists);
+        Validation.Required(order.OrderDate, "order_date");
+        Validation.Required(order.RequestDate, "request_date");
+        if (order.RequestDate < order.OrderDate)
+            throw new ArgumentException("request_date cannot be before order_date.");
+        Validation.Required(order.Reference, "reference");
+        Validation.Required(order.CustomerPoNumber, "customer_po_number");
+        Validation.Required(order.OrderStatus, "order_status");
+        Validation.Reference(order.WarehouseId, "warehouse_id", id => warehouseAccess.GetById(id) is not null);
+        Validation.Reference(order.ShipToClientId, "ship_to_client_id", ClientExists);
+        Validation.Reference(order.BillToClientId, "bill_to_client_id", ClientExists);
         ValidateItems(order.Items);
     }
 
-    private static void ValidateItems(IReadOnlyList<OrderItem> items)
+    private void ValidateItems(IReadOnlyList<OrderItem> items)
     {
-        ArgumentNullException.ThrowIfNull(items);
-        var itemIds = new HashSet<int>();
-        foreach (OrderItem item in items)
-        {
-            ArgumentNullException.ThrowIfNull(item);
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.ItemId);
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(item.Amount);
-            if (!itemIds.Add(item.ItemId))
-                throw new ArgumentException("Each item may appear only once.", nameof(items));
-            if (item.UnitPrice is < 0)
-                throw new ArgumentOutOfRangeException(nameof(item.UnitPrice));
-        }
+        Validation.Items(items, item => item.ItemId, item => item.Amount, id => itemAccess.GetById(id) is not null);
+        for (int index = 0; index < items.Count; index++)
+            Validation.NotNegative(items[index].UnitPrice, $"items[{index}].unit_price");
     }
+
+    private bool ClientExists(int id) => clientAccess.GetById(id) is not null;
 }

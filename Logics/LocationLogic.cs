@@ -3,7 +3,11 @@ using CargoHUB.Models;
 
 namespace CargoHUB.Logics;
 
-public sealed class LocationLogic(LocationAccess locationAccess, WarehouseAccess warehouseAccess, TransferAccess transferAccess)
+public sealed class LocationLogic(
+    LocationAccess locationAccess,
+    WarehouseAccess warehouseAccess,
+    TransferAccess transferAccess,
+    InventoryDataAccess inventoryAccess)
 {
     public IReadOnlyList<Location> GetAll() => locationAccess.GetAll();
 
@@ -15,10 +19,7 @@ public sealed class LocationLogic(LocationAccess locationAccess, WarehouseAccess
     public void Add(Location location)
     {
         Validate(location);
-        if (location.Id < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(location.Id));
-        }
+        Validation.NotNegative(location.Id, "id");
 
         if (location.Id > 0 && GetById(location.Id) is not null)
         {
@@ -43,6 +44,7 @@ public sealed class LocationLogic(LocationAccess locationAccess, WarehouseAccess
         }
 
         Validate(location);
+        Validation.MatchesRoute(location.Id, id);
         location.UpdatedAt = DateTime.UtcNow;
         return locationAccess.Update(id, location);
     }
@@ -64,21 +66,19 @@ public sealed class LocationLogic(LocationAccess locationAccess, WarehouseAccess
             throw new InvalidOperationException($"Location {id} is still used by transfers.");
         }
 
+        if (inventoryAccess.AnyAtLocation(id))
+        {
+            throw new InvalidOperationException($"Location {id} still has inventory.");
+        }
+
         return locationAccess.Remove(id);
     }
 
     private void Validate(Location location)
     {
         ArgumentNullException.ThrowIfNull(location);
-
-        if (string.IsNullOrWhiteSpace(location.Code) || string.IsNullOrWhiteSpace(location.Name))
-        {
-            throw new ArgumentException("All location fields are required.", nameof(location));
-        }
-
-        if (location.WarehouseId <= 0 || warehouseAccess.GetById(location.WarehouseId) is null)
-        {
-            throw new ArgumentException($"Warehouse {location.WarehouseId} does not exist.", nameof(location));
-        }
+        Validation.Required(location.Code, "code");
+        Validation.Required(location.Name, "name");
+        Validation.Reference(location.WarehouseId, "warehouse_id", id => warehouseAccess.GetById(id) is not null);
     }
 }

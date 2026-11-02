@@ -52,6 +52,68 @@ internal static class TestData
         Amount = amount,
     };
 
+    public static Client CreateClient(int id = 0) => new()
+    {
+        Id = id,
+        Name = "Test Client",
+        Address = "Klantstraat 1",
+        City = "Rotterdam",
+        ZipCode = "3011 AB",
+        Province = "Zuid-Holland",
+        Country = "Netherlands",
+        ContactName = "Test Klant",
+        ContactPhone = "(010) 7654321",
+        ContactEmail = "test-client@example.com",
+        CreatedAt = CreatedAt,
+        UpdatedAt = UpdatedAt,
+    };
+
+    public static Order CreateOrder(int id = 0, int clientId = 1, int warehouseId = 1, params OrderItem[] items) => new()
+    {
+        Id = id,
+        ClientId = clientId,
+        OrderDate = CreatedAt,
+        RequestDate = UpdatedAt,
+        Reference = "ORD-TEST",
+        CustomerPoNumber = "PO-TEST",
+        OrderStatus = "Pending",
+        WarehouseId = warehouseId,
+        ShipToClientId = clientId,
+        BillToClientId = clientId,
+        CreatedAt = CreatedAt,
+        UpdatedAt = UpdatedAt,
+        Items = [.. items],
+    };
+
+    public static OrderItem CreateOrderItem(int itemId, int amount, decimal? unitPrice = 1m) => new()
+    {
+        ItemId = itemId,
+        Amount = amount,
+        UnitPrice = unitPrice,
+    };
+
+    public static Shipment CreateShipment(int id = 0, int? orderId = null, params ShipmentItem[] items) => new()
+    {
+        Id = id,
+        Reference = "SHP-TEST",
+        OrderId = orderId,
+        ShipmentDate = CreatedAt,
+        ShipmentType = "Outgoing",
+        ShipmentStatus = "Scheduled",
+        CarrierName = "DHL",
+        ShippingMethod = "Standard",
+        PaymentType = "Manual",
+        CreatedAt = CreatedAt,
+        UpdatedAt = UpdatedAt,
+        Items = [.. items],
+    };
+
+    public static ShipmentItem CreateShipmentItem(int itemId, int amount) => new()
+    {
+        ItemId = itemId,
+        Amount = amount,
+    };
+
     public static ItemLine CreateItemLine(int id = 0, string name = "Tech Gadgets") => new()
     {
         Id = id,

@@ -22,6 +22,11 @@ public sealed class ShipmentDataAccess(CargoHubDbContext context)
             .OrderBy(item => item.ItemId).ToList();
     }
 
+    public bool AnyForOrder(int orderId)
+    {
+        return context.Shipments.Any(row => row.OrderId == orderId);
+    }
+
     public void Add(Shipment shipment)
     {
         context.Shipments.Add(shipment);

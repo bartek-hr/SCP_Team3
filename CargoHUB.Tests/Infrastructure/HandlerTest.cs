@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CargoHUB.Tests.Infrastructure;
 
@@ -54,4 +55,14 @@ public abstract class HandlerTest : DatabaseTest
 
     protected static async Task<JsonDocument> ReadJsonAsync(HttpContext context) =>
         JsonDocument.Parse(await HttpContextTestHelpers.ReadResponseBodyAsync(context));
+
+    // Validation errors use RFC 9457 problem details with the logic message as detail.
+    protected static async Task AssertProblemAsync(HttpContext context, int status, string detail)
+    {
+        Assert.AreEqual(status, context.Response.StatusCode, detail);
+        Assert.AreEqual("application/problem+json", context.Response.ContentType);
+        using JsonDocument json = await ReadJsonAsync(context);
+        Assert.AreEqual(status, json.RootElement.GetProperty("status").GetInt32());
+        Assert.AreEqual(detail, json.RootElement.GetProperty("detail").GetString());
+    }
 }

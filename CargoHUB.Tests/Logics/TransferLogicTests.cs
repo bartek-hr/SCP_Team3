@@ -9,10 +9,11 @@ namespace CargoHUB.Tests.Logics;
 [TestClass]
 public sealed class TransferLogicTests : DatabaseTest
 {
-    private TransferLogic Logic => new(new TransferAccess(Context), new LocationAccess(Context));
+    private TransferLogic Logic => new(new TransferAccess(Context), new LocationAccess(Context), new ItemAccess(Context));
 
     protected override void SeedDatabase()
     {
+        SeedCatalogItems(1, 2, 99);
         Context.Warehouses.Add(TestData.CreateWarehouse(1));
         Context.Locations.AddRange(TestData.CreateLocation(1), TestData.CreateLocation(2), TestData.CreateLocation(3));
 
@@ -89,40 +90,68 @@ public sealed class TransferLogicTests : DatabaseTest
         Assert.ThrowsException<ArgumentException>(() => Logic.Add(TestData.CreateTransfer(0, 1, 3, TestData.CreateItem(1, 0))));
         Assert.ThrowsException<ArgumentException>(() => Logic.Add(TestData.CreateTransfer(0, 1, 3, TestData.CreateItem(0, 5))));
         Assert.ThrowsException<ArgumentException>(() => Logic.Add(nullItem));
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => Logic.Add(TestData.CreateTransfer(-1, 1, 3)));
+        Assert.ThrowsException<ArgumentException>(() => Logic.Add(TestData.CreateTransfer(-1, 1, 3)));
         Assert.ThrowsException<InvalidOperationException>(() => Logic.Add(TestData.CreateTransfer(1, 1, 3)));
+        Assert.AreEqual(2, Logic.GetAll().Count);
+    }
+
+    [TestMethod]
+    public void AddRejectsUnknownAndDuplicateItemsWithAClearMessage()
+    {
+        AssertInvalid(
+            () => Logic.Add(TestData.CreateTransfer(0, 1, 3, TestData.CreateItem(1, 2), TestData.CreateItem(404, 1))),
+            "items[1].item_id 404 does not exist.");
+        AssertInvalid(
+            () => Logic.Add(TestData.CreateTransfer(0, 1, 3, TestData.CreateItem(1, 2), TestData.CreateItem(1, 1))),
+            "item_id 1 appears more than once in items.");
+        AssertInvalid(() => Logic.Add(TestData.CreateTransfer(0, 1, 1)), "from_location_id and to_location_id must be different locations.");
+        AssertInvalid(() => Logic.Add(TestData.CreateTransfer(0, 1, 999)), "to_location_id 999 does not exist.");
         Assert.AreEqual(2, Logic.GetAll().Count);
     }
 
     [TestMethod]
     public void UpdateReplacesItemsWhenTheyAreSent()
     {
-        Transfer updated = TestData.CreateTransfer(0, 2, 3, TestData.CreateItem(99, 7));
+        Transfer updated = TestData.CreateTransfer(0, 3, 1, TestData.CreateItem(99, 7));
         updated.Reference = "TRF-UPDATED";
 
-        Assert.IsTrue(Logic.Update(1, updated));
+        Assert.IsTrue(Logic.Update(2, updated));
 
-        Transfer? stored = Logic.GetById(1);
+        Transfer? stored = Logic.GetById(2);
         Assert.IsNotNull(stored);
         Assert.AreEqual("TRF-UPDATED", stored.Reference);
-        Assert.AreEqual(2, stored.FromLocationId);
-        Assert.AreEqual(3, stored.ToLocationId);
+        Assert.AreEqual(3, stored.FromLocationId);
+        Assert.AreEqual(1, stored.ToLocationId);
         CollectionAssert.AreEqual(new[] { (99, 7) }, stored.Items!.Select(item => (item.ItemId, item.Amount)).ToArray());
-        Assert.AreEqual(1, Context.TransferItems.Count(item => item.TransferId == 1));
+        Assert.AreEqual(1, Context.TransferItems.Count(item => item.TransferId == 2));
     }
 
     [TestMethod]
     public void UpdateKeepsTheStoredItemsWhenTheyAreOmitted()
     {
-        Transfer updated = TestData.CreateTransfer(0, 1, 3);
+        Transfer updated = TestData.CreateTransfer(0, 2, 1);
         updated.Items = null;
 
-        Assert.IsTrue(Logic.Update(1, updated));
+        Assert.IsTrue(Logic.Update(2, updated));
 
-        Transfer? stored = Logic.GetById(1);
+        Transfer? stored = Logic.GetById(2);
         Assert.IsNotNull(stored);
-        Assert.AreEqual(3, stored.ToLocationId);
-        CollectionAssert.AreEqual(new[] { 10, 20 }, stored.Items!.Select(item => item.ItemId).ToArray());
+        Assert.AreEqual(1, stored.ToLocationId);
+        CollectionAssert.AreEqual(new[] { 30 }, stored.Items!.Select(item => item.ItemId).ToArray());
+    }
+
+    [TestMethod]
+    public void UpdateRefusesAProcessedTransfer()
+    {
+        AssertConflict(() => Logic.Update(1, TestData.CreateTransfer(0, 1, 3)), "Transfer 1 is already processed and cannot be changed.");
+
+        Assert.AreEqual(2, Logic.GetById(1)?.ToLocationId);
+    }
+
+    [TestMethod]
+    public void UpdateRejectsAnIdThatDoesNotMatchTheUrl()
+    {
+        AssertInvalid(() => Logic.Update(2, TestData.CreateTransfer(5, 2, 3)), "id 5 in the body does not match id 2 in the URL.");
     }
 
     [TestMethod]
